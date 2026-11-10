@@ -77,7 +77,7 @@ plannershop-web/
 | 8 | Impostazioni (aspetto, SMTP, agenda, utenti, backup) | ✅ | ❌ |
 | 9 | Inviare email ai clienti | ✅ | ✅ |
 
-> Nota: l'eliminazione di prodotti, servizi e fornitori ricade nel punto 6 (consentita a entrambi). Da riconfermare.
+> L'eliminazione di prodotti, servizi e fornitori ricade nel punto 6: consentita a entrambi i ruoli. Ogni eliminazione è logica (§6.0).
 
 Applicazione: `@PreAuthorize` sui metodi del backend (fonte di verità); route guard e visibilità dei pulsanti in Angular solo per l'esperienza d'uso.
 
@@ -95,6 +95,16 @@ Applicazione: `@PreAuthorize` sui metodi del backend (fonte di verità); route g
 ## 6. Modello dati
 
 Convenzioni: nomi tabelle/colonne in `snake_case`; chiavi `bigint` generate; importi `numeric(12,2)`; aliquote `numeric(5,2)`; date `date`, istanti `timestamptz`; ogni tabella di dominio ha `tenant_id`, `created_at`, `updated_at`, `version` (optimistic locking).
+
+### 6.0 Eliminazione logica (soft delete) — regola generale
+
+- **Nessun record viene mai cancellato fisicamente**: vale per tutte le entità (clienti, prodotti, servizi, fornitori, vendite, appuntamenti, staff, utenti, tenant).
+- Ogni tabella ha `deleted_at timestamptz NULL` e `deleted_by bigint NULL` (utente che ha eliminato).
+- Implementazione con `@SoftDelete` di Hibernate (o filtro equivalente): le entità eliminate sono escluse automaticamente da tutte le query, e la `DELETE` di JPA diventa un `UPDATE`.
+- I vincoli di unicità sono indici parziali `WHERE deleted_at IS NULL`, così un valore eliminato si può reinserire.
+- I riferimenti restano validi: una vendita continua a mostrare il cliente o il prodotto eliminato (anche grazie agli snapshot nelle righe).
+- Un elemento eliminato non è più selezionabile in nuove vendite o appuntamenti.
+- Evoluzione possibile: "cestino" per l'ADMIN con ripristino.
 
 ### 6.1 Tenant
 
@@ -143,7 +153,7 @@ Come Prodotto, ma con `nome` al posto di `marca` e **senza** `quantita`.
 | nome | text | ✅ | |
 | indirizzo | text | ✅ | |
 | telefono | text | ✅ | |
-| email | text | ✅ | Nel DB oggi NOT NULL; da confermare se resta obbligatoria |
+| email | text | | Facoltativa (oggi NOT NULL); validata solo se presente |
 | iban | text | | Validato, vedi §7.4 |
 | note | text | | |
 
@@ -157,8 +167,7 @@ Oggi `TAcquisti` è una tabella piatta: le righe di una stessa sessione sono rag
 |---|---|---|
 | cliente_id | FK cliente | |
 | data_ora | timestamptz | Momento della vendita |
-| annullata | bool | Soft delete (oggi `ISDELETED = 'TRUE'`) |
-| annullata_il, annullata_da | | Tracciamento |
+| deleted_at, deleted_by | | Annullamento = soft delete (oggi `ISDELETED = 'TRUE'`), vedi §6.0 |
 | operatore_id | FK app_user | Chi l'ha registrata |
 | totale | numeric(12,2) | Somma delle righe (denormalizzato) |
 
@@ -200,7 +209,7 @@ Sostituisce il campo testo `OPERATORE` dell'agenda.
 | stato | enum | ✅ | `PRENOTATO, CONFERMATO, COMPLETATO, ANNULLATO, ASSENTE` (default `PRENOTATO`) |
 | colore | text | | Esadecimale, default `#7B68EE` |
 | note | text | | |
-| eliminato | bool | | Soft delete |
+| deleted_at, deleted_by | | | Soft delete, vedi §6.0 |
 
 ### 6.9 Impostazioni tenant (`TOpzioni`, `TOpzioniAgenda`)
 
@@ -240,7 +249,7 @@ Flusso (oggi: `ProductPurchaseEditForm` / `ServicePurchaseEditForm`):
 4. Aggiungere più volte lo stesso articolo somma quantità e totali sulla stessa riga.
 5. `sconto_percentuale = (prezzo_vendita × qnt − totale) / (prezzo_vendita × qnt) × 100`, minimo 0.
 6. Alla conferma, **in un'unica transazione**: creazione testata + righe e scarico di magazzino (`quantita -= qnt`). Se la giacenza non basta → errore 409, nessuna modifica.
-7. **Annullamento** (soft delete): la vendita resta visibile come annullata ed è esclusa dalle statistiche. **Da decidere**: se l'annullamento debba ripristinare la giacenza dei prodotti (oggi non avviene).
+7. **Annullamento** (soft delete): la vendita è esclusa da elenchi e statistiche e, **nella stessa transazione, la giacenza dei prodotti venduti viene ripristinata** (`quantita += qnt`; novità rispetto a oggi). Il ripristino avviene anche se nel frattempo il prodotto è stato eliminato.
 
 ### 7.3 Magazzino
 
@@ -280,11 +289,11 @@ Flusso (oggi: `ProductPurchaseEditForm` / `ServicePurchaseEditForm`):
 
 Filtro periodo: sempre / ultimo anno / ultima settimana / intervallo personalizzato.
 
-| Indicatore | Calcolo attuale |
+| Indicatore | Calcolo |
 |---|---|
 | N. prodotti | In catalogo (senza filtro) o caricati nel periodo (per `data_carico`) |
 | Valore inventario | Σ `prezzo_netto × quantita` di tutti i prodotti |
-| Entrate | Σ `prezzo_netto × qnt` delle righe vendute nel periodo, non annullate |
+| Entrate | Σ `totale_pagato` delle righe vendute nel periodo, non annullate (**incassato reale**; oggi si usa il netto di listino) |
 | Uscite | Σ `prezzo_netto × quantita` dei prodotti caricati nel periodo |
 | Utile | Entrate − Uscite |
 | Top prodotti | Raggruppati per prodotto: quantità e importo |
@@ -292,7 +301,7 @@ Filtro periodo: sempre / ultimo anno / ultima settimana / intervallo personalizz
 
 Grafici: top prodotti e top clienti (barre/torta), bilancio.
 
-**Da decidere**: le "Entrate" oggi usano il prezzo netto di listino; più corretto usare `totale_pagato` (incassato reale). Le "Uscite" approssimano gli acquisti di merce con la giacenza attuale dei prodotti caricati nel periodo: una vera gestione degli acquisti da fornitore è un'evoluzione possibile.
+Nota: le "Uscite" approssimano gli acquisti di merce con la giacenza attuale dei prodotti caricati nel periodo: una vera gestione degli acquisti da fornitore è un'evoluzione possibile.
 
 Calcolo lato DB (query aggregate), non in memoria come oggi.
 
@@ -391,10 +400,12 @@ Strumento a riga di comando (modulo del backend) che importa `PSDB.db` e `PSDB_A
 9. Migrazione dati e export.
 10. PWA e rifinitura per mobile.
 
-## 14. Questioni aperte
+## 14. Decisioni prese
 
-1. L'annullamento di una vendita deve ripristinare la giacenza?
-2. Statistiche: le entrate vanno calcolate sull'incassato reale (`totale_pagato`) invece che sul netto di listino?
-3. L'email del fornitore resta obbligatoria?
-4. L'eliminazione di prodotti, servizi e fornitori è consentita anche all'operatore (punto 6 della matrice)?
-5. Eliminazione di un cliente con vendite associate: bloccarla, oppure soft delete del cliente?
+| # | Questione | Decisione |
+|---|---|---|
+| 1 | L'annullamento di una vendita ripristina la giacenza? | Sì (§7.2) |
+| 2 | Entrate calcolate sull'incassato reale? | Sì, su `totale_pagato` (§7.8) |
+| 3 | Email del fornitore obbligatoria? | No (§6.5) |
+| 4 | L'operatore può eliminare prodotti, servizi e fornitori? | Sì (§5.3) |
+| 5 | Eliminazione di un cliente con vendite | Soft delete, esteso a **tutte** le entità (§6.0) |
