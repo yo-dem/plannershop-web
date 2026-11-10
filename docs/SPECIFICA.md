@@ -1,6 +1,6 @@
 # PlannerShop Web — Specifica funzionale e tecnica
 
-> Versione 0.1 — 10/11/2026
+> Versione 0.2 — 10/11/2026
 > Fonte: analisi del progetto desktop `PlannerShop` (C# WinForms, .NET 8, SQLite).
 > Scopo: riscrivere l'applicativo come web app multi-tenant con backend Java/Spring Boot e frontend Angular, containerizzabile e ospitabile online.
 
@@ -18,12 +18,12 @@
 
 | Livello | Scelta |
 |---|---|
-| Backend | Java 21, Spring Boot 3, Maven |
-| Persistenza | Spring Data JPA (Hibernate 6), PostgreSQL 16, Flyway |
+| Backend | Java 21, Spring Boot 4, Maven (wrapper) |
+| Persistenza | Spring Data JPA (Hibernate 7), PostgreSQL 18, Flyway |
 | Sicurezza | Spring Security, `oauth2-resource-server` con JWT firmati dal backend, refresh token in cookie `httpOnly` |
 | API docs | springdoc-openapi → generazione automatica del client TypeScript |
 | Email | Spring Boot Mail (SMTP per tenant) |
-| Frontend | Angular (ultima versione stabile), TypeScript, PrimeNG |
+| Frontend | Angular 22, TypeScript, PrimeNG 22 (tema Aura) |
 | Agenda | FullCalendar (`@fullcalendar/angular`) |
 | Grafici | Chart.js (via PrimeNG Chart) |
 | Deploy | Docker Compose: `postgres`, `backend`, `frontend` (nginx + reverse proxy `/api`) |
@@ -33,8 +33,8 @@
 ```
 plannershop-web/
 ├── backend/     Spring Boot
-├── frontend/    Angular
-├── docker/      docker-compose.yml, nginx.conf, .env.example
+├── frontend/    Angular (+ Dockerfile e nginx.conf)
+├── docker/      docker-compose.yml, .env.example
 └── docs/        specifica e decisioni architetturali
 ```
 
@@ -43,7 +43,7 @@ plannershop-web/
 ## 4. Multi-tenancy
 
 - **Strategia**: schema condiviso, colonna `tenant_id` su ogni tabella di dominio.
-- Le entità di dominio hanno un campo annotato `@TenantId` (Hibernate 6): il filtro `tenant_id = ?` è applicato automaticamente a ogni query e il valore è impostato automaticamente in inserimento.
+- Le entità di dominio hanno un campo annotato `@TenantId` (Hibernate 7): il filtro `tenant_id = ?` è applicato automaticamente a ogni query e il valore è impostato automaticamente in inserimento.
 - Il tenant corrente è letto **esclusivamente** dal token dell'utente autenticato (claim `tenant`), tramite un `CurrentTenantIdentifierResolver`. Il client non invia mai il tenant come parametro.
 - Unicità e indici sono sempre composti con `tenant_id` (es. `UNIQUE (tenant_id, email)`).
 - Evoluzione possibile: Row Level Security di PostgreSQL come seconda barriera.
@@ -389,7 +389,7 @@ Strumento a riga di comando (modulo del backend) che importa `PSDB.db` e `PSDB_A
 
 ## 13. Piano di sviluppo
 
-1. **Scheletro**: Docker Compose con Postgres, Spring Boot con Flyway e health check, Angular con PrimeNG, nginx.
+1. ✅ **Scheletro**: Docker Compose con Postgres, Spring Boot con Flyway e health check, Angular con PrimeNG, nginx.
 2. **Fondamenta**: tenant, utenti, membership, login/refresh/logout, `@TenantId`, `@PreAuthorize`, bootstrap SUPERADMIN, shell Angular con login e guard.
 3. **Clienti**: CRUD completo end-to-end, da usare come modello per le altre entità.
 4. Prodotti, servizi, fornitori.

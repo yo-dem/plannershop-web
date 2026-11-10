@@ -1,0 +1,22 @@
+<p-card header="Stato del sistema" styleClass="status-card">
+  @if (info.isLoading()) {
+    <p-tag severity="secondary" value="Verifica in corso…" />
+  } @else if (info.error()) {
+    <p-tag severity="danger" value="Backend non raggiungibile" />
+    <p class="hint">Controlla che il backend sia avviato su <code>localhost:8080</code>.</p>
+  } @else if (info.value(); as i) {
+    <p-tag severity="success" value="Tutto collegato" />
+    <dl>
+      <dt>Applicazione</dt>
+      <dd>{{ i.applicazione }} {{ i.versione }}</dd>
+      <dt>Database</dt>
+      <dd>{{ i.database }}</dd>
+      <dt>Ora del server</dt>
+      <dd>{{ i.oraServer | date: 'dd/MM/yyyy HH:mm:ss' }}</dd>
+    </dl>
+  }
+
+  <ng-template #footer>
+    <p-button label="Ricontrolla" icon="pi pi-refresh" [outlined]="true" (onClick)="info.reload()" />
+  </ng-template>
+</p-card>

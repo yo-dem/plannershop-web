@@ -1,0 +1,28 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.875rem 1rem;
+  background: var(--p-primary-color);
+  color: var(--p-primary-contrast-color);
+
+  .pi {
+    font-size: 1.25rem;
+  }
+
+  .brand {
+    font-size: 1.125rem;
+    font-weight: 600;
+  }
+}
+
+.content {
+  flex: 1;
+  padding: 1rem;
+}

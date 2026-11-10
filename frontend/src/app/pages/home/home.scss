@@ -1,0 +1,25 @@
+:host {
+  display: block;
+  max-width: 32rem;
+  margin: 0 auto;
+}
+
+dl {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 0.5rem 1rem;
+  margin: 1.25rem 0 0;
+}
+
+dt {
+  color: var(--p-text-muted-color);
+}
+
+dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.hint {
+  color: var(--p-text-muted-color);
+}
