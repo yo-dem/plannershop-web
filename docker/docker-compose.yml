@@ -38,6 +38,9 @@ services:
       DB_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-plannershop}
       DB_USER: ${POSTGRES_USER:-plannershop}
       DB_PASSWORD: ${POSTGRES_PASSWORD:-plannershop}
+      JWT_SECRET: ${JWT_SECRET:-}
+      SUPERADMIN_EMAIL: ${SUPERADMIN_EMAIL:-admin@plannershop.local}
+      SUPERADMIN_PASSWORD: ${SUPERADMIN_PASSWORD:-}
       TZ: ${TZ:-Europe/Rome}
     depends_on:
       postgres:

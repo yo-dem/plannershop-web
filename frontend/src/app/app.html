@@ -1,7 +1,36 @@
-<header class="topbar">
-  <i class="pi pi-calendar" aria-hidden="true"></i>
-  <span class="brand">PlannerShop</span>
-</header>
+<p-toast position="top-center" />
+<p-confirmdialog />
+
+@if (auth.utente(); as utente) {
+  <header class="topbar">
+    <a routerLink="/" class="brand">
+      <i class="pi pi-calendar" aria-hidden="true"></i>
+      <span>PlannerShop</span>
+    </a>
+    @if (utente.tenant) {
+      <span class="tenant">{{ utente.tenant.nome }}</span>
+    }
+
+    <nav class="nav">
+      @for (v of voci(); track v.link) {
+        <a [routerLink]="v.link" routerLinkActive="attiva" [routerLinkActiveOptions]="{ exact: v.link === '/' }">
+          <i [class]="v.icon" aria-hidden="true"></i>
+          <span>{{ v.label }}</span>
+        </a>
+      }
+    </nav>
+
+    <p-button
+      [label]="utente.nome"
+      icon="pi pi-user"
+      [text]="true"
+      severity="contrast"
+      styleClass="utente"
+      (onClick)="menu.toggle($event)"
+    />
+    <p-menu #menu [model]="menuUtente" [popup]="true" appendTo="body" />
+  </header>
+}
 
 <main class="content">
   <router-outlet />

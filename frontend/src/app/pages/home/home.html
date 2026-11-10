@@ -1,3 +1,7 @@
+@if (auth.utente(); as u) {
+  <h2 class="benvenuto">Ciao, {{ u.nome }}</h2>
+}
+
 <p-card header="Stato del sistema" styleClass="status-card">
   @if (info.isLoading()) {
     <p-tag severity="secondary" value="Verifica in corso…" />

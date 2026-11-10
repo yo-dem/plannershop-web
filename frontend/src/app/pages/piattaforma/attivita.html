@@ -1,0 +1,97 @@
+<div class="intestazione">
+  <h2>Attività</h2>
+  <p-button label="Nuova attività" icon="pi pi-plus" (onClick)="apriNuova()" />
+</div>
+
+@if (elenco.error()) {
+  <p-message severity="error">Impossibile caricare le attività.</p-message>
+}
+
+<p-table [value]="elenco.value()" [loading]="elenco.isLoading()" dataKey="id" stripedRows>
+  <ng-template #header>
+    <tr>
+      <th>Nome</th>
+      <th>Amministratori</th>
+      <th>Stato</th>
+      <th class="nascondi-mobile">Creata il</th>
+      <th></th>
+    </tr>
+  </ng-template>
+  <ng-template #body let-a>
+    <tr>
+      <td>{{ a.nome }}</td>
+      <td class="email">{{ a.amministratori.join(', ') }}</td>
+      <td>
+        <p-tag [severity]="a.attivo ? 'success' : 'secondary'" [value]="a.attivo ? 'Attiva' : 'Sospesa'" />
+      </td>
+      <td class="nascondi-mobile">{{ a.createdAt | date: 'dd/MM/yyyy' }}</td>
+      <td class="azioni">
+        <p-button icon="pi pi-pencil" [text]="true" [rounded]="true" ariaLabel="Modifica" (onClick)="apriModifica(a)" />
+        <p-button icon="pi pi-trash" [text]="true" [rounded]="true" severity="danger" ariaLabel="Elimina"
+                  (onClick)="chiediEliminazione(a)" />
+      </td>
+    </tr>
+  </ng-template>
+  <ng-template #emptymessage>
+    <tr><td colspan="5">Nessuna attività. Creane una con "Nuova attività".</td></tr>
+  </ng-template>
+</p-table>
+
+<!-- Nuova attività -->
+<p-dialog header="Nuova attività" [visible]="nuovaAperta()" (visibleChange)="nuovaAperta.set($event)"
+          [modal]="true" [style]="{ width: '30rem' }" [breakpoints]="{ '640px': '95vw' }">
+  @if (errore(); as e) {
+    <p-message severity="error" class="avviso">{{ e }}</p-message>
+  }
+  <form [formGroup]="nuovaForm" (ngSubmit)="creaAttivita()" id="form-nuova" novalidate>
+    <div class="campo">
+      <label for="nome">Nome attività</label>
+      <input pInputText id="nome" formControlName="nome" [fluid]="true" />
+      @if (nonValido('nuova', 'nome')) { <small class="errore">Obbligatorio</small> }
+    </div>
+    <h4>Primo amministratore</h4>
+    <div class="campo">
+      <label for="adminNome">Nome e cognome</label>
+      <input pInputText id="adminNome" formControlName="adminNome" [fluid]="true" />
+      @if (nonValido('nuova', 'adminNome')) { <small class="errore">Obbligatorio</small> }
+    </div>
+    <div class="campo">
+      <label for="adminEmail">Email</label>
+      <input pInputText id="adminEmail" type="email" formControlName="adminEmail" [fluid]="true" />
+      @if (nonValido('nuova', 'adminEmail')) { <small class="errore">Email non valida</small> }
+    </div>
+    <div class="campo">
+      <label for="adminPassword">Password provvisoria</label>
+      <input pInputText id="adminPassword" formControlName="adminPassword" autocomplete="off" [fluid]="true" />
+      <small class="aiuto">Comunicala all'amministratore: dovrà cambiarla al primo accesso.</small>
+      @if (nonValido('nuova', 'adminPassword')) { <small class="errore">Almeno 8 caratteri</small> }
+    </div>
+  </form>
+  <ng-template #footer>
+    <p-button label="Annulla" [outlined]="true" (onClick)="nuovaAperta.set(false)" />
+    <p-button label="Crea" icon="pi pi-check" type="submit" form="form-nuova" [loading]="invio()" />
+  </ng-template>
+</p-dialog>
+
+<!-- Modifica -->
+<p-dialog header="Modifica attività" [visible]="inModifica() !== null" (visibleChange)="!$event && inModifica.set(null)"
+          [modal]="true" [style]="{ width: '26rem' }" [breakpoints]="{ '640px': '95vw' }">
+  @if (errore(); as e) {
+    <p-message severity="error" class="avviso">{{ e }}</p-message>
+  }
+  <form [formGroup]="modificaForm" (ngSubmit)="salvaModifica()" id="form-modifica" novalidate>
+    <div class="campo">
+      <label for="modNome">Nome attività</label>
+      <input pInputText id="modNome" formControlName="nome" [fluid]="true" />
+      @if (nonValido('modifica', 'nome')) { <small class="errore">Obbligatorio</small> }
+    </div>
+    <div class="campo riga">
+      <p-toggleswitch inputId="modAttivo" formControlName="attivo" />
+      <label for="modAttivo">Attiva (se spenta, nessuno può accedere)</label>
+    </div>
+  </form>
+  <ng-template #footer>
+    <p-button label="Annulla" [outlined]="true" (onClick)="inModifica.set(null)" />
+    <p-button label="Salva" icon="pi pi-check" type="submit" form="form-modifica" [loading]="invio()" />
+  </ng-template>
+</p-dialog>

@@ -27,6 +27,10 @@ spring:
   flyway:
     locations: classpath:db/migration
 
+  mvc:
+    problemdetails:
+      enabled: true
+
 server:
   # Dietro nginx: rispetta gli header X-Forwarded-* (protocollo, host).
   forward-headers-strategy: framework
@@ -50,3 +54,18 @@ springdoc:
     path: /api/v3/api-docs
   swagger-ui:
     path: /api/swagger-ui.html
+
+# Impostazioni dell'applicazione (vedi SecurityProperties).
+app:
+  security:
+    # Segreto per firmare i token. In produzione: stringa casuale lunga (≥ 32 caratteri).
+    jwt-secret: ${JWT_SECRET:}
+    access-token-ttl: 15m
+    refresh-token-ttl: 14d
+    login-max-tentativi: 10
+    login-finestra: 15m
+  bootstrap:
+    # Creato al primo avvio se non esistono utenti.
+    superadmin-email: ${SUPERADMIN_EMAIL:admin@plannershop.local}
+    # Se vuota viene generata e scritta nel log.
+    superadmin-password: ${SUPERADMIN_PASSWORD:}

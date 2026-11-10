@@ -1,10 +1,11 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { httpResource } from '@angular/common/http';
 import { Button } from 'primeng/button';
 import { Card } from 'primeng/card';
 import { Tag } from 'primeng/tag';
 
+import { AuthService } from '../../core/auth/auth.service';
 import { Info } from '../../core/info';
 
 /**
@@ -18,6 +19,7 @@ import { Info } from '../../core/info';
   styleUrl: './home.scss',
 })
 export class Home {
+  protected readonly auth = inject(AuthService);
   /** httpResource esegue la GET e espone value(), isLoading(), error() come signal. */
   protected readonly info = httpResource<Info>(() => '/api/info');
 }

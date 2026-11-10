@@ -33,6 +33,9 @@ cd backend && ./mvnw spring-boot:run
 cd frontend && npm install && ng serve
 ```
 
+- **Primo accesso**: al primo avvio il backend crea il SUPERADMIN `admin@plannershop.local`
+  con una password casuale scritta nel log (cerca "Creato il SUPERADMIN"); va cambiata al primo accesso.
+  Dalla pagina *Attività* il SUPERADMIN crea le attività e i loro amministratori.
 - Documentazione API (Swagger UI): http://localhost:8080/api/swagger-ui.html
 - Database: `localhost:5432`, db/utente/password `plannershop` (solo sviluppo)
 
@@ -47,8 +50,9 @@ cd frontend && ng test --watch=false
 
 ```bash
 cd docker
-cp .env.example .env              # e modifica le password
+cp .env.example .env              # e modifica password e JWT_SECRET
 docker compose up -d --build      # → http://localhost:8090
+docker compose logs backend | grep -A3 SUPERADMIN   # password iniziale (primo avvio)
 docker compose down               # ferma (i dati restano nel volume pgdata)
 ```
 
@@ -56,12 +60,19 @@ docker compose down               # ferma (i dati restano nel volume pgdata)
 
 ```
 backend/
-  src/main/java/it/plannershop/   codice Java
+  src/main/java/it/plannershop/
+    common/                       classi base (BaseEntity, TenantScopedEntity), errori API
+    tenant/                       attività e risoluzione del tenant corrente (@TenantId)
+    security/                     Spring Security, JWT, limite tentativi di login
+    user/                         utenti e ruoli per attività
+    auth/                         login, refresh, logout, /api/me
+    platform/                     gestione attività (SUPERADMIN), creazione SUPERADMIN
   src/main/resources/
     application.yml               configurazione (variabili d'ambiente)
     db/migration/                 migrazioni Flyway V<n>__descrizione.sql
 frontend/
-  src/app/                        applicazione Angular
+  src/app/core/auth/              sessione, interceptor del token, guard
+  src/app/pages/                  pagine (login, home, cambia password, attività)
   proxy.conf.json                 /api → localhost:8080 durante ng serve
   nginx.conf                      configurazione nginx dell'immagine Docker
 docker/

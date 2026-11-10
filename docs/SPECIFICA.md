@@ -1,6 +1,6 @@
 # PlannerShop Web — Specifica funzionale e tecnica
 
-> Versione 0.2 — 10/11/2026
+> Versione 0.3 — 10/11/2026
 > Fonte: analisi del progetto desktop `PlannerShop` (C# WinForms, .NET 8, SQLite).
 > Scopo: riscrivere l'applicativo come web app multi-tenant con backend Java/Spring Boot e frontend Angular, containerizzabile e ospitabile online.
 
@@ -83,12 +83,17 @@ Applicazione: `@PreAuthorize` sui metodi del backend (fonte di verità); route g
 
 ### 5.4 Autenticazione
 
-- `POST /api/auth/login` → access token JWT (durata ~15 min) nel body + refresh token (durata ~7–30 gg) in cookie `httpOnly; Secure; SameSite=Strict`.
-- `POST /api/auth/refresh`, `POST /api/auth/logout` (revoca del refresh token, salvato hashato in DB).
-- Claim JWT: `sub` (user id), `tenant`, `role`.
-- Limitazione dei tentativi di login (rate limit per IP/email).
-- Cambio password da parte dell'utente; reset password da parte dell'ADMIN per i propri operatori.
-- La vecchia "password di accesso abilitabile" (`TPwd`) è sostituita dal login utente: non esiste più la modalità senza password.
+- `POST /api/auth/login` {email, password, tenantId?} → access token JWT (15 min) nel body + refresh token (14 gg) in cookie `ps_refresh` `HttpOnly; SameSite=Strict; Path=/api/auth`, `Secure` quando la richiesta arriva in HTTPS (anche tramite `X-Forwarded-Proto`).
+- Utente con più attività e nessun `tenantId`: la risposta contiene solo `sceltaTenant` e il client ripete il login con l'attività scelta.
+- `POST /api/auth/refresh`: **rotazione** del refresh token (il vecchio viene revocato). Riuso di un token già revocato → revoca di tutte le sessioni dell'utente (possibile furto). Il ruolo viene riletto dal DB a ogni rinnovo.
+- `POST /api/auth/logout` (revoca + cancellazione cookie), `GET /api/me`, `PUT /api/auth/password`.
+- Refresh token salvati solo come hash SHA-256; password con BCrypt.
+- Claim JWT: `sub` (user id), `tenant`, `roles`, `nome`, `email`. Firma HS256 con `JWT_SECRET`.
+- Limite tentativi: 10 fallimenti in 15 minuti per IP o per email → `429`.
+- Password provvisorie (`deve_cambiare_password`): l'interfaccia consente solo il cambio password finché non viene cambiata.
+- Primo avvio: se non esistono utenti si crea il SUPERADMIN (`SUPERADMIN_EMAIL` / `SUPERADMIN_PASSWORD`; password generata e scritta nel log se non impostata).
+- Frontend: access token solo in memoria; all'avvio la sessione si ripristina con il refresh; l'interceptor rinnova e ripete una volta le richieste che ricevono `401`.
+- La vecchia "password di accesso abilitabile" (`TPwd`) è sostituita dal login utente.
 
 ---
 
@@ -390,7 +395,7 @@ Strumento a riga di comando (modulo del backend) che importa `PSDB.db` e `PSDB_A
 ## 13. Piano di sviluppo
 
 1. ✅ **Scheletro**: Docker Compose con Postgres, Spring Boot con Flyway e health check, Angular con PrimeNG, nginx.
-2. **Fondamenta**: tenant, utenti, membership, login/refresh/logout, `@TenantId`, `@PreAuthorize`, bootstrap SUPERADMIN, shell Angular con login e guard.
+2. ✅ **Fondamenta**: tenant, utenti, membership, login/refresh/logout, `@TenantId`, `@PreAuthorize`, soft delete di base, bootstrap SUPERADMIN, shell Angular con login, guard e gestione attività (SUPERADMIN).
 3. **Clienti**: CRUD completo end-to-end, da usare come modello per le altre entità.
 4. Prodotti, servizi, fornitori.
 5. Vendite.

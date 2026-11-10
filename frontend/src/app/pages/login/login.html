@@ -1,0 +1,44 @@
+<section class="pannello">
+  <h1><i class="pi pi-calendar" aria-hidden="true"></i> PlannerShop</h1>
+  <p class="sottotitolo">Accedi per continuare</p>
+
+  @if (scaduta()) {
+    <p-message severity="warn" class="avviso">La sessione è scaduta: accedi di nuovo.</p-message>
+  }
+  @if (errore(); as e) {
+    <p-message severity="error" class="avviso">{{ e }}</p-message>
+  }
+
+  <form [formGroup]="form" (ngSubmit)="accedi()" novalidate>
+    <div class="campo">
+      <label for="email">Email</label>
+      <input pInputText id="email" type="email" formControlName="email" autocomplete="username"
+             [class.ng-dirty]="nonValido('email')" [fluid]="true" />
+      @if (nonValido('email')) {
+        <small class="errore">Inserisci un'email valida</small>
+      }
+    </div>
+
+    <div class="campo">
+      <label for="password">Password</label>
+      <p-password inputId="password" formControlName="password" [feedback]="false" [toggleMask]="true"
+                  autocomplete="current-password" [fluid]="true" />
+      @if (nonValido('password')) {
+        <small class="errore">Inserisci la password</small>
+      }
+    </div>
+
+    @if (attivita(); as elenco) {
+      <div class="campo">
+        <label for="tenant">Attività</label>
+        <p-select inputId="tenant" formControlName="tenantId" [options]="elenco" optionLabel="nome"
+                  optionValue="id" placeholder="Scegli l'attività" [fluid]="true" />
+        @if (nonValido('tenantId')) {
+          <small class="errore">Scegli un'attività</small>
+        }
+      </div>
+    }
+
+    <p-button type="submit" label="Accedi" icon="pi pi-sign-in" [loading]="invio()" [fluid]="true" />
+  </form>
+</section>
