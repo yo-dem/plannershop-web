@@ -104,6 +104,15 @@ class AuthFlowTests extends AbstractIntegrationTest {
     }
 
     @Test
+    void inModalitaCloudInfoLoRiportaEIlSuperadminHaLaPiattaforma() throws Exception {
+        MockHttpServletResponse r = login(SUPERADMIN_EMAIL, SUPERADMIN_PASSWORD);
+        assertThat((Boolean) JsonPath.read(r.getContentAsString(), "$.utente.superadmin")).isTrue();
+        mvc.perform(get("/api/info").header("Authorization", "Bearer " + token(r)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.modalita").value("CLOUD"));
+    }
+
+    @Test
     void senzaTokenLeApiRispondono401() throws Exception {
         mvc.perform(get("/api/me")).andExpect(status().isUnauthorized());
         mvc.perform(get("/api/info")).andExpect(status().isUnauthorized());

@@ -55,8 +55,11 @@ springdoc:
   swagger-ui:
     path: /api/swagger-ui.html
 
-# Impostazioni dell'applicazione (vedi SecurityProperties).
+# Impostazioni dell'applicazione (vedi AppProperties, SecurityProperties, BootstrapProperties).
 app:
+  # cloud  = piattaforma con più attività gestite dal SUPERADMIN
+  # locale = installazione sul PC di un'unica attività, senza SUPERADMIN
+  modalita: ${APP_MODALITA:cloud}
   security:
     # Segreto per firmare i token. In produzione: stringa casuale lunga (≥ 32 caratteri).
     jwt-secret: ${JWT_SECRET:}
@@ -65,7 +68,13 @@ app:
     login-max-tentativi: 10
     login-finestra: 15m
   bootstrap:
-    # Creato al primo avvio se non esistono utenti.
+    # Utenti creati al primo avvio, solo se il database non ha utenti.
+    # Le password vuote vengono generate e scritte nel log.
+    # Modalità cloud: il SUPERADMIN.
     superadmin-email: ${SUPERADMIN_EMAIL:admin@plannershop.local}
-    # Se vuota viene generata e scritta nel log.
     superadmin-password: ${SUPERADMIN_PASSWORD:}
+    # Modalità locale: l'unica attività e il suo ADMIN (password sempre provvisoria).
+    attivita-nome: ${ATTIVITA_NOME:La mia attività}
+    admin-email: ${ADMIN_EMAIL:admin@plannershop.local}
+    admin-nome: ${ADMIN_NOME:Amministratore}
+    admin-password: ${ADMIN_PASSWORD:}

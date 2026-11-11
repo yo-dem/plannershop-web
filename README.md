@@ -56,6 +56,34 @@ docker compose logs backend | grep -A3 SUPERADMIN   # password iniziale (primo a
 docker compose down               # ferma (i dati restano nel volume pgdata)
 ```
 
+### Installazione locale (PC di un'unica attività)
+
+Nel file `.env`, **prima del primo avvio**:
+
+```bash
+APP_MODALITA=locale
+ATTIVITA_NOME=Nome del negozio
+ADMIN_EMAIL=titolare@esempio.it
+ADMIN_PASSWORD=                   # vuota = generata e scritta nel log
+```
+
+Al primo avvio vengono creati l'attività e il suo amministratore (password provvisoria);
+il SUPERADMIN e la gestione attività non esistono. Vedi `docs/SPECIFICA.md` §4.1.
+
+```bash
+docker compose logs backend | grep -A4 "Installazione locale"   # password iniziale
+```
+
+### Password dimenticata
+
+```bash
+docker compose run --rm backend --app.reset-password=email@utente
+```
+
+Stampa una nuova password provvisoria (da cambiare al primo accesso) e chiude le sessioni
+aperte dell'utente. Funziona anche con l'applicazione avviata. Da IntelliJ: aggiungi
+`--app.reset-password=email@utente` in *Program arguments* di una copia della run configuration.
+
 ## Struttura
 
 ```

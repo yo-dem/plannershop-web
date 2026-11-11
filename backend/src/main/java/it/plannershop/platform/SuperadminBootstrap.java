@@ -1,43 +1,40 @@
 package it.plannershop.platform;
 
-import java.security.SecureRandom;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import it.plannershop.common.BootstrapProperties;
+import it.plannershop.common.PasswordCasuale;
 import it.plannershop.user.AppUser;
 import it.plannershop.user.AppUserRepository;
 
 /**
- * Al primo avvio (nessun utente nel database) crea il SUPERADMIN.
+ * Modalità CLOUD: al primo avvio (nessun utente nel database) crea il SUPERADMIN.
  *
  * <p>Email e password si leggono da SUPERADMIN_EMAIL / SUPERADMIN_PASSWORD.
  * Se la password non è impostata ne genera una casuale e la scrive UNA volta
  * nel log: va cambiata al primo accesso.
  */
 @Component
+@ConditionalOnProperty(name = "app.modalita", havingValue = "cloud", matchIfMissing = true)
 class SuperadminBootstrap implements ApplicationRunner {
 
     private static final Logger log = LoggerFactory.getLogger(SuperadminBootstrap.class);
 
     private final AppUserRepository users;
     private final PasswordEncoder passwordEncoder;
-    private final String email;
-    private final String password;
+    private final BootstrapProperties props;
 
-    SuperadminBootstrap(AppUserRepository users, PasswordEncoder passwordEncoder,
-            @Value("${app.bootstrap.superadmin-email}") String email,
-            @Value("${app.bootstrap.superadmin-password:}") String password) {
+    SuperadminBootstrap(AppUserRepository users, PasswordEncoder passwordEncoder, BootstrapProperties props) {
         this.users = users;
         this.passwordEncoder = passwordEncoder;
-        this.email = email;
-        this.password = password;
+        this.props = props;
     }
 
     @Override
@@ -46,8 +43,9 @@ class SuperadminBootstrap implements ApplicationRunner {
         if (users.count() > 0) {
             return;
         }
-        boolean generata = password == null || password.isBlank();
-        String pwd = generata ? generaPassword() : password;
+        String email = props.superadminEmail();
+        boolean generata = props.superadminPassword() == null || props.superadminPassword().isBlank();
+        String pwd = generata ? PasswordCasuale.genera() : props.superadminPassword();
         AppUser admin = new AppUser(email, "Amministratore piattaforma", passwordEncoder.encode(pwd));
         admin.setSuperadmin(true);
         admin.cambiaPassword(admin.getPasswordHash(), generata);
@@ -65,15 +63,5 @@ class SuperadminBootstrap implements ApplicationRunner {
         } else {
             log.info("Creato il SUPERADMIN {}", email);
         }
-    }
-
-    private static String generaPassword() {
-        String alfabeto = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789";
-        SecureRandom random = new SecureRandom();
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < 16; i++) {
-            sb.append(alfabeto.charAt(random.nextInt(alfabeto.length())));
-        }
-        return sb.toString();
     }
 }

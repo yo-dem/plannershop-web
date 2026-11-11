@@ -9,9 +9,12 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import it.plannershop.common.AppProperties;
+import it.plannershop.common.AppProperties.Modalita;
+
 /**
  * Endpoint di diagnostica: conferma che frontend, backend e database
- * comunicano. Verrà protetto (o ridotto) quando arriverà la sicurezza.
+ * comunicano, e in che modalità (CLOUD o LOCALE) gira l'applicazione.
  */
 @RestController
 @RequestMapping("/api/info")
@@ -19,10 +22,12 @@ public class InfoController {
 
     private final JdbcTemplate jdbc;
     private final ObjectProvider<BuildProperties> build;
+    private final AppProperties app;
 
-    public InfoController(JdbcTemplate jdbc, ObjectProvider<BuildProperties> build) {
+    public InfoController(JdbcTemplate jdbc, ObjectProvider<BuildProperties> build, AppProperties app) {
         this.jdbc = jdbc;
         this.build = build;
+        this.app = app;
     }
 
     @GetMapping
@@ -30,9 +35,10 @@ public class InfoController {
         BuildProperties props = build.getIfAvailable();
         String version = props != null ? props.getVersion() : "dev";
         String database = jdbc.queryForObject("SHOW server_version", String.class);
-        return new InfoResponse("PlannerShop", version, "PostgreSQL " + database, Instant.now());
+        return new InfoResponse("PlannerShop", version, "PostgreSQL " + database, app.modalita(), Instant.now());
     }
 
-    public record InfoResponse(String applicazione, String versione, String database, Instant oraServer) {
+    public record InfoResponse(String applicazione, String versione, String database, Modalita modalita,
+            Instant oraServer) {
     }
 }

@@ -13,6 +13,8 @@
     <dl>
       <dt>Applicazione</dt>
       <dd>{{ i.applicazione }} {{ i.versione }}</dd>
+      <dt>Installazione</dt>
+      <dd>{{ i.modalita === 'LOCALE' ? 'Locale (un solo PC)' : 'Cloud (più attività)' }}</dd>
       <dt>Database</dt>
       <dd>{{ i.database }}</dd>
       <dt>Ora del server</dt>

@@ -6,6 +6,9 @@
 # Stack completo nei container (test di deploy):
 #   docker compose up -d --build        →  http://localhost:${APP_PORT:-8090}
 #
+# Ripristino della password di un utente (stampa una password provvisoria):
+#   docker compose run --rm backend --app.reset-password=email@utente
+#
 # Le variabili si leggono dal file .env in questa cartella (vedi .env.example).
 # I default valgono SOLO per lo sviluppo locale.
 
@@ -39,8 +42,13 @@ services:
       DB_USER: ${POSTGRES_USER:-plannershop}
       DB_PASSWORD: ${POSTGRES_PASSWORD:-plannershop}
       JWT_SECRET: ${JWT_SECRET:-}
+      APP_MODALITA: ${APP_MODALITA:-cloud}
       SUPERADMIN_EMAIL: ${SUPERADMIN_EMAIL:-admin@plannershop.local}
       SUPERADMIN_PASSWORD: ${SUPERADMIN_PASSWORD:-}
+      ATTIVITA_NOME: ${ATTIVITA_NOME:-La mia attività}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@plannershop.local}
+      ADMIN_NOME: ${ADMIN_NOME:-Amministratore}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
       TZ: ${TZ:-Europe/Rome}
     depends_on:
       postgres:

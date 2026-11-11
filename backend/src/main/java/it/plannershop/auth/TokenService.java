@@ -17,6 +17,7 @@ import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
 import org.springframework.stereotype.Service;
 
+import it.plannershop.common.AppProperties;
 import it.plannershop.security.JwtClaims;
 import it.plannershop.security.SecurityProperties;
 import it.plannershop.user.AppUser;
@@ -30,10 +31,12 @@ class TokenService {
 
     private final JwtEncoder encoder;
     private final SecurityProperties props;
+    private final AppProperties app;
 
-    TokenService(JwtEncoder encoder, SecurityProperties props) {
+    TokenService(JwtEncoder encoder, SecurityProperties props, AppProperties app) {
         this.encoder = encoder;
         this.props = props;
+        this.app = app;
     }
 
     /**
@@ -46,7 +49,8 @@ class TokenService {
         if (membership != null) {
             ruoli.add(membership.getRuolo().name());
         }
-        if (user.isSuperadmin()) {
+        // In modalità LOCALE la piattaforma non esiste: il ruolo non viene mai concesso.
+        if (user.isSuperadmin() && !app.isLocale()) {
             ruoli.add("SUPERADMIN");
         }
         JwtClaimsSet.Builder claims = JwtClaimsSet.builder()

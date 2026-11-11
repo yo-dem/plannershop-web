@@ -2,6 +2,7 @@ package it.plannershop.platform;
 
 import java.util.List;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,8 +21,9 @@ import it.plannershop.user.Membership;
 import it.plannershop.user.MembershipRepository;
 import it.plannershop.user.Ruolo;
 
-/** Gestione delle attività da parte del SUPERADMIN. */
+/** Gestione delle attività da parte del SUPERADMIN (solo modalità CLOUD). */
 @Service
+@ConditionalOnProperty(name = "app.modalita", havingValue = "cloud", matchIfMissing = true)
 public class PlatformTenantService {
 
     private final TenantRepository tenants;

@@ -2,6 +2,7 @@ package it.plannershop.platform;
 
 import java.util.List;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -24,6 +25,7 @@ import jakarta.validation.Valid;
  * per tutti i metodi (in aggiunta alla regola su /api/platform/** in SecurityConfig).
  */
 @RestController
+@ConditionalOnProperty(name = "app.modalita", havingValue = "cloud", matchIfMissing = true)
 @RequestMapping("/api/platform/tenants")
 @PreAuthorize("hasRole('SUPERADMIN')")
 public class PlatformTenantController {

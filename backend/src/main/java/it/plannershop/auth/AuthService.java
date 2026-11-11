@@ -13,6 +13,7 @@ import it.plannershop.auth.AuthDtos.Sessione;
 import it.plannershop.auth.AuthDtos.TenantOpzione;
 import it.plannershop.auth.AuthDtos.UtenteCorrente;
 import it.plannershop.common.ApiException;
+import it.plannershop.common.AppProperties;
 import it.plannershop.security.LoginAttemptLimiter;
 import it.plannershop.security.SecurityProperties;
 import it.plannershop.tenant.Tenant;
@@ -34,12 +35,13 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final LoginAttemptLimiter limiter;
     private final SecurityProperties props;
+    private final AppProperties app;
     /** Hash fittizio: si verifica anche se l'utente non esiste, per non rivelarlo dai tempi di risposta. */
     private final String hashFittizio;
 
     AuthService(AppUserRepository users, MembershipRepository memberships,
             RefreshTokenRepository refreshTokens, TokenService tokens, PasswordEncoder passwordEncoder,
-            LoginAttemptLimiter limiter, SecurityProperties props) {
+            LoginAttemptLimiter limiter, SecurityProperties props, AppProperties app) {
         this.users = users;
         this.memberships = memberships;
         this.refreshTokens = refreshTokens;
@@ -47,6 +49,7 @@ public class AuthService {
         this.passwordEncoder = passwordEncoder;
         this.limiter = limiter;
         this.props = props;
+        this.app = app;
         this.hashFittizio = passwordEncoder.encode("password-fittizia-per-tempi-costanti");
     }
 
@@ -83,7 +86,7 @@ public class AuthService {
                         .map(m -> new TenantOpzione(m.getTenant().getId(), m.getTenant().getNome()))
                         .toList());
             }
-            if (valide.isEmpty() && !user.isSuperadmin()) {
+            if (valide.isEmpty() && !accedeAllaPiattaforma(user)) {
                 throw new ApiException(HttpStatus.FORBIDDEN, "Il tuo utente non è associato a nessuna attività attiva");
             }
             scelta = valide.isEmpty() ? null : valide.getFirst();
@@ -120,7 +123,7 @@ public class AuthService {
             // Si rilegge il ruolo: se nel frattempo è cambiato, il nuovo token lo riflette.
             membership = memberships.findValida(user.getId(), salvato.getTenantId())
                     .orElseThrow(() -> ApiException.nonAutenticato("Non hai più accesso a questa attività"));
-        } else if (!user.isSuperadmin()) {
+        } else if (!accedeAllaPiattaforma(user)) {
             throw ApiException.nonAutenticato("Sessione non più valida");
         }
         return apriSessione(user, membership, userAgent);
@@ -163,14 +166,19 @@ public class AuthService {
                 utente(user, membership));
     }
 
-    private static UtenteCorrente utente(AppUser user, Membership membership) {
+    /** Solo in modalità CLOUD il SUPERADMIN può lavorare senza un'attività. */
+    private boolean accedeAllaPiattaforma(AppUser user) {
+        return user.isSuperadmin() && !app.isLocale();
+    }
+
+    private UtenteCorrente utente(AppUser user, Membership membership) {
         String ruolo = membership != null ? membership.getRuolo().name() : "SUPERADMIN";
         TenantOpzione tenant = null;
         if (membership != null) {
             Tenant t = membership.getTenant();
             tenant = new TenantOpzione(t.getId(), t.getNome());
         }
-        return new UtenteCorrente(user.getId(), user.getEmail(), user.getNome(), ruolo, user.isSuperadmin(), tenant,
+        return new UtenteCorrente(user.getId(), user.getEmail(), user.getNome(), ruolo, accedeAllaPiattaforma(user), tenant,
                 user.isDeveCambiarePassword());
     }
 
