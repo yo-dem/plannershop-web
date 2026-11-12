@@ -1,75 +1,90 @@
-<p-dialog [header]="titolo()" [visible]="visibile()" (visibleChange)="visibile.set($event)" [modal]="true"
-          [style]="{ width: '36rem' }" [breakpoints]="{ '640px': '100vw' }" [draggable]="false">
-  @if (errore(); as e) {
-    <p-message severity="error" class="avviso">{{ e }}</p-message>
-  }
+<h2 mat-dialog-title>{{ id === null ? 'Nuovo cliente' : 'Modifica cliente' }}</h2>
 
-  <form [formGroup]="form" (ngSubmit)="salva()" id="form-cliente" novalidate [class.in-caricamento]="caricamento()">
-    <div class="riga">
-      <div class="campo">
-        <label for="nome">Nome *</label>
-        <input pInputText id="nome" formControlName="nome" autocomplete="off" [fluid]="true"
-               [invalid]="!!erroreCampo('nome')" />
-        @if (erroreCampo('nome'); as e) { <small class="errore">{{ e }}</small> }
-      </div>
-      <div class="campo">
-        <label for="cognome">Cognome *</label>
-        <input pInputText id="cognome" formControlName="cognome" autocomplete="off" [fluid]="true"
-               [invalid]="!!erroreCampo('cognome')" />
-        @if (erroreCampo('cognome'); as e) { <small class="errore">{{ e }}</small> }
-      </div>
-    </div>
-
-    <div class="riga">
-      <div class="campo">
-        <label for="telefono">Telefono</label>
-        <input pInputText id="telefono" type="tel" formControlName="telefono" autocomplete="off" [fluid]="true"
-               [invalid]="!!erroreCampo('telefono')" />
-        @if (erroreCampo('telefono'); as e) { <small class="errore">{{ e }}</small> }
-      </div>
-      <div class="campo">
-        <label for="email">Email</label>
-        <input pInputText id="email" type="email" formControlName="email" autocomplete="off" [fluid]="true"
-               [invalid]="!!erroreCampo('email')" />
-        @if (erroreCampo('email'); as e) { <small class="errore">{{ e }}</small> }
-      </div>
-    </div>
-
-    <div class="campo">
-      <span class="etichetta">Compleanno</span>
-      <div class="riga compatta">
-        <p-select formControlName="giornoNascita" [options]="giorni()" placeholder="Giorno" [showClear]="true"
-                  ariaLabel="Giorno di nascita" appendTo="body" class="giorno" />
-        <p-select formControlName="meseNascita" [options]="mesi" optionLabel="nome" optionValue="valore"
-                  placeholder="Mese" [showClear]="true" ariaLabel="Mese di nascita" appendTo="body" class="mese" />
-      </div>
-      @if (erroriServer()['compleanno']; as e) { <small class="errore">{{ e }}</small> }
-    </div>
-
-    <div class="campo">
-      <label for="indirizzo">Indirizzo</label>
-      <input pInputText id="indirizzo" formControlName="indirizzo" autocomplete="off" [fluid]="true"
-             [invalid]="!!erroreCampo('indirizzo')" />
-      @if (erroreCampo('indirizzo'); as e) { <small class="errore">{{ e }}</small> }
-    </div>
-
-    <div class="campo">
-      <label for="note">Note</label>
-      <textarea pTextarea id="note" formControlName="note" rows="3" [autoResize]="true" [fluid]="true"></textarea>
-      @if (erroreCampo('note'); as e) { <small class="errore">{{ e }}</small> }
-    </div>
-  </form>
-
-  <ng-template #footer>
-    @if (clienteId() !== null && auth.haRuolo('ADMIN')) {
-      <p-button label="Elimina" icon="pi pi-trash" severity="danger" [text]="true" class="elimina"
-                (onClick)="chiediEliminazione()" [disabled]="caricamento()" />
+<!-- Il form contiene anche i pulsanti, così "Salva" e il tasto Invio inviano il modulo. -->
+<form [formGroup]="form" (ngSubmit)="salva()" novalidate>
+  <mat-dialog-content>
+    @if (caricamento()) {
+      <mat-progress-bar mode="indeterminate" class="caricamento" />
     }
-    <p-button label="Annulla" [outlined]="true" (onClick)="visibile.set(false)" />
-    <!-- Pulsante HTML nativo: p-button non trasmette l'attributo "form" e il modulo non verrebbe inviato. -->
-    <button pButton type="submit" form="form-cliente" [loading]="invio()" [disabled]="caricamento() || invio()">
-      <i class="pi pi-check" pButtonIcon></i>
-      <span pButtonLabel>Salva</span>
+    @if (errore(); as e) {
+      <app-avviso tipo="errore">{{ e }}</app-avviso>
+    }
+
+    <div class="modulo" [class.in-caricamento]="caricamento()">
+      <div class="modulo-riga">
+        <mat-form-field>
+          <mat-label>Nome</mat-label>
+          <input matInput id="nome" formControlName="nome" autocomplete="off" required />
+          <mat-error>{{ messaggio('nome') }}</mat-error>
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>Cognome</mat-label>
+          <input matInput id="cognome" formControlName="cognome" autocomplete="off" required />
+          <mat-error>{{ messaggio('cognome') }}</mat-error>
+        </mat-form-field>
+      </div>
+
+      <div class="modulo-riga">
+        <mat-form-field>
+          <mat-label>Telefono</mat-label>
+          <input matInput id="telefono" type="tel" formControlName="telefono" autocomplete="off" />
+          <mat-icon matSuffix>call</mat-icon>
+          <mat-error>{{ messaggio('telefono') }}</mat-error>
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>Email</mat-label>
+          <input matInput id="email" type="email" formControlName="email" autocomplete="off" />
+          <mat-icon matSuffix>mail</mat-icon>
+          <mat-error>{{ messaggio('email') }}</mat-error>
+        </mat-form-field>
+      </div>
+
+      <div class="compleanno">
+        <mat-form-field class="giorno">
+          <mat-label>Giorno</mat-label>
+          <mat-select id="giornoNascita" formControlName="giornoNascita">
+            <mat-option [value]="null">—</mat-option>
+            @for (g of giorni(); track g) {
+              <mat-option [value]="g">{{ g }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>Mese del compleanno</mat-label>
+          <mat-select id="meseNascita" formControlName="meseNascita">
+            <mat-option [value]="null">—</mat-option>
+            @for (m of mesi; track m.valore) {
+              <mat-option [value]="m.valore">{{ m.nome }}</mat-option>
+            }
+          </mat-select>
+          <mat-error>{{ messaggio('meseNascita') }}</mat-error>
+        </mat-form-field>
+      </div>
+
+      <mat-form-field>
+        <mat-label>Indirizzo</mat-label>
+        <input matInput id="indirizzo" formControlName="indirizzo" autocomplete="off" />
+        <mat-error>{{ messaggio('indirizzo') }}</mat-error>
+      </mat-form-field>
+
+      <mat-form-field>
+        <mat-label>Note</mat-label>
+        <textarea matInput id="note" formControlName="note" rows="3"></textarea>
+        <mat-error>{{ messaggio('note') }}</mat-error>
+      </mat-form-field>
+    </div>
+  </mat-dialog-content>
+
+  <mat-dialog-actions>
+    @if (id !== null && auth.haRuolo('ADMIN')) {
+      <button matButton type="button" class="elimina" (click)="elimina()" [disabled]="caricamento()">
+        <mat-icon>delete</mat-icon> Elimina
+      </button>
+    }
+    <span class="spazio"></span>
+    <button matButton type="button" mat-dialog-close>Annulla</button>
+    <button matButton="filled" type="submit" [disabled]="caricamento() || invio()">
+      <mat-icon>check</mat-icon> Salva
     </button>
-  </ng-template>
-</p-dialog>
+  </mat-dialog-actions>
+</form>

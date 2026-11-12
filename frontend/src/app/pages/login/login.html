@@ -1,44 +1,46 @@
 <section class="pannello">
-  <h1><i class="pi pi-calendar" aria-hidden="true"></i> PlannerShop</h1>
+  <h1><mat-icon aria-hidden="true">calendar_month</mat-icon> PlannerShop</h1>
   <p class="sottotitolo">Accedi per continuare</p>
 
   @if (scaduta()) {
-    <p-message severity="warn" class="avviso">La sessione è scaduta: accedi di nuovo.</p-message>
+    <app-avviso tipo="attenzione">La sessione è scaduta: accedi di nuovo.</app-avviso>
   }
   @if (errore(); as e) {
-    <p-message severity="error" class="avviso">{{ e }}</p-message>
+    <app-avviso tipo="errore">{{ e }}</app-avviso>
   }
 
-  <form [formGroup]="form" (ngSubmit)="accedi()" novalidate>
-    <div class="campo">
-      <label for="email">Email</label>
-      <input pInputText id="email" type="email" formControlName="email" autocomplete="username"
-             [class.ng-dirty]="nonValido('email')" [fluid]="true" />
-      @if (nonValido('email')) {
-        <small class="errore">Inserisci un'email valida</small>
-      }
-    </div>
+  <form [formGroup]="form" (ngSubmit)="accedi()" class="modulo" novalidate>
+    <mat-form-field>
+      <mat-label>Email</mat-label>
+      <input matInput id="email" type="email" formControlName="email" autocomplete="username" />
+      <mat-error>Inserisci un'email valida</mat-error>
+    </mat-form-field>
 
-    <div class="campo">
-      <label for="password">Password</label>
-      <p-password inputId="password" formControlName="password" [feedback]="false" [toggleMask]="true"
-                  autocomplete="current-password" [fluid]="true" />
-      @if (nonValido('password')) {
-        <small class="errore">Inserisci la password</small>
-      }
-    </div>
+    <mat-form-field>
+      <mat-label>Password</mat-label>
+      <input matInput id="password" [type]="mostraPassword() ? 'text' : 'password'" formControlName="password"
+             autocomplete="current-password" />
+      <button matIconButton matSuffix type="button" (click)="mostraPassword.set(!mostraPassword())"
+              [attr.aria-label]="mostraPassword() ? 'Nascondi password' : 'Mostra password'">
+        <mat-icon>{{ mostraPassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+      </button>
+      <mat-error>Inserisci la password</mat-error>
+    </mat-form-field>
 
     @if (attivita(); as elenco) {
-      <div class="campo">
-        <label for="tenant">Attività</label>
-        <p-select inputId="tenant" formControlName="tenantId" [options]="elenco" optionLabel="nome"
-                  optionValue="id" placeholder="Scegli l'attività" [fluid]="true" />
-        @if (nonValido('tenantId')) {
-          <small class="errore">Scegli un'attività</small>
-        }
-      </div>
+      <mat-form-field>
+        <mat-label>Attività</mat-label>
+        <mat-select id="tenant" formControlName="tenantId">
+          @for (a of elenco; track a.id) {
+            <mat-option [value]="a.id">{{ a.nome }}</mat-option>
+          }
+        </mat-select>
+        <mat-error>Scegli un'attività</mat-error>
+      </mat-form-field>
     }
 
-    <p-button type="submit" label="Accedi" icon="pi pi-sign-in" [loading]="invio()" [fluid]="true" />
+    <button matButton="filled" type="submit" class="accedi" [disabled]="invio()">
+      <mat-icon>login</mat-icon> {{ invio() ? 'Accesso in corso…' : 'Accedi' }}
+    </button>
   </form>
 </section>

@@ -4,31 +4,8 @@
   margin: 0 auto;
 }
 
-.intestazione {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 1rem;
-  margin-bottom: 1rem;
-
-  h2 {
-    margin: 0;
-  }
-}
-
-.comandi {
-  display: flex;
-  gap: 0.5rem;
-}
-
 .ricerca {
-  display: block;
-  margin-bottom: 1rem;
-}
-
-.avviso {
-  display: block;
+  width: 100%;
   margin-bottom: 1rem;
 }
 
@@ -36,33 +13,16 @@
   overflow-wrap: anywhere;
 }
 
-.cliccabile {
-  cursor: pointer;
-}
-
 /* Riga appena salvata: resta evidenziata finché non se ne salva un'altra. */
 .evidenziata > td {
-  background: color-mix(in srgb, var(--p-primary-color) 14%, transparent) !important;
-}
-
-@media (max-width: 640px) {
-  .nascondi-mobile {
-    display: none;
-  }
-
-  /* Su smartphone i pulsanti mostrano solo l'icona. */
-  .comandi ::ng-deep .p-button-label {
-    display: none;
-  }
+  background: var(--mat-sys-primary-container) !important;
 }
 
 /* Compleanni: i giorni già passati del mese corrente sono attenuati. */
 .passato > td {
-  color: var(--p-text-muted-color);
+  color: var(--mat-sys-on-surface-variant);
 }
 
-h2 {
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
+.mese {
+  width: 12rem;
 }

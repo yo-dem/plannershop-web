@@ -1,10 +1,7 @@
-<p-toast position="top-center" />
-<p-confirmdialog />
-
 @if (auth.utente(); as utente) {
   <header class="topbar">
     <a routerLink="/" class="brand">
-      <i class="pi pi-calendar" aria-hidden="true"></i>
+      <mat-icon aria-hidden="true">calendar_month</mat-icon>
       <span>PlannerShop</span>
     </a>
     @if (utente.tenant) {
@@ -14,30 +11,34 @@
     <nav class="nav">
       @for (v of voci(); track v.link) {
         <a [routerLink]="v.link" routerLinkActive="attiva" [routerLinkActiveOptions]="{ exact: v.link === '/' }">
-          <i [class]="v.icon" aria-hidden="true"></i>
+          <mat-icon aria-hidden="true">{{ v.icon }}</mat-icon>
           <span>{{ v.label }}</span>
         </a>
       }
     </nav>
 
     @if (numeroCompleanni(); as n) {
-      <a routerLink="/clienti/compleanni" class="compleanni"
-         [attr.aria-label]="n + (n === 1 ? ' compleanno' : ' compleanni') + ' questo mese'"
-         [title]="n + (n === 1 ? ' compleanno' : ' compleanni') + ' questo mese'">
-        <i class="pi pi-gift" aria-hidden="true"></i>
+      @let testo = n + (n === 1 ? ' compleanno' : ' compleanni') + ' questo mese';
+      <a routerLink="/clienti/compleanni" class="compleanni" [attr.aria-label]="testo" [matTooltip]="testo">
+        <mat-icon aria-hidden="true">redeem</mat-icon>
         <span class="conteggio">{{ n }}</span>
       </a>
     }
 
-    <p-button
-      [label]="utente.nome"
-      icon="pi pi-user"
-      [text]="true"
-      severity="contrast"
-      styleClass="utente"
-      (onClick)="menu.toggle($event)"
-    />
-    <p-menu #menu [model]="menuUtente" [popup]="true" appendTo="body" />
+    <button matButton class="utente" [matMenuTriggerFor]="menuUtente">
+      <mat-icon>account_circle</mat-icon>
+      <span class="nome-utente">{{ utente.nome }}</span>
+    </button>
+    <mat-menu #menuUtente="matMenu" xPosition="before">
+      <a mat-menu-item routerLink="/cambia-password">
+        <mat-icon>key</mat-icon>
+        <span>Cambia password</span>
+      </a>
+      <button mat-menu-item (click)="auth.logout()">
+        <mat-icon>logout</mat-icon>
+        <span>Esci</span>
+      </button>
+    </mat-menu>
   </header>
 }
 

@@ -6,7 +6,7 @@ Riscrittura web dell'applicazione desktop PlannerShop (WinForms).
 | Parte | Tecnologia | Cartella |
 |---|---|---|
 | Backend | Java 21, Spring Boot 4, PostgreSQL 18, Flyway | `backend/` |
-| Frontend | Angular 22, PrimeNG (tema Aura) | `frontend/` |
+| Frontend | Angular 22, Angular Material (Material 3) | `frontend/` |
 | Deploy | Docker Compose (postgres, backend, nginx) | `docker/` |
 
 Specifica funzionale e tecnica: [docs/SPECIFICA.md](docs/SPECIFICA.md)
@@ -171,7 +171,8 @@ backend/
     db/migration/    migrazioni Flyway V<n>__descrizione.sql
   src/test/          test d'integrazione (Testcontainers)
 frontend/
-  src/app/core/      sessione, interceptor del token, guard, traduzioni PrimeNG
+  src/app/core/      sessione, interceptor del token, guard, servizi API
+  src/app/core/ui/   componenti comuni: avvisi, notifiche, conferme, paginatore in italiano
   src/app/pages/     pagine (login, home, cambia password, clienti, piattaforma)
   proxy.conf.json    /api → localhost:8080 durante ng serve
   nginx.conf         configurazione nginx dell'immagine Docker

@@ -1,31 +1,38 @@
 import { Component, inject, signal } from '@angular/core';
 import { AbstractControl, FormBuilder, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
+import { MatButton } from '@angular/material/button';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIcon } from '@angular/material/icon';
+import { MatInput } from '@angular/material/input';
 import { Router } from '@angular/router';
-import { MessageService } from 'primeng/api';
-import { Button } from 'primeng/button';
-import { Message } from 'primeng/message';
-import { Password } from 'primeng/password';
 
 import { AuthService } from '../../core/auth/auth.service';
 import { erroriCampo, messaggioErrore } from '../../core/errori';
+import { Avviso } from '../../core/ui/avviso';
+import { Notifiche } from '../../core/ui/notifiche';
 
-/** La conferma deve coincidere con la nuova password. */
+/** La conferma deve coincidere con la nuova password (errore sul campo "conferma"). */
 function passwordUguali(group: AbstractControl): ValidationErrors | null {
   const nuova = group.get('nuovaPassword')?.value;
-  const conferma = group.get('conferma')?.value;
-  return nuova && conferma && nuova !== conferma ? { diverse: true } : null;
+  const conferma = group.get('conferma');
+  const diverse = !!nuova && !!conferma?.value && nuova !== conferma.value;
+  if (conferma) {
+    const { diverse: _, ...altri } = conferma.errors ?? {};
+    conferma.setErrors(diverse ? { ...altri, diverse: true } : Object.keys(altri).length ? altri : null);
+  }
+  return null;
 }
 
 @Component({
   selector: 'app-cambia-password',
-  imports: [ReactiveFormsModule, Button, Message, Password],
+  imports: [ReactiveFormsModule, MatButton, MatFormFieldModule, MatIcon, MatInput, Avviso],
   templateUrl: './cambia-password.html',
   styleUrl: './cambia-password.scss',
 })
 export class CambiaPassword {
   protected readonly auth = inject(AuthService);
   private readonly router = inject(Router);
-  private readonly messaggi = inject(MessageService);
+  private readonly notifiche = inject(Notifiche);
 
   protected readonly form = inject(FormBuilder).nonNullable.group(
     {
@@ -49,7 +56,7 @@ export class CambiaPassword {
     const { passwordAttuale, nuovaPassword } = this.form.getRawValue();
     try {
       await this.auth.cambiaPassword(passwordAttuale, nuovaPassword);
-      this.messaggi.add({ severity: 'success', summary: 'Password aggiornata' });
+      this.notifiche.successo('Password aggiornata');
       await this.router.navigate(['/']);
     } catch (err) {
       const campi = erroriCampo(err);
@@ -57,10 +64,5 @@ export class CambiaPassword {
     } finally {
       this.invio.set(false);
     }
-  }
-
-  protected nonValido(campo: 'passwordAttuale' | 'nuovaPassword' | 'conferma'): boolean {
-    const c = this.form.controls[campo];
-    return c.invalid && c.touched;
   }
 }

@@ -1,16 +1,19 @@
 import { httpResource } from '@angular/common/http';
 import { Component, computed, inject, signal } from '@angular/core';
+import { MatButton } from '@angular/material/button';
+import { MatDialog } from '@angular/material/dialog';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIcon } from '@angular/material/icon';
+import { MatInput } from '@angular/material/input';
+import { MatPaginator, PageEvent } from '@angular/material/paginator';
+import { MatProgressBar } from '@angular/material/progress-bar';
+import { MatSort, MatSortHeader, Sort } from '@angular/material/sort';
+import { MatTableModule } from '@angular/material/table';
 import { RouterLink } from '@angular/router';
-import { Button } from 'primeng/button';
-import { IconField } from 'primeng/iconfield';
-import { InputIcon } from 'primeng/inputicon';
-import { InputText } from 'primeng/inputtext';
-import { Message } from 'primeng/message';
-import { TableLazyLoadEvent, TableModule } from 'primeng/table';
 
-import { AuthService } from '../../core/auth/auth.service';
 import { API_CLIENTI, Cliente, ClientiService, Pagina, compleanno } from '../../core/clienti';
-import { ClienteDialog } from './cliente-dialog';
+import { Avviso } from '../../core/ui/avviso';
+import { apriCliente } from './cliente-dialog';
 
 /**
  * Elenco clienti: ricerca istantanea, ordinamento e paginazione fatti dal
@@ -18,40 +21,37 @@ import { ClienteDialog } from './cliente-dialog';
  */
 @Component({
   selector: 'app-clienti',
-  imports: [RouterLink, Button, IconField, InputIcon, InputText, Message, TableModule, ClienteDialog],
+  imports: [
+    RouterLink, MatButton, MatFormFieldModule, MatIcon, MatInput, MatPaginator, MatProgressBar, MatSort,
+    MatSortHeader, MatTableModule, Avviso,
+  ],
   templateUrl: './clienti.html',
   styleUrl: './clienti.scss',
 })
 export class Clienti {
-  protected readonly auth = inject(AuthService);
   private readonly clienti = inject(ClientiService);
+  private readonly dialog = inject(MatDialog);
   protected readonly compleanno = compleanno;
+  protected readonly colonne = ['cognome', 'telefono', 'email', 'compleanno'];
 
   // --- stato dell'elenco (ogni cambiamento ricarica i dati dal server)
   protected readonly testo = signal('');
   private readonly ricerca = signal('');
-  protected readonly primo = signal(0);
+  protected readonly pagina = signal(0);
   protected readonly righe = signal(20);
-  private readonly ordinaPer = signal<string | null>(null);
-  private readonly ordine = signal<1 | -1>(1);
+  private readonly ordinamento = signal<Sort>({ active: '', direction: '' });
 
-  protected readonly pagina = httpResource<Pagina<Cliente>>(() => {
+  protected readonly dati = httpResource<Pagina<Cliente>>(() => {
     this.clienti.modifiche(); // ricarica dopo inserimenti, modifiche, eliminazioni
-    const params: Record<string, string | number> = {
-      page: Math.floor(this.primo() / this.righe()),
-      size: this.righe(),
-    };
+    const params: Record<string, string | number> = { page: this.pagina(), size: this.righe() };
     if (this.ricerca()) params['q'] = this.ricerca();
-    const campo = this.ordinaPer();
-    if (campo) params['sort'] = `${campo},${this.ordine() === 1 ? 'asc' : 'desc'}`;
+    const { active, direction } = this.ordinamento();
+    if (active && direction) params['sort'] = `${active},${direction}`;
     return { url: API_CLIENTI, params };
   });
-  protected readonly elementi = computed(() => this.pagina.value()?.elementi ?? []);
-  protected readonly totale = computed(() => this.pagina.value()?.totale ?? 0);
+  protected readonly elementi = computed(() => this.dati.value()?.elementi ?? []);
+  protected readonly totale = computed(() => this.dati.value()?.totale ?? 0);
 
-  // --- finestra di inserimento/modifica
-  protected readonly dialogAperto = signal(false);
-  protected readonly clienteScelto = signal<number | null>(null);
   /** Riga evidenziata dopo un salvataggio. */
   protected readonly evidenziato = signal<number | null>(null);
 
@@ -63,30 +63,29 @@ export class Clienti {
     clearTimeout(this.attesaRicerca);
     this.attesaRicerca = setTimeout(() => {
       this.ricerca.set(valore.trim());
-      this.primo.set(0);
+      this.pagina.set(0);
     }, 300);
   }
 
-  /** Paginazione e ordinamento della tabella. */
-  carica(e: TableLazyLoadEvent): void {
-    this.primo.set(e.first ?? 0);
-    this.righe.set(e.rows ?? 20);
-    const campo = typeof e.sortField === 'string' ? e.sortField : null;
-    this.ordinaPer.set(campo);
-    this.ordine.set(e.sortOrder === -1 ? -1 : 1);
+  cambiaPagina(e: PageEvent): void {
+    this.pagina.set(e.pageIndex);
+    this.righe.set(e.pageSize);
   }
 
-  nuovo(): void {
-    this.clienteScelto.set(null);
-    this.dialogAperto.set(true);
+  ordina(s: Sort): void {
+    this.ordinamento.set(s);
+    this.pagina.set(0);
   }
 
-  apri(c: Cliente): void {
-    this.clienteScelto.set(c.id);
-    this.dialogAperto.set(true);
+  async nuovo(): Promise<void> {
+    this.evidenzia(await apriCliente(this.dialog, null));
   }
 
-  salvato(c: Cliente): void {
-    this.evidenziato.set(c.id);
+  async apri(c: Cliente): Promise<void> {
+    this.evidenzia(await apriCliente(this.dialog, c.id));
+  }
+
+  private evidenzia(esito: Cliente | 'eliminato' | undefined): void {
+    if (esito && esito !== 'eliminato') this.evidenziato.set(esito.id);
   }
 }

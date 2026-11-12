@@ -1,25 +1,31 @@
 import { httpResource } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { MatIconButton } from '@angular/material/button';
+import { MatDialog } from '@angular/material/dialog';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIcon } from '@angular/material/icon';
+import { MatProgressBar } from '@angular/material/progress-bar';
+import { MatSelectModule } from '@angular/material/select';
+import { MatTableModule } from '@angular/material/table';
 import { RouterLink } from '@angular/router';
-import { Button } from 'primeng/button';
-import { Message } from 'primeng/message';
-import { Select } from 'primeng/select';
-import { TableModule } from 'primeng/table';
-import { Tag } from 'primeng/tag';
 
 import { API_CLIENTI, Cliente, ClientiService, MESI } from '../../core/clienti';
-import { ClienteDialog } from './cliente-dialog';
+import { Avviso } from '../../core/ui/avviso';
+import { apriCliente } from './cliente-dialog';
 
 /** Clienti che compiono gli anni in un mese (di default quello corrente). */
 @Component({
   selector: 'app-compleanni',
-  imports: [FormsModule, RouterLink, Button, Message, Select, TableModule, Tag, ClienteDialog],
+  imports: [
+    RouterLink, MatIconButton, MatFormFieldModule, MatIcon, MatProgressBar, MatSelectModule, MatTableModule, Avviso,
+  ],
   templateUrl: './compleanni.html',
   styleUrl: './clienti.scss',
 })
 export class Compleanni {
   private readonly clienti = inject(ClientiService);
+  private readonly dialog = inject(MatDialog);
+  protected readonly colonne = ['giorno', 'cliente', 'telefono', 'email'];
 
   protected readonly mesi = MESI.map((nome, i) => ({ nome: nome[0].toUpperCase() + nome.slice(1), valore: i + 1 }));
   private readonly oggi = new Date();
@@ -33,9 +39,6 @@ export class Compleanni {
     { defaultValue: [] },
   );
 
-  protected readonly dialogAperto = signal(false);
-  protected readonly clienteScelto = signal<number | null>(null);
-
   protected eOggi(c: Cliente): boolean {
     return c.meseNascita === this.oggi.getMonth() + 1 && c.giornoNascita === this.oggi.getDate();
   }
@@ -45,7 +48,6 @@ export class Compleanni {
   }
 
   apri(c: Cliente): void {
-    this.clienteScelto.set(c.id);
-    this.dialogAperto.set(true);
+    void apriCliente(this.dialog, c.id);
   }
 }

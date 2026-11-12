@@ -7,10 +7,10 @@
 .topbar {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 0.75rem;
   padding: 0.5rem 1rem;
-  background: var(--p-primary-color);
-  color: var(--p-primary-contrast-color);
+  background: var(--mat-sys-primary);
+  color: var(--mat-sys-on-primary);
 
   a {
     color: inherit;
@@ -22,8 +22,7 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  font-size: 1.125rem;
-  font-weight: 600;
+  font: var(--mat-sys-title-large);
 }
 
 .tenant {
@@ -43,11 +42,12 @@
     align-items: center;
     gap: 0.4rem;
     padding: 0.5rem 0.75rem;
-    border-radius: var(--p-border-radius-md);
+    border-radius: var(--mat-sys-corner-full);
+    font: var(--mat-sys-label-large);
 
     &:hover,
     &.attiva {
-      background: color-mix(in srgb, currentColor 15%, transparent);
+      background: color-mix(in srgb, currentColor 16%, transparent);
     }
   }
 }
@@ -58,14 +58,10 @@
   display: flex;
   align-items: center;
   padding: 0.5rem;
-  border-radius: var(--p-border-radius-md);
+  border-radius: var(--mat-sys-corner-full);
 
   &:hover {
-    background: color-mix(in srgb, currentColor 15%, transparent);
-  }
-
-  .pi {
-    font-size: 1.125rem;
+    background: color-mix(in srgb, currentColor 16%, transparent);
   }
 
   .conteggio {
@@ -75,8 +71,8 @@
     min-width: 1.1rem;
     padding: 0 0.25rem;
     border-radius: 999px;
-    background: var(--p-red-500);
-    color: #fff;
+    background: var(--mat-sys-error);
+    color: var(--mat-sys-on-error);
     font-size: 0.7rem;
     font-weight: 700;
     line-height: 1.1rem;
@@ -84,8 +80,9 @@
   }
 }
 
-:host ::ng-deep .utente.p-button {
-  color: inherit;
+.utente {
+  --mat-button-text-label-text-color: var(--mat-sys-on-primary);
+  --mat-button-text-state-layer-color: var(--mat-sys-on-primary);
 }
 
 .content {
@@ -95,12 +92,29 @@
 
 /* Smartphone: nascondi i testi, restano le icone. */
 @media (max-width: 640px) {
+  .topbar {
+    gap: 0.25rem;
+    padding: 0.5rem;
+  }
+
   .tenant,
-  .nav span {
+  .nav span,
+  .nome-utente {
     display: none;
   }
 
-  :host ::ng-deep .utente .p-button-label {
+  .utente {
+    min-width: 0;
+    padding: 0 0.5rem;
+
+    mat-icon {
+      margin: 0;
+    }
+  }
+}
+
+@media (max-width: 420px) {
+  .brand span {
     display: none;
   }
 }

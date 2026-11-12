@@ -1,54 +1,57 @@
 <div class="intestazione">
   <h2>Clienti</h2>
   <div class="comandi">
-    <p-button label="Compleanni" icon="pi pi-gift" [outlined]="true" routerLink="/clienti/compleanni" />
-    <p-button label="Nuovo cliente" icon="pi pi-plus" (onClick)="nuovo()" />
+    <a matButton="outlined" routerLink="/clienti/compleanni"><mat-icon>redeem</mat-icon> Compleanni</a>
+    <button matButton="filled" (click)="nuovo()"><mat-icon>person_add</mat-icon> Nuovo cliente</button>
   </div>
 </div>
 
-<p-iconfield class="ricerca">
-  <p-inputicon class="pi pi-search" />
-  <input pInputText type="search" [value]="testo()" (input)="cerca($any($event.target).value)"
-         placeholder="Cerca per nome, cognome, telefono o email" aria-label="Cerca clienti" [fluid]="true" />
-</p-iconfield>
+<mat-form-field class="ricerca">
+  <mat-icon matPrefix>search</mat-icon>
+  <mat-label>Cerca cliente</mat-label>
+  <input matInput type="search" [value]="testo()" (input)="cerca($any($event.target).value)"
+         placeholder="Nome, cognome, telefono o email" />
+</mat-form-field>
 
-@if (pagina.error()) {
-  <p-message severity="error" class="avviso">Impossibile caricare i clienti.</p-message>
+@if (dati.error()) {
+  <app-avviso tipo="errore">Impossibile caricare i clienti.</app-avviso>
 }
 
-<p-table [value]="elementi()" [lazy]="true" (onLazyLoad)="carica($event)" [loading]="pagina.isLoading()"
-         [paginator]="true" [rows]="righe()" [first]="primo()" [totalRecords]="totale()"
-         [rowsPerPageOptions]="[20, 50, 100]" [showCurrentPageReport]="true"
-         currentPageReportTemplate="{first}–{last} di {totalRecords}"
-         dataKey="id" stripedRows [rowHover]="true">
-  <ng-template #header>
-    <tr>
-      <th pSortableColumn="cognome">Cliente <p-sort-icon field="cognome" /></th>
-      <th>Telefono</th>
-      <th class="nascondi-mobile">Email</th>
-      <th pSortableColumn="compleanno" class="nascondi-mobile">Compleanno <p-sort-icon field="compleanno" /></th>
-    </tr>
-  </ng-template>
-  <ng-template #body let-c>
-    <tr class="cliccabile" [class.evidenziata]="c.id === evidenziato()" (click)="apri(c)"
-        (keydown.enter)="apri(c)" tabindex="0">
-      <td><strong>{{ c.cognome }}</strong> {{ c.nome }}</td>
-      <td>{{ c.telefono }}</td>
-      <td class="nascondi-mobile email">{{ c.email }}</td>
-      <td class="nascondi-mobile">{{ compleanno(c) }}</td>
-    </tr>
-  </ng-template>
-  <ng-template #emptymessage>
-    <tr>
-      <td colspan="4">
+<div class="tabella">
+  @if (dati.isLoading()) {
+    <mat-progress-bar mode="indeterminate" />
+  }
+  <table mat-table [dataSource]="elementi()" matSort (matSortChange)="ordina($event)">
+    <ng-container matColumnDef="cognome">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Cliente</th>
+      <td mat-cell *matCellDef="let c"><strong>{{ c.cognome }}</strong> {{ c.nome }}</td>
+    </ng-container>
+    <ng-container matColumnDef="telefono">
+      <th mat-header-cell *matHeaderCellDef>Telefono</th>
+      <td mat-cell *matCellDef="let c">{{ c.telefono }}</td>
+    </ng-container>
+    <ng-container matColumnDef="email">
+      <th mat-header-cell *matHeaderCellDef class="nascondi-mobile">Email</th>
+      <td mat-cell *matCellDef="let c" class="nascondi-mobile email">{{ c.email }}</td>
+    </ng-container>
+    <ng-container matColumnDef="compleanno">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header class="nascondi-mobile">Compleanno</th>
+      <td mat-cell *matCellDef="let c" class="nascondi-mobile">{{ compleanno(c) }}</td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="colonne"></tr>
+    <tr mat-row *matRowDef="let c; columns: colonne" class="cliccabile" [class.evidenziata]="c.id === evidenziato()"
+        (click)="apri(c)" (keydown.enter)="apri(c)" tabindex="0"></tr>
+    <tr *matNoDataRow>
+      <td class="vuoto" [attr.colspan]="colonne.length">
         @if (testo()) {
           Nessun cliente trovato per "{{ testo() }}".
-        } @else {
+        } @else if (!dati.isLoading()) {
           Nessun cliente. Inseriscine uno con "Nuovo cliente".
         }
       </td>
     </tr>
-  </ng-template>
-</p-table>
-
-<app-cliente-dialog [(visibile)]="dialogAperto" [clienteId]="clienteScelto()" (salvato)="salvato($event)" />
+  </table>
+  <mat-paginator [length]="totale()" [pageIndex]="pagina()" [pageSize]="righe()" [pageSizeOptions]="[20, 50, 100]"
+                 (page)="cambiaPagina($event)" />
+</div>

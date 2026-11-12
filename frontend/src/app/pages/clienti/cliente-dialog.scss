@@ -1,52 +1,23 @@
-form {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-
-  &.in-caricamento {
-    opacity: 0.5;
-    pointer-events: none;
-  }
+.in-caricamento {
+  opacity: 0.5;
+  pointer-events: none;
 }
 
-.riga {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
-
-  &.compatta {
-    grid-template-columns: 8rem 1fr;
-    gap: 0.5rem;
-  }
-}
-
-.campo {
-  display: flex;
-  flex-direction: column;
-  gap: 0.375rem;
-  min-width: 0;
-}
-
-.etichetta {
-  font-weight: inherit;
-}
-
-.errore {
-  color: var(--p-red-500);
-}
-
-.avviso {
-  display: block;
+.caricamento {
   margin-bottom: 1rem;
 }
 
-/* "Elimina" a sinistra, gli altri pulsanti a destra. */
-.elimina {
-  margin-right: auto;
+.compleanno {
+  display: grid;
+  grid-template-columns: 8rem 1fr;
+  gap: 0.875rem 0.75rem;
 }
 
-@media (max-width: 640px) {
-  .riga:not(.compatta) {
-    grid-template-columns: 1fr;
-  }
+.spazio {
+  flex: 1;
+}
+
+.elimina {
+  --mat-button-text-label-text-color: var(--mat-sys-error);
+  --mat-button-text-state-layer-color: var(--mat-sys-error);
 }

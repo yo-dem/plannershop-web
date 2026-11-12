@@ -23,9 +23,11 @@
 | Sicurezza | Spring Security, `oauth2-resource-server` con JWT firmati dal backend, refresh token in cookie `httpOnly` |
 | API docs | springdoc-openapi → generazione automatica del client TypeScript |
 | Email | Spring Boot Mail (SMTP per tenant) |
-| Frontend | Angular 22, TypeScript, PrimeNG 22 (tema Aura) |
-| Agenda | FullCalendar (`@fullcalendar/angular`) |
-| Grafici | Chart.js (via PrimeNG Chart) |
+| Frontend | Angular 22, TypeScript, Angular Material 22 (Material 3, tema verde), icone Material Symbols e carattere Roboto inclusi nel progetto (funzionano offline) |
+| Agenda | FullCalendar (`@fullcalendar/angular`), solo plugin MIT (i plugin "premium" sono a pagamento) |
+| Grafici | Chart.js (MIT) |
+
+**Licenze**: si usano solo librerie open source (MIT, Apache 2.0, OFL). PrimeNG è stato scartato perché dalla versione 22 richiede una licenza commerciale PrimeUI (§14).
 | Deploy | Docker Compose: `postgres`, `backend`, `frontend` (nginx + reverse proxy `/api`) |
 
 ## 3. Struttura del repository
@@ -411,7 +413,7 @@ Strumento a riga di comando (modulo del backend) che importa `PSDB.db` e `PSDB_A
 
 ## 13. Piano di sviluppo
 
-1. ✅ **Scheletro**: Docker Compose con Postgres, Spring Boot con Flyway e health check, Angular con PrimeNG, nginx.
+1. ✅ **Scheletro**: Docker Compose con Postgres, Spring Boot con Flyway e health check, Angular con interfaccia a componenti, nginx.
 2. ✅ **Fondamenta**: tenant, utenti, membership, login/refresh/logout, `@TenantId`, `@PreAuthorize`, soft delete di base, bootstrap SUPERADMIN, shell Angular con login, guard e gestione attività (SUPERADMIN).
 2b. ✅ **Modalità locale**: `APP_MODE=locale` (§4.1), bootstrap dell'attività, ripristino password da riga di comando.
 3. ✅ **Clienti**: CRUD completo end-to-end (ricerca, paginazione, ordinamento, compleanni del mese con avviso nella barra), da usare come modello per le altre entità.
@@ -433,3 +435,4 @@ Strumento a riga di comando (modulo del backend) che importa `PSDB.db` e `PSDB_A
 | 4 | L'operatore può eliminare prodotti, servizi e fornitori? | Sì (§5.3) |
 | 5 | Eliminazione di un cliente con vendite | Soft delete, esteso a **tutte** le entità (§6.0) |
 | 6 | Installazione sul PC del cliente senza piattaforma | Modalità `locale` da configurazione, stesso codice (§4.1) |
+| 7 | Libreria dei componenti del frontend | Angular Material (MIT) al posto di PrimeNG: dalla versione 22 PrimeNG richiede una chiave di licenza PrimeUI (gratuita solo sotto certi limiti, rinnovo annuale) |

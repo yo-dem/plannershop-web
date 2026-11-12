@@ -1,19 +1,20 @@
 import { Component, inject, input, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { MatButton, MatIconButton } from '@angular/material/button';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIcon } from '@angular/material/icon';
+import { MatInput } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
 import { Router } from '@angular/router';
-import { Button } from 'primeng/button';
-import { InputText } from 'primeng/inputtext';
-import { Message } from 'primeng/message';
-import { Password } from 'primeng/password';
-import { Select } from 'primeng/select';
 
 import { TenantOpzione } from '../../core/auth/auth.models';
 import { AuthService } from '../../core/auth/auth.service';
 import { messaggioErrore } from '../../core/errori';
+import { Avviso } from '../../core/ui/avviso';
 
 @Component({
   selector: 'app-login',
-  imports: [ReactiveFormsModule, Button, InputText, Message, Password, Select],
+  imports: [ReactiveFormsModule, MatButton, MatIconButton, MatFormFieldModule, MatIcon, MatInput, MatSelectModule, Avviso],
   templateUrl: './login.html',
   styleUrl: './login.scss',
 })
@@ -33,6 +34,7 @@ export class Login {
 
   protected readonly invio = signal(false);
   protected readonly errore = signal<string | null>(null);
+  protected readonly mostraPassword = signal(false);
   /** Attività tra cui scegliere, se l'utente ne ha più di una. */
   protected readonly attivita = signal<TenantOpzione[] | null>(null);
 
@@ -62,10 +64,5 @@ export class Login {
     } finally {
       this.invio.set(false);
     }
-  }
-
-  protected nonValido(campo: 'email' | 'password' | 'tenantId'): boolean {
-    const c = this.form.controls[campo];
-    return c.invalid && c.touched;
   }
 }

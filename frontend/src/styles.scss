@@ -1,12 +1,147 @@
-/* Stili globali. I componenti PrimeNG prendono colori e misure dal tema Aura. */
+/*
+ * Stili globali e tema Angular Material (Material 3).
+ * I colori si usano tramite le variabili di sistema --mat-sys-* (es.
+ * --mat-sys-primary, --mat-sys-surface, --mat-sys-error), così cambiando
+ * il tema qui cambia tutta l'applicazione.
+ */
+@use '@angular/material' as mat;
 
 html {
+  color-scheme: light;
   font-size: 16px;
+
+  @include mat.theme((
+    color: (
+      primary: mat.$green-palette,
+      tertiary: mat.$azure-palette,
+    ),
+    typography: Roboto,
+    density: 0,
+  ));
 }
 
 body {
   margin: 0;
-  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-  background: var(--p-surface-50);
-  color: var(--p-text-color);
+  font: var(--mat-sys-body-large);
+  background: var(--mat-sys-surface-container-low);
+  color: var(--mat-sys-on-surface);
+}
+
+/* Pannello bianco con angoli arrotondati (login, cambio password, schede). */
+.pannello {
+  padding: 1.5rem;
+  background: var(--mat-sys-surface);
+  border-radius: var(--mat-sys-corner-large);
+  box-shadow: var(--mat-sys-level1);
+}
+
+/* Moduli: campi uno sotto l'altro. */
+.modulo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+  /* Spazio per l'etichetta del primo campo, che sporge sopra il bordo. */
+  padding-top: 0.5rem;
+
+  mat-form-field {
+    width: 100%;
+  }
+}
+
+/* Due campi affiancati, uno sotto l'altro su smartphone. */
+.modulo-riga {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.875rem 1rem;
+
+  @media (max-width: 640px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Intestazione di pagina: titolo a sinistra, comandi a destra. */
+.intestazione {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1rem;
+
+  h2 {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    margin: 0;
+    font: var(--mat-sys-headline-small);
+  }
+}
+
+.comandi {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+/* Tabelle: contenitore con bordo arrotondato e scorrimento orizzontale se serve. */
+.tabella {
+  overflow-x: auto;
+  border-radius: var(--mat-sys-corner-medium);
+  background: var(--mat-sys-surface);
+  box-shadow: var(--mat-sys-level1);
+
+  table {
+    width: 100%;
+  }
+
+  tr.cliccabile {
+    cursor: pointer;
+
+    &:hover > td {
+      background: var(--mat-sys-surface-container);
+    }
+  }
+
+  .vuoto {
+    padding: 1.5rem 1rem;
+    color: var(--mat-sys-on-surface-variant);
+  }
+}
+
+/* Su smartphone si nascondono le colonne secondarie. */
+@media (max-width: 640px) {
+  .nascondi-mobile {
+    display: none;
+  }
+}
+
+/* Piccola etichetta colorata (stato, "Oggi"). */
+.etichetta {
+  display: inline-block;
+  padding: 0.125rem 0.5rem;
+  border-radius: 999px;
+  font: var(--mat-sys-label-medium);
+  background: var(--mat-sys-surface-container-high);
+  color: var(--mat-sys-on-surface-variant);
+
+  &.positiva {
+    background: var(--mat-sys-primary-container);
+    color: var(--mat-sys-on-primary-container);
+  }
+
+  &.negativa {
+    background: var(--mat-sys-error-container);
+    color: var(--mat-sys-on-error-container);
+  }
+}
+
+.testo-secondario {
+  color: var(--mat-sys-on-surface-variant);
+}
+
+/* Notifica di errore (Notifiche.errore). */
+.notifica-errore {
+  --mat-snack-bar-container-color: var(--mat-sys-error-container);
+  --mat-snack-bar-supporting-text-color: var(--mat-sys-on-error-container);
+  --mat-snack-bar-button-color: var(--mat-sys-on-error-container);
 }

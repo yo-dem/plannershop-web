@@ -4,6 +4,15 @@
   margin: 0 auto;
 }
 
+.benvenuto {
+  margin-top: 0;
+  font: var(--mat-sys-headline-small);
+}
+
+mat-card-content {
+  padding-top: 0.75rem;
+}
+
 dl {
   display: grid;
   grid-template-columns: max-content 1fr;
@@ -12,15 +21,10 @@ dl {
 }
 
 dt {
-  color: var(--p-text-muted-color);
+  color: var(--mat-sys-on-surface-variant);
 }
 
 dd {
   margin: 0;
   overflow-wrap: anywhere;
 }
-
-.hint {
-  color: var(--p-text-muted-color);
-}
-.benvenuto { margin-top: 0; }
