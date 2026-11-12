@@ -50,12 +50,12 @@ plannershop-web/
 
 ### 4.1 Modalità di installazione
 
-Variabile `APP_MODALITA`, da scegliere prima del primo avvio. Il codice e lo schema del database sono gli stessi nelle due modalità: un'installazione locale può in futuro passare online senza conversioni.
+Variabile `APP_MODE`, da scegliere prima del primo avvio. Il codice e lo schema del database sono gli stessi nelle due modalità: un'installazione locale può in futuro passare online senza conversioni.
 
 | | `cloud` (default) | `locale` |
 |---|---|---|
 | Uso | Piattaforma online con più attività | PC di un'unica attività |
-| Primo avvio (nessun utente) | Crea il SUPERADMIN (`SUPERADMIN_*`) | Crea l'attività e il suo ADMIN (`ATTIVITA_NOME`, `ADMIN_*`), password sempre provvisoria |
+| Primo avvio (nessun utente) | Crea il SUPERADMIN (`SUPERADMIN_*`) | Crea l'attività e il suo ADMIN (`ACTIVITY_NAME`, `ADMIN_*`), password sempre provvisoria |
 | SUPERADMIN e `/api/platform/**` | Attivi | Assenti: le API di piattaforma non esistono e il ruolo SUPERADMIN non viene mai inserito nei token; un utente superadmin senza attività non può accedere |
 | `GET /api/info` | `modalita: CLOUD` | `modalita: LOCALE` |
 
@@ -380,7 +380,7 @@ Errori: `ProblemDetail` (RFC 9457). Concorrenza: campo `version`; conflitto → 
 - In locale: porta esposta solo su `127.0.0.1`.
 - Online: HTTPS tramite reverse proxy (Caddy/Traefik + Let's Encrypt), backup pianificati.
 - Bootstrap: al primo avvio, se non esistono utenti, crea il SUPERADMIN (modalità cloud) oppure l'attività e il suo ADMIN (modalità locale), da variabili d'ambiente (§4.1).
-- Installazione presso un cliente (modalità locale): Docker Desktop su Windows (WSL2), `APP_MODALITA=locale` nel `.env`; in alternativa futura, installazione nativa (PostgreSQL + backend come servizio Windows).
+- Installazione presso un cliente (modalità locale): Docker Desktop su Windows (WSL2), `APP_MODE=locale` nel `.env`; in alternativa futura, installazione nativa (PostgreSQL + backend come servizio Windows).
 
 ## 11. Migrazione dati
 
@@ -411,7 +411,7 @@ Strumento a riga di comando (modulo del backend) che importa `PSDB.db` e `PSDB_A
 
 1. ✅ **Scheletro**: Docker Compose con Postgres, Spring Boot con Flyway e health check, Angular con PrimeNG, nginx.
 2. ✅ **Fondamenta**: tenant, utenti, membership, login/refresh/logout, `@TenantId`, `@PreAuthorize`, soft delete di base, bootstrap SUPERADMIN, shell Angular con login, guard e gestione attività (SUPERADMIN).
-2b. ✅ **Modalità locale**: `APP_MODALITA=locale` (§4.1), bootstrap dell'attività, ripristino password da riga di comando.
+2b. ✅ **Modalità locale**: `APP_MODE=locale` (§4.1), bootstrap dell'attività, ripristino password da riga di comando.
 3. **Clienti**: CRUD completo end-to-end, da usare come modello per le altre entità.
 4. Prodotti, servizi, fornitori.
 5. Vendite.

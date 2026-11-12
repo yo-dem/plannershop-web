@@ -61,8 +61,8 @@ docker compose down               # ferma (i dati restano nel volume pgdata)
 Nel file `.env`, **prima del primo avvio**:
 
 ```bash
-APP_MODALITA=locale
-ATTIVITA_NOME=Nome del negozio
+APP_MODE=locale
+ACTIVITY_NAME=Nome del negozio
 ADMIN_EMAIL=titolare@esempio.it
 ADMIN_PASSWORD=                   # vuota = generata e scritta nel log
 ```

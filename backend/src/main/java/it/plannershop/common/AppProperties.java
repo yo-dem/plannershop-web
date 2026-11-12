@@ -6,7 +6,7 @@ import org.springframework.boot.context.properties.bind.DefaultValue;
 /**
  * Impostazioni generali ({@code app.*} in application.yml).
  *
- * @param modalita come viene installata l'applicazione (variabile APP_MODALITA)
+ * @param modalita come viene installata l'applicazione (variabile APP_MODE)
  */
 @ConfigurationProperties("app")
 public record AppProperties(@DefaultValue("CLOUD") Modalita modalita) {

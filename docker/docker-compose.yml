@@ -42,12 +42,12 @@ services:
       DB_USER: ${POSTGRES_USER:-plannershop}
       DB_PASSWORD: ${POSTGRES_PASSWORD:-plannershop}
       JWT_SECRET: ${JWT_SECRET:-}
-      APP_MODALITA: ${APP_MODALITA:-cloud}
+      APP_MODE: ${APP_MODE:-cloud}
       SUPERADMIN_EMAIL: ${SUPERADMIN_EMAIL:-admin@plannershop.local}
       SUPERADMIN_PASSWORD: ${SUPERADMIN_PASSWORD:-}
-      ATTIVITA_NOME: ${ATTIVITA_NOME:-La mia attività}
+      ACTIVITY_NAME: ${ACTIVITY_NAME:-La mia attività}
       ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@plannershop.local}
-      ADMIN_NOME: ${ADMIN_NOME:-Amministratore}
+      ADMIN_NAME: ${ADMIN_NAME:-Amministratore}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
       TZ: ${TZ:-Europe/Rome}
     depends_on:

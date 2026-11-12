@@ -12,3 +12,6 @@ frontend/.angular/
 .DS_Store
 # Env
 .env
+
+# Credenziali locali (mai su git)
+docs/CREDENZIALI-*.md

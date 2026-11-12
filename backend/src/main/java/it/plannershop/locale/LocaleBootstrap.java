@@ -23,8 +23,8 @@ import it.plannershop.user.Ruolo;
  * Modalità LOCALE: al primo avvio (nessun utente nel database) crea l'unica
  * attività e il suo ADMIN, al posto del SUPERADMIN.
  *
- * <p>Nome dell'attività, email e password si leggono da ATTIVITA_NOME,
- * ADMIN_EMAIL, ADMIN_NOME, ADMIN_PASSWORD. La password è sempre provvisoria:
+ * <p>Nome dell'attività, email e password si leggono da ACTIVITY_NAME,
+ * ADMIN_EMAIL, ADMIN_NAME, ADMIN_PASSWORD. La password è sempre provvisoria:
  * chi installa la conosce, quindi il cliente la cambia al primo accesso.
  */
 @Component

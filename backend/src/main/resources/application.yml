@@ -59,7 +59,7 @@ springdoc:
 app:
   # cloud  = piattaforma con più attività gestite dal SUPERADMIN
   # locale = installazione sul PC di un'unica attività, senza SUPERADMIN
-  modalita: ${APP_MODALITA:cloud}
+  modalita: ${APP_MODE:cloud}
   security:
     # Segreto per firmare i token. In produzione: stringa casuale lunga (≥ 32 caratteri).
     jwt-secret: ${JWT_SECRET:}
@@ -74,7 +74,7 @@ app:
     superadmin-email: ${SUPERADMIN_EMAIL:admin@plannershop.local}
     superadmin-password: ${SUPERADMIN_PASSWORD:}
     # Modalità locale: l'unica attività e il suo ADMIN (password sempre provvisoria).
-    attivita-nome: ${ATTIVITA_NOME:La mia attività}
+    attivita-nome: ${ACTIVITY_NAME:La mia attività}
     admin-email: ${ADMIN_EMAIL:admin@plannershop.local}
-    admin-nome: ${ADMIN_NOME:Amministratore}
+    admin-nome: ${ADMIN_NAME:Amministratore}
     admin-password: ${ADMIN_PASSWORD:}
