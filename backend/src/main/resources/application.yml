@@ -31,6 +31,12 @@ spring:
     problemdetails:
       enabled: true
 
+  # Paginazione delle API (?page=&size=&sort=): massimo 100 elementi per pagina.
+  data:
+    web:
+      pageable:
+        max-page-size: 100
+
 server:
   # Dietro nginx: rispetta gli header X-Forwarded-* (protocollo, host).
   forward-headers-strategy: framework

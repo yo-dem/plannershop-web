@@ -26,6 +26,18 @@ export const routes: Routes = [
         title: 'Cambia password · PlannerShop',
       },
       {
+        path: 'clienti',
+        canActivate: [ruoloGuard('ADMIN', 'OPERATORE')],
+        loadComponent: () => import('./pages/clienti/clienti').then((m) => m.Clienti),
+        title: 'Clienti · PlannerShop',
+      },
+      {
+        path: 'clienti/compleanni',
+        canActivate: [ruoloGuard('ADMIN', 'OPERATORE')],
+        loadComponent: () => import('./pages/clienti/compleanni').then((m) => m.Compleanni),
+        title: 'Compleanni · PlannerShop',
+      },
+      {
         path: 'piattaforma',
         canActivate: [ruoloGuard('SUPERADMIN')],
         loadComponent: () => import('./pages/piattaforma/attivita').then((m) => m.Attivita),

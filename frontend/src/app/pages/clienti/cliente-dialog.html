@@ -1,0 +1,72 @@
+<p-dialog [header]="titolo()" [visible]="visibile()" (visibleChange)="visibile.set($event)" [modal]="true"
+          [style]="{ width: '36rem' }" [breakpoints]="{ '640px': '100vw' }" [draggable]="false">
+  @if (errore(); as e) {
+    <p-message severity="error" class="avviso">{{ e }}</p-message>
+  }
+
+  <form [formGroup]="form" (ngSubmit)="salva()" id="form-cliente" novalidate [class.in-caricamento]="caricamento()">
+    <div class="riga">
+      <div class="campo">
+        <label for="nome">Nome *</label>
+        <input pInputText id="nome" formControlName="nome" autocomplete="off" [fluid]="true"
+               [invalid]="!!erroreCampo('nome')" />
+        @if (erroreCampo('nome'); as e) { <small class="errore">{{ e }}</small> }
+      </div>
+      <div class="campo">
+        <label for="cognome">Cognome *</label>
+        <input pInputText id="cognome" formControlName="cognome" autocomplete="off" [fluid]="true"
+               [invalid]="!!erroreCampo('cognome')" />
+        @if (erroreCampo('cognome'); as e) { <small class="errore">{{ e }}</small> }
+      </div>
+    </div>
+
+    <div class="riga">
+      <div class="campo">
+        <label for="telefono">Telefono</label>
+        <input pInputText id="telefono" type="tel" formControlName="telefono" autocomplete="off" [fluid]="true"
+               [invalid]="!!erroreCampo('telefono')" />
+        @if (erroreCampo('telefono'); as e) { <small class="errore">{{ e }}</small> }
+      </div>
+      <div class="campo">
+        <label for="email">Email</label>
+        <input pInputText id="email" type="email" formControlName="email" autocomplete="off" [fluid]="true"
+               [invalid]="!!erroreCampo('email')" />
+        @if (erroreCampo('email'); as e) { <small class="errore">{{ e }}</small> }
+      </div>
+    </div>
+
+    <div class="campo">
+      <span class="etichetta">Compleanno</span>
+      <div class="riga compatta">
+        <p-select formControlName="giornoNascita" [options]="giorni()" placeholder="Giorno" [showClear]="true"
+                  ariaLabel="Giorno di nascita" appendTo="body" class="giorno" />
+        <p-select formControlName="meseNascita" [options]="mesi" optionLabel="nome" optionValue="valore"
+                  placeholder="Mese" [showClear]="true" ariaLabel="Mese di nascita" appendTo="body" class="mese" />
+      </div>
+      @if (erroriServer()['compleanno']; as e) { <small class="errore">{{ e }}</small> }
+    </div>
+
+    <div class="campo">
+      <label for="indirizzo">Indirizzo</label>
+      <input pInputText id="indirizzo" formControlName="indirizzo" autocomplete="off" [fluid]="true"
+             [invalid]="!!erroreCampo('indirizzo')" />
+      @if (erroreCampo('indirizzo'); as e) { <small class="errore">{{ e }}</small> }
+    </div>
+
+    <div class="campo">
+      <label for="note">Note</label>
+      <textarea pTextarea id="note" formControlName="note" rows="3" [autoResize]="true" [fluid]="true"></textarea>
+      @if (erroreCampo('note'); as e) { <small class="errore">{{ e }}</small> }
+    </div>
+  </form>
+
+  <ng-template #footer>
+    @if (clienteId() !== null && auth.haRuolo('ADMIN')) {
+      <p-button label="Elimina" icon="pi pi-trash" severity="danger" [text]="true" class="elimina"
+                (onClick)="chiediEliminazione()" [disabled]="caricamento()" />
+    }
+    <p-button label="Annulla" [outlined]="true" (onClick)="visibile.set(false)" />
+    <p-button label="Salva" icon="pi pi-check" type="submit" form="form-cliente" [loading]="invio()"
+              [disabled]="caricamento()" />
+  </ng-template>
+</p-dialog>

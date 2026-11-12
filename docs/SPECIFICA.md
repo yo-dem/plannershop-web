@@ -333,7 +333,9 @@ Calcolo lato DB (query aggregate), non in memoria come oggi.
 
 ## 8. API REST (bozza)
 
-Prefisso `/api`. JSON. Paginazione `?page=&size=&sort=`, ricerca `?q=`.
+Prefisso `/api`. JSON. Paginazione `?page=&size=&sort=` (max 100 per pagina; ordinamenti consentiti per risorsa, gli altri ignorati), ricerca `?q=`. Gli elenchi paginati rispondono `{elementi, totale, pagina, dimensione}`.
+
+Clienti (implementato): ricerca su nome e cognome in entrambi gli ordini, telefono, email; ordinamento `cognome` (predefinito), `nome`, `compleanno`, `createdAt`, `updatedAt`. La modifica (`PUT`) richiede il campo `version` letto in precedenza: se nel frattempo il cliente è cambiato → `409`. Testi ripuliti dagli spazi, email in minuscolo, compleanno con giorno e mese entrambi presenti e data esistente (29 febbraio ammesso), errore nel campo `compleanno`.
 
 | Risorsa | Endpoint | Ruoli |
 |---|---|---|
@@ -341,7 +343,7 @@ Prefisso `/api`. JSON. Paginazione `?page=&size=&sort=`, ricerca `?q=`.
 | Me | `GET /me` (utente, tenant, ruolo, impostazioni aspetto) | tutti |
 | Clienti | `GET/POST /clienti`, `GET/PUT /clienti/{id}` | A, O |
 | | `DELETE /clienti/{id}` | A |
-| | `GET /clienti/compleanni?mese=` | A, O |
+| | `GET /clienti/compleanni?mese=` (senza mese: mese corrente nel fuso dell'attività) | A, O |
 | | `GET /clienti/{id}/vendite` | A, O |
 | | `POST /clienti/{id}/email` (multipart, locandina opzionale) | A, O |
 | Prodotti | CRUD `/prodotti`, `?disponibili=true` | A, O |
@@ -412,7 +414,7 @@ Strumento a riga di comando (modulo del backend) che importa `PSDB.db` e `PSDB_A
 1. ✅ **Scheletro**: Docker Compose con Postgres, Spring Boot con Flyway e health check, Angular con PrimeNG, nginx.
 2. ✅ **Fondamenta**: tenant, utenti, membership, login/refresh/logout, `@TenantId`, `@PreAuthorize`, soft delete di base, bootstrap SUPERADMIN, shell Angular con login, guard e gestione attività (SUPERADMIN).
 2b. ✅ **Modalità locale**: `APP_MODE=locale` (§4.1), bootstrap dell'attività, ripristino password da riga di comando.
-3. **Clienti**: CRUD completo end-to-end, da usare come modello per le altre entità.
+3. ✅ **Clienti**: CRUD completo end-to-end (ricerca, paginazione, ordinamento, compleanni del mese con avviso nella barra), da usare come modello per le altre entità.
 4. Prodotti, servizi, fornitori.
 5. Vendite.
 6. Staff e agenda.

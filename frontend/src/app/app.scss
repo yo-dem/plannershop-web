@@ -52,6 +52,38 @@
   }
 }
 
+/* Avviso compleanni del mese: icona regalo con il numero di clienti. */
+.compleanni {
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: 0.5rem;
+  border-radius: var(--p-border-radius-md);
+
+  &:hover {
+    background: color-mix(in srgb, currentColor 15%, transparent);
+  }
+
+  .pi {
+    font-size: 1.125rem;
+  }
+
+  .conteggio {
+    position: absolute;
+    top: 0;
+    right: -0.125rem;
+    min-width: 1.1rem;
+    padding: 0 0.25rem;
+    border-radius: 999px;
+    background: var(--p-red-500);
+    color: #fff;
+    font-size: 0.7rem;
+    font-weight: 700;
+    line-height: 1.1rem;
+    text-align: center;
+  }
+}
+
 :host ::ng-deep .utente.p-button {
   color: inherit;
 }

@@ -1,0 +1,54 @@
+<div class="intestazione">
+  <h2>Clienti</h2>
+  <div class="comandi">
+    <p-button label="Compleanni" icon="pi pi-gift" [outlined]="true" routerLink="/clienti/compleanni" />
+    <p-button label="Nuovo cliente" icon="pi pi-plus" (onClick)="nuovo()" />
+  </div>
+</div>
+
+<p-iconfield class="ricerca">
+  <p-inputicon class="pi pi-search" />
+  <input pInputText type="search" [value]="testo()" (input)="cerca($any($event.target).value)"
+         placeholder="Cerca per nome, cognome, telefono o email" aria-label="Cerca clienti" [fluid]="true" />
+</p-iconfield>
+
+@if (pagina.error()) {
+  <p-message severity="error" class="avviso">Impossibile caricare i clienti.</p-message>
+}
+
+<p-table [value]="elementi()" [lazy]="true" (onLazyLoad)="carica($event)" [loading]="pagina.isLoading()"
+         [paginator]="true" [rows]="righe()" [first]="primo()" [totalRecords]="totale()"
+         [rowsPerPageOptions]="[20, 50, 100]" [showCurrentPageReport]="true"
+         currentPageReportTemplate="{first}–{last} di {totalRecords}"
+         dataKey="id" stripedRows [rowHover]="true">
+  <ng-template #header>
+    <tr>
+      <th pSortableColumn="cognome">Cliente <p-sort-icon field="cognome" /></th>
+      <th>Telefono</th>
+      <th class="nascondi-mobile">Email</th>
+      <th pSortableColumn="compleanno" class="nascondi-mobile">Compleanno <p-sort-icon field="compleanno" /></th>
+    </tr>
+  </ng-template>
+  <ng-template #body let-c>
+    <tr class="cliccabile" [class.evidenziata]="c.id === evidenziato()" (click)="apri(c)"
+        (keydown.enter)="apri(c)" tabindex="0">
+      <td><strong>{{ c.cognome }}</strong> {{ c.nome }}</td>
+      <td>{{ c.telefono }}</td>
+      <td class="nascondi-mobile email">{{ c.email }}</td>
+      <td class="nascondi-mobile">{{ compleanno(c) }}</td>
+    </tr>
+  </ng-template>
+  <ng-template #emptymessage>
+    <tr>
+      <td colspan="4">
+        @if (testo()) {
+          Nessun cliente trovato per "{{ testo() }}".
+        } @else {
+          Nessun cliente. Inseriscine uno con "Nuovo cliente".
+        }
+      </td>
+    </tr>
+  </ng-template>
+</p-table>
+
+<app-cliente-dialog [(visibile)]="dialogAperto" [clienteId]="clienteScelto()" (salvato)="salvato($event)" />

@@ -20,6 +20,15 @@
       }
     </nav>
 
+    @if (numeroCompleanni(); as n) {
+      <a routerLink="/clienti/compleanni" class="compleanni"
+         [attr.aria-label]="n + (n === 1 ? ' compleanno' : ' compleanni') + ' questo mese'"
+         [title]="n + (n === 1 ? ' compleanno' : ' compleanni') + ' questo mese'">
+        <i class="pi pi-gift" aria-hidden="true"></i>
+        <span class="conteggio">{{ n }}</span>
+      </a>
+    }
+
     <p-button
       [label]="utente.nome"
       icon="pi pi-user"

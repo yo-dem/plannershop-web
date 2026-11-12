@@ -1,0 +1,37 @@
+<div class="intestazione">
+  <h2><p-button icon="pi pi-arrow-left" [text]="true" [rounded]="true" routerLink="/clienti"
+                ariaLabel="Torna ai clienti" /> Compleanni</h2>
+  <p-select [options]="mesi" optionLabel="nome" optionValue="valore" [ngModel]="mese()"
+            (ngModelChange)="mese.set($event)" ariaLabel="Mese" />
+</div>
+
+@if (elenco.error()) {
+  <p-message severity="error" class="avviso">Impossibile caricare i compleanni.</p-message>
+}
+
+<p-table [value]="elenco.value()" [loading]="elenco.isLoading()" dataKey="id" stripedRows [rowHover]="true">
+  <ng-template #header>
+    <tr>
+      <th>Giorno</th>
+      <th>Cliente</th>
+      <th>Telefono</th>
+      <th class="nascondi-mobile">Email</th>
+    </tr>
+  </ng-template>
+  <ng-template #body let-c>
+    <tr class="cliccabile" [class.passato]="giaPassato(c)" (click)="apri(c)" (keydown.enter)="apri(c)" tabindex="0">
+      <td>
+        {{ c.giornoNascita }}
+        @if (eOggi(c)) { <p-tag value="Oggi" severity="danger" /> }
+      </td>
+      <td><strong>{{ c.cognome }}</strong> {{ c.nome }}</td>
+      <td>{{ c.telefono }}</td>
+      <td class="nascondi-mobile email">{{ c.email }}</td>
+    </tr>
+  </ng-template>
+  <ng-template #emptymessage>
+    <tr><td colspan="4">Nessun compleanno in questo mese.</td></tr>
+  </ng-template>
+</p-table>
+
+<app-cliente-dialog [(visibile)]="dialogAperto" [clienteId]="clienteScelto()" />
