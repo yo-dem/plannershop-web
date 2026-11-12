@@ -38,6 +38,18 @@ export const routes: Routes = [
         title: 'Compleanni · PlannerShop',
       },
       {
+        path: 'prodotti',
+        canActivate: [ruoloGuard('ADMIN', 'OPERATORE')],
+        loadComponent: () => import('./pages/prodotti/prodotti').then((m) => m.Prodotti),
+        title: 'Prodotti · PlannerShop',
+      },
+      {
+        path: 'servizi',
+        canActivate: [ruoloGuard('ADMIN', 'OPERATORE')],
+        loadComponent: () => import('./pages/servizi/servizi').then((m) => m.Servizi),
+        title: 'Servizi · PlannerShop',
+      },
+      {
         path: 'piattaforma',
         canActivate: [ruoloGuard('SUPERADMIN')],
         loadComponent: () => import('./pages/piattaforma/attivita').then((m) => m.Attivita),

@@ -24,6 +24,8 @@ export class App {
     const voci = [{ label: 'Home', icon: 'home', link: '/' }];
     if (this.auth.haRuolo('ADMIN', 'OPERATORE')) {
       voci.push({ label: 'Clienti', icon: 'group', link: '/clienti' });
+      voci.push({ label: 'Prodotti', icon: 'inventory_2', link: '/prodotti' });
+      voci.push({ label: 'Servizi', icon: 'content_cut', link: '/servizi' });
     }
     if (this.auth.haRuolo('SUPERADMIN')) {
       voci.push({ label: 'Attività', icon: 'store', link: '/piattaforma' });

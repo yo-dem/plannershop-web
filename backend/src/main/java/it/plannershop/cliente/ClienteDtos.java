@@ -3,6 +3,8 @@ package it.plannershop.cliente;
 import java.time.Instant;
 import java.time.Month;
 
+import static it.plannershop.common.Testi.pulisci;
+
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Max;
@@ -61,14 +63,6 @@ public final class ClienteDtos {
             email = pulisci(email);
             indirizzo = pulisci(indirizzo);
             note = pulisci(note);
-        }
-
-        private static String pulisci(String s) {
-            if (s == null) {
-                return null;
-            }
-            String t = s.strip();
-            return t.isEmpty() ? null : t;
         }
 
         /** Giorno e mese insieme, e il giorno deve esistere in quel mese (29 febbraio ammesso). */

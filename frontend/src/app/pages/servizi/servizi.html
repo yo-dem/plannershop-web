@@ -1,0 +1,56 @@
+<div class="intestazione">
+  <h2>Servizi</h2>
+  <div class="comandi">
+    <button matButton="filled" (click)="nuovo()"><mat-icon>add</mat-icon> Nuovo servizio</button>
+  </div>
+</div>
+
+<mat-form-field class="ricerca">
+  <mat-icon matPrefix>search</mat-icon>
+  <mat-label>Cerca servizio</mat-label>
+  <input matInput type="search" [value]="elenco.testo()" (input)="elenco.cerca($any($event.target).value)"
+         placeholder="Nome, descrizione o note" />
+</mat-form-field>
+
+@if (dati.error()) {
+  <app-avviso tipo="errore">Impossibile caricare i servizi.</app-avviso>
+}
+
+<div class="tabella">
+  @if (dati.isLoading()) {
+    <mat-progress-bar mode="indeterminate" />
+  }
+  <table mat-table [dataSource]="elementi()" matSort (matSortChange)="elenco.ordina($event)">
+    <ng-container matColumnDef="nome">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Servizio</th>
+      <td mat-cell *matCellDef="let s">
+        <strong>{{ s.nome }}</strong>
+        <div class="testo-secondario solo-mobile">{{ s.descrizione }}</div>
+      </td>
+    </ng-container>
+    <ng-container matColumnDef="descrizione">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header class="nascondi-mobile">Descrizione</th>
+      <td mat-cell *matCellDef="let s" class="nascondi-mobile">{{ s.descrizione }}</td>
+    </ng-container>
+    <ng-container matColumnDef="prezzoVendita">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header arrowPosition="before" class="numero">Prezzo</th>
+      <td mat-cell *matCellDef="let s" class="numero">{{ s.prezzoVendita | currency: 'EUR' }}</td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="colonne"></tr>
+    <tr mat-row *matRowDef="let s; columns: colonne" class="cliccabile"
+        [class.evidenziata]="s.id === elenco.evidenziato()"
+        (click)="apri(s)" (keydown.enter)="apri(s)" tabindex="0"></tr>
+    <tr *matNoDataRow>
+      <td class="vuoto" [attr.colspan]="colonne.length">
+        @if (elenco.testo()) {
+          Nessun servizio trovato per "{{ elenco.testo() }}".
+        } @else if (!dati.isLoading()) {
+          Nessun servizio. Inseriscine uno con "Nuovo servizio".
+        }
+      </td>
+    </tr>
+  </table>
+  <mat-paginator [length]="totale()" [pageIndex]="elenco.pagina()" [pageSize]="elenco.righe()"
+                 [pageSizeOptions]="[20, 50, 100]" (page)="elenco.cambiaPagina($event)" />
+</div>

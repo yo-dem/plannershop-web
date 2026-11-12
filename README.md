@@ -17,9 +17,11 @@ Funzionano: login con scelta dell'attività, sessione con rinnovo automatico, lo
 password (obbligatorio se provvisoria), ruoli SUPERADMIN / ADMIN / OPERATORE, gestione delle
 attività da parte del SUPERADMIN, modalità di installazione `cloud` e `locale`, ripristino
 password da riga di comando, **clienti** (elenco con ricerca, ordinamento e paginazione,
-inserimento, modifica, eliminazione solo per l'ADMIN, compleanni del mese con avviso in alto).
+inserimento, modifica, eliminazione solo per l'ADMIN, compleanni del mese con avviso in alto),
+**prodotti** (giacenza evidenziata, filtro "solo disponibili") e **servizi**, con calcolo del
+prezzo netto o IVA inclusa.
 
-Non ancora presenti: prodotti, servizi, fornitori, vendite, agenda, impostazioni, email,
+Non ancora presenti: fornitori, vendite, agenda, impostazioni, email,
 statistiche, migrazione dei dati dal vecchio programma (piano in `docs/SPECIFICA.md` §13).
 
 ## Requisiti
@@ -157,12 +159,15 @@ con l'applicazione avviata. Da IntelliJ: aggiungi `--app.reset-password=email@ut
 ```
 backend/
   src/main/java/it/plannershop/
-    common/          classi base (BaseEntity, TenantScopedEntity), errori API, impostazioni app
+    common/          classi base (BaseEntity, TenantScopedEntity), errori API, impostazioni app,
+                     calcolo prezzi, ricerca e ordinamento degli elenchi
     tenant/          attività e risoluzione del tenant corrente (@TenantId)
     security/        Spring Security, JWT, limite tentativi di login
     user/            utenti, ruoli per attività, ripristino password
     auth/            login, refresh, logout, cambio password, /api/me
     cliente/         anagrafica clienti e compleanni
+    prodotto/        prodotti e magazzino
+    servizio/        servizi offerti
     platform/        gestione attività (SUPERADMIN) e sua creazione — modalità cloud
     locale/          creazione dell'attività al primo avvio — modalità locale
     info/            /api/info (versione, database, modalità)
@@ -171,9 +176,9 @@ backend/
     db/migration/    migrazioni Flyway V<n>__descrizione.sql
   src/test/          test d'integrazione (Testcontainers)
 frontend/
-  src/app/core/      sessione, interceptor del token, guard, servizi API
-  src/app/core/ui/   componenti comuni: avvisi, notifiche, conferme, paginatore in italiano
-  src/app/pages/     pagine (login, home, cambia password, clienti, piattaforma)
+  src/app/core/      sessione, interceptor del token, guard, servizi API, prezzi, stato elenchi
+  src/app/core/ui/   componenti comuni: avvisi, notifiche, conferme, paginatore, campi prezzo
+  src/app/pages/     pagine (login, home, cambia password, clienti, prodotti, servizi, piattaforma)
   proxy.conf.json    /api → localhost:8080 durante ng serve
   nginx.conf         configurazione nginx dell'immagine Docker
 docker/

@@ -4,18 +4,8 @@
   margin: 0 auto;
 }
 
-.ricerca {
-  width: 100%;
-  margin-bottom: 1rem;
-}
-
 .email {
   overflow-wrap: anywhere;
-}
-
-/* Riga appena salvata: resta evidenziata finché non se ne salva un'altra. */
-.evidenziata > td {
-  background: var(--mat-sys-primary-container) !important;
 }
 
 /* Compleanni: i giorni già passati del mese corrente sono attenuati. */

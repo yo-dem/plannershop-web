@@ -14,82 +14,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Map;
-import java.util.UUID;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
-import com.jayway.jsonpath.JsonPath;
+import it.plannershop.AbstractAttivitaTest;
 
-import it.plannershop.AbstractIntegrationTest;
-import it.plannershop.tenant.Tenant;
-import it.plannershop.tenant.TenantRepository;
-import it.plannershop.user.AppUser;
-import it.plannershop.user.AppUserRepository;
-import it.plannershop.user.Membership;
-import it.plannershop.user.MembershipRepository;
-import it.plannershop.user.Ruolo;
-
-class ClientiTests extends AbstractIntegrationTest {
-
-    private static final String PASSWORD = "Password-123";
-
-    @Autowired
-    MockMvc mvc;
-    @Autowired
-    TenantRepository tenants;
-    @Autowired
-    AppUserRepository users;
-    @Autowired
-    MembershipRepository memberships;
-    @Autowired
-    PasswordEncoder passwordEncoder;
-    @Autowired
-    JdbcTemplate jdbc;
-
-    /** Token di accesso, per attività nuove a ogni test. */
-    private String admin;
-    private String operatore;
-    private String adminAltraAttivita;
-
-    @BeforeEach
-    void preparaAttivita() throws Exception {
-        Tenant t = tenants.save(new Tenant("Negozio " + UUID.randomUUID()));
-        admin = token(utente(t, Ruolo.ADMIN));
-        operatore = token(utente(t, Ruolo.OPERATORE));
-        adminAltraAttivita = token(utente(tenants.save(new Tenant("Altro negozio")), Ruolo.ADMIN));
-    }
-
-    // ---------------------------------------------------------------- helper
-
-    private String utente(Tenant t, Ruolo ruolo) {
-        AppUser u = users.save(new AppUser(ruolo.name().toLowerCase() + "-" + UUID.randomUUID() + "@test.local",
-                "Utente " + ruolo, passwordEncoder.encode(PASSWORD)));
-        memberships.save(new Membership(u, t, ruolo));
-        return u.getEmail();
-    }
-
-    private String token(String email) throws Exception {
-        String body = mvc.perform(post("/api/auth/login").contentType(MediaType.APPLICATION_JSON)
-                .content("{\"email\":\"%s\",\"password\":\"%s\"}".formatted(email, PASSWORD)))
-                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
-        return JsonPath.read(body, "$.accessToken");
-    }
-
-    private ResultActions chiama(MockHttpServletRequestBuilder req, String token) throws Exception {
-        return mvc.perform(req.header("Authorization", "Bearer " + token));
-    }
-
-    private ResultActions invia(MockHttpServletRequestBuilder req, String token, String json) throws Exception {
-        return chiama(req.contentType(MediaType.APPLICATION_JSON).content(json), token);
-    }
+class ClientiTests extends AbstractAttivitaTest {
 
     private static String cliente(String nome, String cognome) {
         return "{\"nome\":\"%s\",\"cognome\":\"%s\"}".formatted(nome, cognome);
@@ -97,12 +27,7 @@ class ClientiTests extends AbstractIntegrationTest {
 
     /** Crea un cliente e restituisce il suo JSON. */
     private String crea(String token, String json) throws Exception {
-        return invia(post("/api/clienti"), token, json).andExpect(status().isCreated())
-                .andReturn().getResponse().getContentAsString();
-    }
-
-    private static long id(String json) {
-        return ((Number) JsonPath.read(json, "$.id")).longValue();
+        return crea("/api/clienti", token, json);
     }
 
     // ---------------------------------------------------------------- test
@@ -250,10 +175,7 @@ class ClientiTests extends AbstractIntegrationTest {
 
     @Test
     void ilSuperadminSenzaAttivitaNonAccedeAiClienti() throws Exception {
-        String body = mvc.perform(post("/api/auth/login").contentType(MediaType.APPLICATION_JSON)
-                .content("{\"email\":\"%s\",\"password\":\"%s\"}".formatted(SUPERADMIN_EMAIL, SUPERADMIN_PASSWORD)))
-                .andReturn().getResponse().getContentAsString();
-        chiama(get("/api/clienti"), JsonPath.read(body, "$.accessToken")).andExpect(status().isForbidden());
+        chiama(get("/api/clienti"), token(SUPERADMIN_EMAIL, SUPERADMIN_PASSWORD)).andExpect(status().isForbidden());
         mvc.perform(get("/api/clienti")).andExpect(status().isUnauthorized());
     }
 }
