@@ -3,7 +3,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { HttpErrorResponse } from '@angular/common/http';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ConfirmationService, MessageService } from 'primeng/api';
-import { Button } from 'primeng/button';
+import { Button, ButtonDirective, ButtonIcon, ButtonLabel } from 'primeng/button';
 import { Dialog } from 'primeng/dialog';
 import { InputText } from 'primeng/inputtext';
 import { Message } from 'primeng/message';
@@ -20,7 +20,7 @@ import { erroriCampo, messaggioErrore } from '../../core/errori';
  */
 @Component({
   selector: 'app-cliente-dialog',
-  imports: [ReactiveFormsModule, Button, Dialog, InputText, Message, Select, Textarea],
+  imports: [ReactiveFormsModule, Button, ButtonDirective, ButtonIcon, ButtonLabel, Dialog, InputText, Message, Select, Textarea],
   templateUrl: './cliente-dialog.html',
   styleUrl: './cliente-dialog.scss',
 })

@@ -66,7 +66,10 @@
                 (onClick)="chiediEliminazione()" [disabled]="caricamento()" />
     }
     <p-button label="Annulla" [outlined]="true" (onClick)="visibile.set(false)" />
-    <p-button label="Salva" icon="pi pi-check" type="submit" form="form-cliente" [loading]="invio()"
-              [disabled]="caricamento()" />
+    <!-- Pulsante HTML nativo: p-button non trasmette l'attributo "form" e il modulo non verrebbe inviato. -->
+    <button pButton type="submit" form="form-cliente" [loading]="invio()" [disabled]="caricamento() || invio()">
+      <i class="pi pi-check" pButtonIcon></i>
+      <span pButtonLabel>Salva</span>
+    </button>
   </ng-template>
 </p-dialog>

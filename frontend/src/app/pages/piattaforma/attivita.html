@@ -69,7 +69,11 @@
   </form>
   <ng-template #footer>
     <p-button label="Annulla" [outlined]="true" (onClick)="nuovaAperta.set(false)" />
-    <p-button label="Crea" icon="pi pi-check" type="submit" form="form-nuova" [loading]="invio()" />
+    <!-- Pulsante HTML nativo: p-button non trasmette l'attributo "form" e il modulo non verrebbe inviato. -->
+    <button pButton type="submit" form="form-nuova" [loading]="invio()" [disabled]="invio()">
+      <i class="pi pi-check" pButtonIcon></i>
+      <span pButtonLabel>Crea</span>
+    </button>
   </ng-template>
 </p-dialog>
 
@@ -92,6 +96,10 @@
   </form>
   <ng-template #footer>
     <p-button label="Annulla" [outlined]="true" (onClick)="inModifica.set(null)" />
-    <p-button label="Salva" icon="pi pi-check" type="submit" form="form-modifica" [loading]="invio()" />
+    <!-- Pulsante HTML nativo: p-button non trasmette l'attributo "form" e il modulo non verrebbe inviato. -->
+    <button pButton type="submit" form="form-modifica" [loading]="invio()" [disabled]="invio()">
+      <i class="pi pi-check" pButtonIcon></i>
+      <span pButtonLabel>Salva</span>
+    </button>
   </ng-template>
 </p-dialog>

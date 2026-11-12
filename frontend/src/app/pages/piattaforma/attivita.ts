@@ -3,7 +3,7 @@ import { HttpClient, httpResource } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ConfirmationService, MessageService } from 'primeng/api';
-import { Button } from 'primeng/button';
+import { Button, ButtonDirective, ButtonIcon, ButtonLabel } from 'primeng/button';
 import { Dialog } from 'primeng/dialog';
 import { InputText } from 'primeng/inputtext';
 import { Message } from 'primeng/message';
@@ -27,7 +27,7 @@ const API = '/api/platform/tenants';
 /** Gestione delle attività della piattaforma (solo SUPERADMIN). */
 @Component({
   selector: 'app-attivita',
-  imports: [DatePipe, ReactiveFormsModule, Button, Dialog, InputText, Message, TableModule, Tag, ToggleSwitch],
+  imports: [DatePipe, ReactiveFormsModule, Button, ButtonDirective, ButtonIcon, ButtonLabel, Dialog, InputText, Message, TableModule, Tag, ToggleSwitch],
   templateUrl: './attivita.html',
   styleUrl: './attivita.scss',
 })
