@@ -117,4 +117,13 @@
   .brand span {
     display: none;
   }
+
+  /* Cinque sezioni più avviso e utente devono stare anche in 360 px. */
+  .nav {
+    gap: 0;
+
+    a {
+      padding: 0.5rem;
+    }
+  }
 }

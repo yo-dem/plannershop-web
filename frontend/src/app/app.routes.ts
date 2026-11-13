@@ -38,6 +38,12 @@ export const routes: Routes = [
         title: 'Compleanni · PlannerShop',
       },
       {
+        path: 'fornitori',
+        canActivate: [ruoloGuard('ADMIN', 'OPERATORE')],
+        loadComponent: () => import('./pages/fornitori/fornitori').then((m) => m.Fornitori),
+        title: 'Fornitori · PlannerShop',
+      },
+      {
         path: 'prodotti',
         canActivate: [ruoloGuard('ADMIN', 'OPERATORE')],
         loadComponent: () => import('./pages/prodotti/prodotti').then((m) => m.Prodotti),

@@ -1,6 +1,6 @@
 # PlannerShop Web — Specifica funzionale e tecnica
 
-> Versione 0.5 — 12/11/2026
+> Versione 0.6 — 13/11/2026
 > Fonte: analisi del progetto desktop `PlannerShop` (C# WinForms, .NET 8, SQLite).
 > Scopo: riscrivere l'applicativo come web app multi-tenant con backend Java/Spring Boot e frontend Angular, containerizzabile e ospitabile online.
 
@@ -174,7 +174,7 @@ Come Prodotto, ma con `nome` al posto di `marca` e **senza** `quantita`.
 | indirizzo | text | ✅ | |
 | telefono | text | ✅ | |
 | email | text | | Facoltativa (oggi NOT NULL); validata solo se presente |
-| iban | text | | Validato, vedi §7.4 |
+| iban | text | | Validato, vedi §7.4; salvato senza spazi e in maiuscolo, mostrato a gruppi di quattro |
 | note | text | | |
 
 ### 6.6 Vendita — **nuova struttura testata/righe**
@@ -340,6 +340,8 @@ Calcolo lato DB (query aggregate), non in memoria come oggi.
 
 Prefisso `/api`. JSON. Paginazione `?page=&size=&sort=` (max 100 per pagina; ordinamenti consentiti per risorsa, gli altri ignorati), ricerca `?q=`. Gli elenchi paginati rispondono `{elementi, totale, pagina, dimensione}`.
 
+Fornitori (implementati): ricerca su nome, indirizzo, telefono, email, IBAN (anche scritto con gli spazi) e note; ordinamento per `nome` (predefinito), `createdAt`, `updatedAt`. Nome, indirizzo e telefono obbligatori; email e IBAN facoltativi ma verificati se presenti. Eliminazione consentita anche all'operatore.
+
 Prodotti e servizi (implementati): ricerca su marca e descrizione in entrambi gli ordini e note (prodotti), nome, descrizione e note (servizi); ordinamento predefinito per marca e descrizione / nome, poi `quantita`, `prezzoVendita`, `dataCarico` (prodotti), `createdAt`, `updatedAt`. `?disponibili=true` restituisce solo i prodotti con quantità > 0. Data di carico assente in inserimento → oggi nel fuso dell'attività. Prezzi come §7.1. Eliminazione consentita anche all'operatore.
 
 Clienti (implementato): ricerca su nome e cognome in entrambi gli ordini, telefono, email; ordinamento `cognome` (predefinito), `nome`, `compleanno`, `createdAt`, `updatedAt`. La modifica (`PUT`) richiede il campo `version` letto in precedenza: se nel frattempo il cliente è cambiato → `409`. Testi ripuliti dagli spazi, email in minuscolo, compleanno con giorno e mese entrambi presenti e data esistente (29 febbraio ammesso), errore nel campo `compleanno`.
@@ -422,7 +424,7 @@ Strumento a riga di comando (modulo del backend) che importa `PSDB.db` e `PSDB_A
 2. ✅ **Fondamenta**: tenant, utenti, membership, login/refresh/logout, `@TenantId`, `@PreAuthorize`, soft delete di base, bootstrap SUPERADMIN, shell Angular con login, guard e gestione attività (SUPERADMIN).
 2b. ✅ **Modalità locale**: `APP_MODE=locale` (§4.1), bootstrap dell'attività, ripristino password da riga di comando.
 3. ✅ **Clienti**: CRUD completo end-to-end (ricerca, paginazione, ordinamento, compleanni del mese con avviso nella barra), da usare come modello per le altre entità.
-4. Prodotti e servizi ✅ (prezzi netto/ivato, giacenza evidenziata con soglia fissa 10 in attesa delle impostazioni), fornitori.
+4. ✅ **Fornitori, prodotti e servizi** (IBAN verificato con Mod-97; prezzi netto/ivato; giacenza evidenziata con soglia fissa 10 in attesa delle impostazioni).
 5. Vendite.
 6. Staff e agenda.
 7. Impostazioni (aspetto, SMTP, agenda) ed email.

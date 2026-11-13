@@ -18,10 +18,10 @@ password (obbligatorio se provvisoria), ruoli SUPERADMIN / ADMIN / OPERATORE, ge
 attività da parte del SUPERADMIN, modalità di installazione `cloud` e `locale`, ripristino
 password da riga di comando, **clienti** (elenco con ricerca, ordinamento e paginazione,
 inserimento, modifica, eliminazione solo per l'ADMIN, compleanni del mese con avviso in alto),
-**prodotti** (giacenza evidenziata, filtro "solo disponibili") e **servizi**, con calcolo del
-prezzo netto o IVA inclusa.
+**fornitori** (IBAN verificato), **prodotti** (giacenza evidenziata, filtro "solo disponibili")
+e **servizi**, con calcolo del prezzo netto o IVA inclusa.
 
-Non ancora presenti: fornitori, vendite, agenda, impostazioni, email,
+Non ancora presenti: vendite, agenda, impostazioni, email,
 statistiche, migrazione dei dati dal vecchio programma (piano in `docs/SPECIFICA.md` §13).
 
 ## Requisiti
@@ -160,12 +160,13 @@ con l'applicazione avviata. Da IntelliJ: aggiungi `--app.reset-password=email@ut
 backend/
   src/main/java/it/plannershop/
     common/          classi base (BaseEntity, TenantScopedEntity), errori API, impostazioni app,
-                     calcolo prezzi, ricerca e ordinamento degli elenchi
+                     calcolo prezzi, verifica IBAN, ricerca e ordinamento degli elenchi
     tenant/          attività e risoluzione del tenant corrente (@TenantId)
     security/        Spring Security, JWT, limite tentativi di login
     user/            utenti, ruoli per attività, ripristino password
     auth/            login, refresh, logout, cambio password, /api/me
     cliente/         anagrafica clienti e compleanni
+    fornitore/       fornitori
     prodotto/        prodotti e magazzino
     servizio/        servizi offerti
     platform/        gestione attività (SUPERADMIN) e sua creazione — modalità cloud
@@ -178,7 +179,7 @@ backend/
 frontend/
   src/app/core/      sessione, interceptor del token, guard, servizi API, prezzi, stato elenchi
   src/app/core/ui/   componenti comuni: avvisi, notifiche, conferme, paginatore, campi prezzo
-  src/app/pages/     pagine (login, home, cambia password, clienti, prodotti, servizi, piattaforma)
+  src/app/pages/     pagine (login, home, cambia password, clienti, fornitori, prodotti, servizi, piattaforma)
   proxy.conf.json    /api → localhost:8080 durante ng serve
   nginx.conf         configurazione nginx dell'immagine Docker
 docker/
