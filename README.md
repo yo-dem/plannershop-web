@@ -6,16 +6,19 @@ Riscrittura web dell'applicazione desktop PlannerShop (WinForms).
 | Parte | Tecnologia | Cartella |
 |---|---|---|
 | Backend | Java 21, Spring Boot 4, PostgreSQL 18, Flyway | `backend/` |
-| Frontend | Angular 22, Angular Material (Material 3) | `frontend/` |
+| Frontend | Angular 22, Angular Material (Material 3), traduzioni `@angular/localize` | `frontend/` |
 | Deploy | Docker Compose (postgres, backend, nginx) | `docker/` |
 
 Specifica funzionale e tecnica: [docs/SPECIFICA.md](docs/SPECIFICA.md)
 
+**Lingua**: il codice è tutto in inglese (nomi, database, API, commenti). L'italiano sta solo nelle
+traduzioni dei testi per l'utente: vedi [Traduzioni](#traduzioni).
+
 ## Stato attuale
 
 Funzionano: login con scelta dell'attività, sessione con rinnovo automatico, logout, cambio
-password (obbligatorio se provvisoria), ruoli SUPERADMIN / ADMIN / OPERATORE, gestione delle
-attività da parte del SUPERADMIN, modalità di installazione `cloud` e `locale`, ripristino
+password (obbligatorio se provvisoria), ruoli SUPERADMIN / ADMIN / OPERATOR (operatore), gestione delle
+attività da parte del SUPERADMIN, modalità di installazione `cloud` e `local`, ripristino
 password da riga di comando, **clienti** (elenco con ricerca, ordinamento e paginazione,
 inserimento, modifica, eliminazione solo per l'ADMIN, compleanni del mese con avviso in alto),
 **fornitori** (IBAN verificato), **prodotti** (giacenza evidenziata, filtro "solo disponibili")
@@ -63,7 +66,7 @@ JWT_SECRET=un-segreto-di-sviluppo-lungo-almeno-32-caratteri
 ### Primo accesso
 
 - **Database nuovo:** al primo avvio il backend crea il SUPERADMIN `admin@plannershop.local`
-  con una password casuale scritta nel log (cerca *"Creato il SUPERADMIN"*), da cambiare al primo
+  con una password casuale scritta nel log (cerca *"SUPERADMIN created"*), da cambiare al primo
   accesso. Dal menu *Attività* il SUPERADMIN crea le attività e i loro amministratori.
 - **Utenti di sviluppo già creati** (super amministratore, amministratore, operatore): vedi
   `docs/CREDENZIALI-SVILUPPO.md`. Il file è solo locale, escluso da git.
@@ -85,6 +88,7 @@ solo API e senza login risponde 401.
 ```bash
 cd backend && ./mvnw verify            # Testcontainers: Docker deve essere acceso
 cd frontend && ng test --watch=false
+cd frontend && npm run i18n            # testi da tradurre: estrazione e controllo della traduzione
 ```
 
 Da IntelliJ: clic destro su `backend/src/test/java` → *Run 'All Tests'*.
@@ -97,7 +101,7 @@ Come in produzione: nginx serve il frontend e inoltra `/api` al backend.
 cd docker
 cp .env.example .env                    # modifica password e JWT_SECRET (openssl rand -base64 48)
 docker compose up -d --build            # → http://localhost:8090
-docker compose logs backend | grep -A3 SUPERADMIN   # password iniziale (primo avvio)
+docker compose logs backend | grep -A3 "SUPERADMIN created"   # password iniziale (primo avvio)
 docker compose logs -f backend          # log del backend
 docker compose down                     # ferma (i dati restano nel volume pgdata)
 docker compose down -v                  # ferma e CANCELLA il database
@@ -114,12 +118,12 @@ La variabile `APP_MODE` (nel `.env`, oppure nelle Environment variables di Intel
 | `APP_MODE` | Uso | Al primo avvio crea |
 |---|---|---|
 | `cloud` (default) | Piattaforma con più attività | il SUPERADMIN (`SUPERADMIN_EMAIL`, `SUPERADMIN_PASSWORD`) |
-| `locale` | PC di un'unica attività | l'attività e il suo ADMIN; SUPERADMIN e gestione attività non esistono |
+| `local` | PC di un'unica attività | l'attività e il suo ADMIN; SUPERADMIN e gestione attività non esistono |
 
 Esempio di `.env` per un'installazione locale:
 
 ```bash
-APP_MODE=locale
+APP_MODE=local
 ACTIVITY_NAME=Nome del negozio
 ADMIN_EMAIL=titolare@esempio.it
 ADMIN_NAME=Nome Cognome
@@ -127,7 +131,7 @@ ADMIN_PASSWORD=                         # vuota = generata e scritta nel log
 ```
 
 ```bash
-docker compose logs backend | grep -A4 "Installazione locale"   # password iniziale
+docker compose logs backend | grep -A4 "Local installation"   # password iniziale
 ```
 
 La password iniziale è sempre provvisoria. Dettagli in `docs/SPECIFICA.md` §4.1.
@@ -142,10 +146,36 @@ Stampa una nuova password provvisoria e chiude le sessioni aperte dell'utente. F
 con l'applicazione avviata. Da IntelliJ: aggiungi `--app.reset-password=email@utente` in
 *Program arguments* di una copia della run configuration.
 
+## Traduzioni
+
+I testi dell'interfaccia si scrivono **in inglese** nel codice, con un ID leggibile:
+
+```html
+<h2 i18n="@@customers.title">Customers</h2>
+<input placeholder="Search" i18n-placeholder="@@customers.searchHint" />
+```
+
+```ts
+this.notifications.success($localize`:@@customers.updated:Customer updated`);
+```
+
+La traduzione italiana è in `frontend/src/locale/messages.it.json` (`"customers.title": "Clienti"`).
+Dopo aver aggiunto o cambiato testi:
+
+```bash
+cd frontend && npm run i18n
+```
+
+estrae i testi in `src/locale/messages.json` e segnala le chiavi mancanti o non più usate nel file
+italiano. I messaggi del backend (errori e validazione) sono in
+`backend/src/main/resources/messages.properties` (inglese) e `messages_it.properties` (italiano): il
+frontend chiede l'italiano con l'header `Accept-Language`.
+
 ## Problemi comuni
 
 | Sintomo | Causa e soluzione |
 |---|---|
+| Dopo un aggiornamento: errori di Flyway (checksum) all'avvio del backend | Le migrazioni sono state riscritte (succede solo in sviluppo, prima del rilascio): ricrea il database con `docker compose down -v`. |
 | Pagina bianca su `localhost:8080` | Normale: è solo l'API. Apri `localhost:4200` (sviluppo) o `localhost:8090` (container). |
 | "Email o password non corretti" | Password cambiata o database ricreato: usa il ripristino password. Dopo 10 tentativi falliti il login si blocca per 15 minuti (oppure riavvia il backend). |
 | Scollegato dopo ogni riavvio del backend | Manca `JWT_SECRET`: impostalo come sopra. |
@@ -159,27 +189,31 @@ con l'applicazione avviata. Da IntelliJ: aggiungi `--app.reset-password=email@ut
 ```
 backend/
   src/main/java/it/plannershop/
-    common/          classi base (BaseEntity, TenantScopedEntity), errori API, impostazioni app,
-                     calcolo prezzi, verifica IBAN, ricerca e ordinamento degli elenchi
+    common/          classi base (BaseEntity, TenantScopedEntity), errori API, impostazioni,
+                     prezzi, IBAN, ricerca e ordinamento degli elenchi
     tenant/          attività e risoluzione del tenant corrente (@TenantId)
     security/        Spring Security, JWT, limite tentativi di login
     user/            utenti, ruoli per attività, ripristino password
     auth/            login, refresh, logout, cambio password, /api/me
-    cliente/         anagrafica clienti e compleanni
-    fornitore/       fornitori
-    prodotto/        prodotti e magazzino
-    servizio/        servizi offerti
-    platform/        gestione attività (SUPERADMIN) e sua creazione — modalità cloud
-    locale/          creazione dell'attività al primo avvio — modalità locale
+    customer/        clienti e compleanni
+    supplier/        fornitori
+    product/         prodotti e magazzino
+    serviceitem/     servizi (ServiceItem, per non confonderlo con @Service di Spring)
+    platform/        gestione attività (SUPERADMIN) — modalità cloud
+    local/           creazione dell'attività al primo avvio — modalità local
     info/            /api/info (versione, database, modalità)
   src/main/resources/
-    application.yml  configurazione (variabili d'ambiente)
-    db/migration/    migrazioni Flyway V<n>__descrizione.sql
+    application.yml        configurazione (variabili d'ambiente)
+    messages*.properties   messaggi del backend (inglese) e traduzione italiana
+    db/migration/          migrazioni Flyway V<n>__description.sql
   src/test/          test d'integrazione (Testcontainers)
 frontend/
-  src/app/core/      sessione, interceptor del token, guard, servizi API, prezzi, stato elenchi
+  src/app/core/      sessione, interceptor del token, guard, servizi API, prezzi, elenchi, lingua
   src/app/core/ui/   componenti comuni: avvisi, notifiche, conferme, paginatore, campi prezzo
-  src/app/pages/     pagine (login, home, cambia password, clienti, fornitori, prodotti, servizi, piattaforma)
+  src/app/pages/     pagine (login, home, change-password, customers, suppliers, products,
+                     services, platform)
+  src/locale/        messages.json (testi inglesi estratti), messages.it.json (traduzione)
+  scripts/           check-translations.mjs (usato da npm run i18n)
   proxy.conf.json    /api → localhost:8080 durante ng serve
   nginx.conf         configurazione nginx dell'immagine Docker
 docker/

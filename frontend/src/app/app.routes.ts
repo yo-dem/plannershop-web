@@ -1,16 +1,18 @@
 import { Routes } from '@angular/router';
 
-import { authGuard, ospiteGuard, ruoloGuard } from './core/auth/auth.guards';
+import { authGuard, guestGuard, roleGuard } from './core/auth/auth.guards';
+
+const title = (page: string) => `${page} · PlannerShop`;
 
 export const routes: Routes = [
   {
     path: 'login',
-    canActivate: [ospiteGuard],
+    canActivate: [guestGuard],
     loadComponent: () => import('./pages/login/login').then((m) => m.Login),
-    title: 'Accedi · PlannerShop',
+    title: title($localize`:@@title.login:Sign in`),
   },
   {
-    // Tutte le pagine qui sotto richiedono l'accesso.
+    // All the pages below require sign-in.
     path: '',
     canActivateChild: [authGuard],
     children: [
@@ -20,46 +22,45 @@ export const routes: Routes = [
         title: 'PlannerShop',
       },
       {
-        path: 'cambia-password',
-        loadComponent: () =>
-          import('./pages/cambia-password/cambia-password').then((m) => m.CambiaPassword),
-        title: 'Cambia password · PlannerShop',
+        path: 'change-password',
+        loadComponent: () => import('./pages/change-password/change-password').then((m) => m.ChangePassword),
+        title: title($localize`:@@title.changePassword:Change password`),
       },
       {
-        path: 'clienti',
-        canActivate: [ruoloGuard('ADMIN', 'OPERATORE')],
-        loadComponent: () => import('./pages/clienti/clienti').then((m) => m.Clienti),
-        title: 'Clienti · PlannerShop',
+        path: 'customers',
+        canActivate: [roleGuard('ADMIN', 'OPERATOR')],
+        loadComponent: () => import('./pages/customers/customers').then((m) => m.Customers),
+        title: title($localize`:@@title.customers:Customers`),
       },
       {
-        path: 'clienti/compleanni',
-        canActivate: [ruoloGuard('ADMIN', 'OPERATORE')],
-        loadComponent: () => import('./pages/clienti/compleanni').then((m) => m.Compleanni),
-        title: 'Compleanni · PlannerShop',
+        path: 'customers/birthdays',
+        canActivate: [roleGuard('ADMIN', 'OPERATOR')],
+        loadComponent: () => import('./pages/customers/birthdays').then((m) => m.Birthdays),
+        title: title($localize`:@@title.birthdays:Birthdays`),
       },
       {
-        path: 'fornitori',
-        canActivate: [ruoloGuard('ADMIN', 'OPERATORE')],
-        loadComponent: () => import('./pages/fornitori/fornitori').then((m) => m.Fornitori),
-        title: 'Fornitori · PlannerShop',
+        path: 'suppliers',
+        canActivate: [roleGuard('ADMIN', 'OPERATOR')],
+        loadComponent: () => import('./pages/suppliers/suppliers').then((m) => m.Suppliers),
+        title: title($localize`:@@title.suppliers:Suppliers`),
       },
       {
-        path: 'prodotti',
-        canActivate: [ruoloGuard('ADMIN', 'OPERATORE')],
-        loadComponent: () => import('./pages/prodotti/prodotti').then((m) => m.Prodotti),
-        title: 'Prodotti · PlannerShop',
+        path: 'products',
+        canActivate: [roleGuard('ADMIN', 'OPERATOR')],
+        loadComponent: () => import('./pages/products/products').then((m) => m.Products),
+        title: title($localize`:@@title.products:Products`),
       },
       {
-        path: 'servizi',
-        canActivate: [ruoloGuard('ADMIN', 'OPERATORE')],
-        loadComponent: () => import('./pages/servizi/servizi').then((m) => m.Servizi),
-        title: 'Servizi · PlannerShop',
+        path: 'services',
+        canActivate: [roleGuard('ADMIN', 'OPERATOR')],
+        loadComponent: () => import('./pages/services/services').then((m) => m.Services),
+        title: title($localize`:@@title.services:Services`),
       },
       {
-        path: 'piattaforma',
-        canActivate: [ruoloGuard('SUPERADMIN')],
-        loadComponent: () => import('./pages/piattaforma/attivita').then((m) => m.Attivita),
-        title: 'Attività · PlannerShop',
+        path: 'platform',
+        canActivate: [roleGuard('SUPERADMIN')],
+        loadComponent: () => import('./pages/platform/tenants').then((m) => m.Tenants),
+        title: title($localize`:@@title.tenants:Businesses`),
       },
     ],
   },

@@ -1,15 +1,15 @@
-# ---- Build: compila Angular ----
+# ---- Build: compile Angular ----
 FROM node:26-alpine AS build
 WORKDIR /src
 
-# Prima solo i manifest: node_modules resta in cache finché non cambiano.
+# Manifests first: node_modules stays cached until they change.
 COPY package.json package-lock.json ./
 RUN npm ci
 
 COPY . .
 RUN npm run build
 
-# ---- Runtime: nginx serve i file statici e inoltra /api al backend ----
+# ---- Runtime: nginx serves the static files and forwards /api to the backend ----
 FROM nginx:1-alpine
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=build /src/dist/frontend/browser /usr/share/nginx/html

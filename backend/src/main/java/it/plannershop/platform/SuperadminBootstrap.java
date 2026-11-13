@@ -10,19 +10,20 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import it.plannershop.common.BootstrapProperties;
-import it.plannershop.common.PasswordCasuale;
+import it.plannershop.common.RandomPassword;
 import it.plannershop.user.AppUser;
 import it.plannershop.user.AppUserRepository;
 
 /**
- * Modalità CLOUD: al primo avvio (nessun utente nel database) crea il SUPERADMIN.
+ * CLOUD mode: on first start-up (no users in the database) creates the SUPERADMIN.
  *
- * <p>Email e password si leggono da SUPERADMIN_EMAIL / SUPERADMIN_PASSWORD.
- * Se la password non è impostata ne genera una casuale e la scrive UNA volta
- * nel log: va cambiata al primo accesso.
+ * <p>Email, password and name come from SUPERADMIN_EMAIL / SUPERADMIN_PASSWORD /
+ * SUPERADMIN_NAME. If the
+ * password is not set, a random one is generated and logged ONCE: it must be
+ * changed at the first sign-in.
  */
 @Component
-@ConditionalOnProperty(name = "app.modalita", havingValue = "cloud", matchIfMissing = true)
+@ConditionalOnProperty(name = "app.mode", havingValue = "cloud", matchIfMissing = true)
 class SuperadminBootstrap implements ApplicationRunner {
 
     private static final Logger log = LoggerFactory.getLogger(SuperadminBootstrap.class);
@@ -44,24 +45,24 @@ class SuperadminBootstrap implements ApplicationRunner {
             return;
         }
         String email = props.superadminEmail();
-        boolean generata = props.superadminPassword() == null || props.superadminPassword().isBlank();
-        String pwd = generata ? PasswordCasuale.genera() : props.superadminPassword();
-        AppUser admin = new AppUser(email, "Amministratore piattaforma", passwordEncoder.encode(pwd));
+        boolean generated = props.superadminPassword() == null || props.superadminPassword().isBlank();
+        String pwd = generated ? RandomPassword.generate() : props.superadminPassword();
+        AppUser admin = new AppUser(email, props.superadminName(), passwordEncoder.encode(pwd));
         admin.setSuperadmin(true);
-        admin.cambiaPassword(admin.getPasswordHash(), generata);
+        admin.changePassword(admin.getPasswordHash(), generated);
         users.save(admin);
 
-        if (generata) {
+        if (generated) {
             log.warn("""
 
                     ==============================================================
-                     Creato il SUPERADMIN
+                     SUPERADMIN created
                        email:    {}
                        password: {}
-                     La password è provvisoria: cambiala al primo accesso.
+                     The password is temporary: change it at first sign-in.
                     ==============================================================""", email, pwd);
         } else {
-            log.info("Creato il SUPERADMIN {}", email);
+            log.info("SUPERADMIN created: {}", email);
         }
     }
 }

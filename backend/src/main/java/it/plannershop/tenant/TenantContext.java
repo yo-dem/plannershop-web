@@ -3,39 +3,39 @@ package it.plannershop.tenant;
 import java.util.function.Supplier;
 
 /**
- * Permette di eseguire codice "come" un certo tenant fuori da una richiesta
- * HTTP autenticata (import dati, job pianificati, test).
+ * Runs code "as" a given tenant outside an authenticated HTTP request
+ * (data import, scheduled jobs, tests).
  *
- * <p>Nelle richieste normali il tenant arriva dal token e questa classe non serve.
+ * <p>In normal requests the tenant comes from the token and this class is not needed.
  */
 public final class TenantContext {
 
-    private static final ThreadLocal<Long> CORRENTE = new ThreadLocal<>();
+    private static final ThreadLocal<Long> CURRENT = new ThreadLocal<>();
 
     private TenantContext() {
     }
 
-    static Long corrente() {
-        return CORRENTE.get();
+    static Long current() {
+        return CURRENT.get();
     }
 
-    public static <T> T callAs(Long tenantId, Supplier<T> azione) {
-        Long precedente = CORRENTE.get();
-        CORRENTE.set(tenantId);
+    public static <T> T callAs(Long tenantId, Supplier<T> action) {
+        Long previous = CURRENT.get();
+        CURRENT.set(tenantId);
         try {
-            return azione.get();
+            return action.get();
         } finally {
-            if (precedente == null) {
-                CORRENTE.remove();
+            if (previous == null) {
+                CURRENT.remove();
             } else {
-                CORRENTE.set(precedente);
+                CURRENT.set(previous);
             }
         }
     }
 
-    public static void runAs(Long tenantId, Runnable azione) {
+    public static void runAs(Long tenantId, Runnable action) {
         callAs(tenantId, () -> {
-            azione.run();
+            action.run();
             return null;
         });
     }

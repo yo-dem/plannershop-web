@@ -1,13 +1,13 @@
--- Migrazione iniziale.
--- Flyway applica i file V<n>__<descrizione>.sql in ordine, una sola volta,
--- e registra quelli eseguiti nella tabella flyway_schema_history.
--- REGOLA: una migrazione già applicata non si modifica mai; si aggiunge un nuovo file.
+-- Initial migration.
+-- Flyway applies the V<n>__<description>.sql files in order, once each,
+-- and records them in the flyway_schema_history table.
+-- RULE: a migration that has been applied is never modified; add a new file instead.
 --
--- Le tabelle di dominio (tenant, utenti, clienti, ...) arrivano dalla V2 in poi.
+-- Domain tables (tenants, users, customers, ...) start from V2.
 
 CREATE TABLE app_info (
-    chiave  text PRIMARY KEY,
-    valore  text NOT NULL
+    info_key    text PRIMARY KEY,
+    info_value  text NOT NULL
 );
 
-INSERT INTO app_info (chiave, valore) VALUES ('schema_creato_il', now()::text);
+INSERT INTO app_info (info_key, info_value) VALUES ('schema_created_at', now()::text);

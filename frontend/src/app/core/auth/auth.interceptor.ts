@@ -2,35 +2,39 @@ import { HttpErrorResponse, HttpInterceptorFn, HttpRequest } from '@angular/comm
 import { inject } from '@angular/core';
 import { catchError, from, switchMap, throwError } from 'rxjs';
 
+import { LANGUAGE } from '../i18n';
 import { AuthService } from './auth.service';
 
-const API_AUTH = ['/api/auth/login', '/api/auth/refresh', '/api/auth/logout'];
+const AUTH_APIS = ['/api/auth/login', '/api/auth/refresh', '/api/auth/logout'];
 
 /**
- * Per ogni chiamata /api:
- * 1. aggiunge l'header Authorization con l'access token;
- * 2. se il server risponde 401 (token scaduto), rinnova la sessione e
- *    ripete la richiesta una volta; se non si può rinnovare, torna al login.
+ * For every /api call:
+ * 1. adds the Authorization header with the access token, and Accept-Language,
+ *    so the backend answers with messages in the language of the UI;
+ * 2. if the server answers 401 (expired token), renews the session and retries
+ *    the request once; if the session cannot be renewed, goes back to sign-in.
  */
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   if (!req.url.startsWith('/api/')) return next(req);
 
   const auth = inject(AuthService);
-  const chiamataAuth = API_AUTH.some((u) => req.url.startsWith(u));
-  const conToken = (r: HttpRequest<unknown>) => {
+  const authCall = AUTH_APIS.some((u) => req.url.startsWith(u));
+  const withHeaders = (r: HttpRequest<unknown>) => {
     const token = auth.token();
-    return token && !chiamataAuth ? r.clone({ setHeaders: { Authorization: `Bearer ${token}` } }) : r;
+    const headers: Record<string, string> = { 'Accept-Language': LANGUAGE };
+    if (token && !authCall) headers['Authorization'] = `Bearer ${token}`;
+    return r.clone({ setHeaders: headers });
   };
 
-  return next(conToken(req)).pipe(
+  return next(withHeaders(req)).pipe(
     catchError((err: unknown) => {
-      if (!(err instanceof HttpErrorResponse) || err.status !== 401 || chiamataAuth) {
+      if (!(err instanceof HttpErrorResponse) || err.status !== 401 || authCall) {
         return throwError(() => err);
       }
       return from(auth.refresh()).pipe(
         switchMap((ok) => {
-          if (ok) return next(conToken(req));
-          auth.sessioneScaduta();
+          if (ok) return next(withHeaders(req));
+          auth.sessionExpired();
           return throwError(() => err);
         }),
       );

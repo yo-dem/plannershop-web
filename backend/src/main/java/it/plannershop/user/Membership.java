@@ -15,10 +15,10 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 /**
- * Appartenenza di un utente a un'attività, con il suo ruolo.
+ * A user's membership in a tenant, with their role.
  *
- * <p>Non usa {@code @TenantId}: al login bisogna leggere le appartenenze
- * dell'utente a tutte le attività, prima che un tenant sia stato scelto.
+ * <p>Does not use {@code @TenantId}: at sign-in the memberships of the user in
+ * all tenants must be read, before a tenant has been chosen.
  */
 @Entity
 @Table(name = "membership")
@@ -36,16 +36,16 @@ public class Membership extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private Ruolo ruolo;
+    private Role role;
 
     protected Membership() {
-        // per JPA
+        // for JPA
     }
 
-    public Membership(AppUser user, Tenant tenant, Ruolo ruolo) {
+    public Membership(AppUser user, Tenant tenant, Role role) {
         this.user = user;
         this.tenant = tenant;
-        this.ruolo = ruolo;
+        this.role = role;
     }
 
     public AppUser getUser() {
@@ -56,11 +56,11 @@ public class Membership extends BaseEntity {
         return tenant;
     }
 
-    public Ruolo getRuolo() {
-        return ruolo;
+    public Role getRole() {
+        return role;
     }
 
-    public void setRuolo(Ruolo ruolo) {
-        this.ruolo = ruolo;
+    public void setRole(Role role) {
+        this.role = role;
     }
 }

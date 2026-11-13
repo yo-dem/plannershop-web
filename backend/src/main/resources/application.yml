@@ -1,7 +1,7 @@
-# Configurazione del backend.
-# I valori ${VAR:default} si leggono da variabili d'ambiente: i default valgono
-# per lo sviluppo locale (Postgres avviato con docker compose), in produzione
-# vanno sempre impostati tramite il file docker/.env.
+# Backend configuration.
+# ${VAR:default} values are read from environment variables: the defaults are
+# meant for local development (Postgres started with docker compose); in
+# production always set them through the docker/.env file.
 
 spring:
   application:
@@ -13,11 +13,11 @@ spring:
     password: ${DB_PASSWORD:plannershop}
 
   jpa:
-    # Lo schema lo gestisce SOLO Flyway: Hibernate si limita a verificare
-    # che le entità corrispondano alle tabelle.
+    # The schema is managed ONLY by Flyway: Hibernate just validates that the
+    # entities match the tables.
     hibernate:
       ddl-auto: validate
-    # Evita query "nascoste" durante il rendering della risposta HTTP.
+    # Avoid "hidden" queries while the HTTP response is being rendered.
     open-in-view: false
     properties:
       hibernate:
@@ -31,19 +31,26 @@ spring:
     problemdetails:
       enabled: true
 
-  # Paginazione delle API (?page=&size=&sort=): massimo 100 elementi per pagina.
+  # Messages shown to the user (messages.properties = English, messages_it = Italian).
+  # The language comes from the Accept-Language header; without a translation,
+  # English is used (never the language of the server).
+  messages:
+    basename: messages
+    fallback-to-system-locale: false
+
+  # API pagination (?page=&size=&sort=): at most 100 items per page.
   data:
     web:
       pageable:
         max-page-size: 100
 
 server:
-  # Dietro nginx: rispetta gli header X-Forwarded-* (protocollo, host).
+  # Behind nginx: honour the X-Forwarded-* headers (protocol, host).
   forward-headers-strategy: framework
   error:
     include-message: always
 
-# Actuator: espone solo lo stato di salute (usato dall'healthcheck Docker).
+# Actuator: exposes only the health status (used by the Docker healthcheck).
 management:
   endpoints:
     web:
@@ -54,33 +61,34 @@ management:
       probes:
         enabled: true
 
-# Documentazione API sotto /api, così passa dallo stesso proxy del frontend.
+# API documentation under /api, so it goes through the same proxy as the frontend.
 springdoc:
   api-docs:
     path: /api/v3/api-docs
   swagger-ui:
     path: /api/swagger-ui.html
 
-# Impostazioni dell'applicazione (vedi AppProperties, SecurityProperties, BootstrapProperties).
+# Application settings (see AppProperties, SecurityProperties, BootstrapProperties).
 app:
-  # cloud  = piattaforma con più attività gestite dal SUPERADMIN
-  # locale = installazione sul PC di un'unica attività, senza SUPERADMIN
-  modalita: ${APP_MODE:cloud}
+  # cloud = platform with many businesses managed by the SUPERADMIN
+  # local = installed on the PC of a single business, without SUPERADMIN
+  mode: ${APP_MODE:cloud}
   security:
-    # Segreto per firmare i token. In produzione: stringa casuale lunga (≥ 32 caratteri).
+    # Secret used to sign the tokens. In production: a long random string (≥ 32 characters).
     jwt-secret: ${JWT_SECRET:}
     access-token-ttl: 15m
     refresh-token-ttl: 14d
-    login-max-tentativi: 10
-    login-finestra: 15m
+    login-max-attempts: 10
+    login-window: 15m
   bootstrap:
-    # Utenti creati al primo avvio, solo se il database non ha utenti.
-    # Le password vuote vengono generate e scritte nel log.
-    # Modalità cloud: il SUPERADMIN.
+    # Users created on first start-up, only if the database has no users.
+    # Empty passwords are generated and written to the log.
+    # Cloud mode: the SUPERADMIN.
     superadmin-email: ${SUPERADMIN_EMAIL:admin@plannershop.local}
     superadmin-password: ${SUPERADMIN_PASSWORD:}
-    # Modalità locale: l'unica attività e il suo ADMIN (password sempre provvisoria).
-    attivita-nome: ${ACTIVITY_NAME:La mia attività}
+    superadmin-name: ${SUPERADMIN_NAME:Platform administrator}
+    # Local mode: the single business and its ADMIN (password always temporary).
+    tenant-name: ${ACTIVITY_NAME:My business}
     admin-email: ${ADMIN_EMAIL:admin@plannershop.local}
-    admin-nome: ${ADMIN_NAME:Amministratore}
+    admin-name: ${ADMIN_NAME:Administrator}
     admin-password: ${ADMIN_PASSWORD:}

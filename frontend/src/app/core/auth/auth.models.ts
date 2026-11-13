@@ -1,26 +1,26 @@
-/** Tipi delle API di autenticazione (vedi AuthDtos.java nel backend). */
+/** Types of the authentication APIs (see AuthDtos.java in the backend). */
 
-export type Ruolo = 'ADMIN' | 'OPERATORE' | 'SUPERADMIN';
+export type Role = 'ADMIN' | 'OPERATOR' | 'SUPERADMIN';
 
-export interface TenantOpzione {
+export interface TenantOption {
   id: number;
-  nome: string;
+  name: string;
 }
 
-export interface UtenteCorrente {
+export interface CurrentUser {
   id: number;
   email: string;
-  nome: string;
-  ruolo: Ruolo;
+  name: string;
+  role: Role;
   superadmin: boolean;
-  tenant: TenantOpzione | null;
-  deveCambiarePassword: boolean;
+  tenant: TenantOption | null;
+  mustChangePassword: boolean;
 }
 
 export interface LoginResponse {
   accessToken: string | null;
-  scadeTraSecondi: number | null;
-  utente: UtenteCorrente | null;
-  /** Valorizzato se l'utente deve scegliere l'attività prima di entrare. */
-  sceltaTenant: TenantOpzione[] | null;
+  expiresInSeconds: number | null;
+  user: CurrentUser | null;
+  /** Set when the user must choose the tenant before signing in. */
+  tenantChoices: TenantOption[] | null;
 }

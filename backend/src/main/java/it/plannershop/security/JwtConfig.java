@@ -19,8 +19,8 @@ import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 
 /**
- * Firma e verifica degli access token JWT con HMAC-SHA256 (chiave simmetrica):
- * è il backend stesso a emettere e verificare i token.
+ * Signs and verifies JWT access tokens with HMAC-SHA256 (symmetric key): the
+ * backend itself issues and verifies the tokens.
  */
 @Configuration
 class JwtConfig {
@@ -29,18 +29,18 @@ class JwtConfig {
 
     @Bean
     SecretKey jwtSecretKey(SecurityProperties props) throws NoSuchAlgorithmException {
-        byte[] materiale;
+        byte[] material;
         if (props.jwtSecret() == null || props.jwtSecret().isBlank()) {
-            materiale = new byte[32];
-            new SecureRandom().nextBytes(materiale);
-            log.warn("JWT_SECRET non impostato: generato un segreto casuale. "
-                    + "Gli accessi scadranno a ogni riavvio. Impostalo in produzione.");
+            material = new byte[32];
+            new SecureRandom().nextBytes(material);
+            log.warn("JWT_SECRET not set: generated a random secret. "
+                    + "Sessions will expire at every restart. Set it in production.");
         } else {
-            materiale = props.jwtSecret().getBytes(StandardCharsets.UTF_8);
+            material = props.jwtSecret().getBytes(StandardCharsets.UTF_8);
         }
-        // SHA-256 → sempre 32 byte, la lunghezza richiesta da HS256.
-        byte[] chiave = MessageDigest.getInstance("SHA-256").digest(materiale);
-        return new SecretKeySpec(chiave, "HmacSHA256");
+        // SHA-256 → always 32 bytes, the length required by HS256.
+        byte[] key = MessageDigest.getInstance("SHA-256").digest(material);
+        return new SecretKeySpec(key, "HmacSHA256");
     }
 
     @Bean

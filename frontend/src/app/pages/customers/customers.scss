@@ -1,0 +1,18 @@
+:host {
+  display: block;
+  max-width: 64rem;
+  margin: 0 auto;
+}
+
+.email {
+  overflow-wrap: anywhere;
+}
+
+/* Birthdays: the days already past in the current month are dimmed. */
+.past > td {
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.month {
+  width: 12rem;
+}

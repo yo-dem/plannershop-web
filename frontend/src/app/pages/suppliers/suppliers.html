@@ -1,0 +1,59 @@
+<div class="page-header">
+  <h2 i18n="@@suppliers.title">Suppliers</h2>
+  <div class="page-actions">
+    <button matButton="filled" (click)="create()">
+      <mat-icon>add_business</mat-icon> <ng-container i18n="@@suppliers.new">New supplier</ng-container>
+    </button>
+  </div>
+</div>
+
+<mat-form-field class="search">
+  <mat-icon matPrefix>search</mat-icon>
+  <mat-label i18n="@@suppliers.search">Search supplier</mat-label>
+  <input matInput type="search" [value]="list.text()" (input)="list.search($any($event.target).value)"
+         placeholder="Name, address, phone, email, IBAN or notes" i18n-placeholder="@@suppliers.searchHint" />
+</mat-form-field>
+
+@if (data.error()) {
+  <app-notice type="error" i18n="@@suppliers.loadError">Unable to load the suppliers.</app-notice>
+}
+
+<div class="table-card">
+  @if (data.isLoading()) {
+    <mat-progress-bar mode="indeterminate" />
+  }
+  <table mat-table [dataSource]="items()" matSort (matSortChange)="list.sortBy($event)">
+    <ng-container matColumnDef="name">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header i18n="@@suppliers.supplier">Supplier</th>
+      <td mat-cell *matCellDef="let s"><strong>{{ s.name }}</strong></td>
+    </ng-container>
+    <ng-container matColumnDef="phone">
+      <th mat-header-cell *matHeaderCellDef i18n="@@suppliers.phone">Phone</th>
+      <td mat-cell *matCellDef="let s">{{ s.phone }}</td>
+    </ng-container>
+    <ng-container matColumnDef="email">
+      <th mat-header-cell *matHeaderCellDef class="hide-mobile" i18n="@@suppliers.email">Email</th>
+      <td mat-cell *matCellDef="let s" class="hide-mobile wrap">{{ s.email }}</td>
+    </ng-container>
+    <ng-container matColumnDef="address">
+      <th mat-header-cell *matHeaderCellDef class="hide-mobile" i18n="@@suppliers.address">Address</th>
+      <td mat-cell *matCellDef="let s" class="hide-mobile">{{ s.address }}</td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="columns"></tr>
+    <tr mat-row *matRowDef="let s; columns: columns" class="clickable"
+        [class.highlighted]="s.id === list.highlighted()"
+        (click)="open(s)" (keydown.enter)="open(s)" tabindex="0"></tr>
+    <tr *matNoDataRow>
+      <td class="empty" [attr.colspan]="columns.length">
+        @if (list.text()) {
+          <ng-container i18n="@@suppliers.noResults">No supplier found for "{{ list.text() // i18n(ph="query") }}".</ng-container>
+        } @else if (!data.isLoading()) {
+          <ng-container i18n="@@suppliers.empty">No suppliers yet. Add one with "New supplier".</ng-container>
+        }
+      </td>
+    </tr>
+  </table>
+  <mat-paginator [length]="total()" [pageIndex]="list.page()" [pageSize]="list.pageSize()"
+                 [pageSizeOptions]="[20, 50, 100]" (page)="list.changePage($event)" />
+</div>

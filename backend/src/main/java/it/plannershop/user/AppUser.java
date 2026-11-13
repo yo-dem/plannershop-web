@@ -9,8 +9,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 
 /**
- * Persona che accede all'applicazione. Non appartiene a un tenant: i ruoli
- * nelle singole attività sono in {@link Membership}.
+ * A person who signs in to the application. Does not belong to a tenant: the
+ * roles in the single tenants are in {@link Membership}.
  */
 @Entity
 @Table(name = "app_user")
@@ -25,26 +25,26 @@ public class AppUser extends BaseEntity {
     private String passwordHash;
 
     @Column(nullable = false)
-    private String nome;
+    private String name;
 
     @Column(nullable = false)
-    private boolean attivo = true;
+    private boolean active = true;
 
-    /** Amministratore della piattaforma: gestisce le attività, non i loro dati. */
+    /** Platform administrator: manages the tenants, not their data. */
     @Column(nullable = false)
     private boolean superadmin;
 
-    /** Password provvisoria: l'interfaccia chiede di cambiarla al primo accesso. */
+    /** Temporary password: the UI asks to change it at the first sign-in. */
     @Column(nullable = false)
-    private boolean deveCambiarePassword;
+    private boolean mustChangePassword;
 
     protected AppUser() {
-        // per JPA
+        // for JPA
     }
 
-    public AppUser(String email, String nome, String passwordHash) {
+    public AppUser(String email, String name, String passwordHash) {
         this.email = email.trim().toLowerCase();
-        this.nome = nome;
+        this.name = name;
         this.passwordHash = passwordHash;
     }
 
@@ -56,25 +56,25 @@ public class AppUser extends BaseEntity {
         return passwordHash;
     }
 
-    public void cambiaPassword(String nuovoHash, boolean provvisoria) {
-        this.passwordHash = nuovoHash;
-        this.deveCambiarePassword = provvisoria;
+    public void changePassword(String newHash, boolean temporary) {
+        this.passwordHash = newHash;
+        this.mustChangePassword = temporary;
     }
 
-    public String getNome() {
-        return nome;
+    public String getName() {
+        return name;
     }
 
-    public void setNome(String nome) {
-        this.nome = nome;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public boolean isAttivo() {
-        return attivo;
+    public boolean isActive() {
+        return active;
     }
 
-    public void setAttivo(boolean attivo) {
-        this.attivo = attivo;
+    public void setActive(boolean active) {
+        this.active = active;
     }
 
     public boolean isSuperadmin() {
@@ -85,7 +85,7 @@ public class AppUser extends BaseEntity {
         this.superadmin = superadmin;
     }
 
-    public boolean isDeveCambiarePassword() {
-        return deveCambiarePassword;
+    public boolean isMustChangePassword() {
+        return mustChangePassword;
     }
 }

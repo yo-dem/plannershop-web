@@ -1,31 +1,31 @@
 import { AbstractControl, ValidationErrors } from '@angular/forms';
 
-/** Spazi tolti e lettere in maiuscolo. */
-export function normalizzaIban(iban: string): string {
+/** Spaces removed and letters upper-cased. */
+export function normalizeIban(iban: string): string {
   return iban.replace(/\s/g, '').toUpperCase();
 }
 
 /**
- * IBAN valido: paese, cifre di controllo, 11–30 caratteri alfanumerici e
- * controllo Mod-97 uguale a 1 (stessa verifica del backend, SPECIFICA §7.4).
+ * Valid IBAN: country, check digits, 11–30 alphanumeric characters and Mod-97
+ * check equal to 1 (same check as the backend, SPECIFICA §7.4).
  */
-export function ibanValido(iban: string): boolean {
-  const s = normalizzaIban(iban);
+export function isValidIban(iban: string): boolean {
+  const s = normalizeIban(iban);
   if (!/^[A-Z]{2}\d{2}[A-Z0-9]{11,30}$/.test(s)) return false;
-  let resto = 0;
+  let remainder = 0;
   for (const c of s.slice(4) + s.slice(0, 4)) {
-    const cifre = /[A-Z]/.test(c) ? String(c.charCodeAt(0) - 55) : c; // A = 10 ... Z = 35
-    for (const d of cifre) resto = (resto * 10 + Number(d)) % 97;
+    const digits = /[A-Z]/.test(c) ? String(c.charCodeAt(0) - 55) : c; // A = 10 ... Z = 35
+    for (const d of digits) remainder = (remainder * 10 + Number(d)) % 97;
   }
-  return resto === 1;
+  return remainder === 1;
 }
 
-/** In gruppi di quattro, per leggerlo meglio: "IT60 X054 2811 ...". */
-export function formattaIban(iban: string | null): string {
-  return iban ? normalizzaIban(iban).replace(/(.{4})(?=.)/g, '$1 ') : '';
+/** In groups of four, easier to read: "IT60 X054 2811 ...". */
+export function formatIban(iban: string | null): string {
+  return iban ? normalizeIban(iban).replace(/(.{4})(?=.)/g, '$1 ') : '';
 }
 
-/** Validatore del modulo: campo vuoto valido, altrimenti errore "iban". */
+/** Form validator: empty field is valid, otherwise "iban" error. */
 export function ibanValidator(c: AbstractControl<string>): ValidationErrors | null {
-  return c.value && !ibanValido(c.value) ? { iban: true } : null;
+  return c.value && !isValidIban(c.value) ? { iban: true } : null;
 }

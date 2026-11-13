@@ -6,20 +6,20 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.bind.DefaultValue;
 
 /**
- * Impostazioni di sicurezza ({@code app.security.*} in application.yml).
+ * Security settings ({@code app.security.*} in application.yml).
  *
- * @param jwtSecret         segreto per firmare i token; se vuoto se ne genera uno
- *                          casuale a ogni avvio (va bene solo in sviluppo)
- * @param accessTokenTtl    durata dell'access token
- * @param refreshTokenTtl   durata del refresh token (sessione "ricordata")
- * @param loginMaxTentativi tentativi falliti consentiti nella finestra
- * @param loginFinestra     finestra temporale per il conteggio dei tentativi
+ * @param jwtSecret        secret used to sign the tokens; if empty a random one is
+ *                         generated at every start (fine only in development)
+ * @param accessTokenTtl   access token lifetime
+ * @param refreshTokenTtl  refresh token lifetime ("remembered" session)
+ * @param loginMaxAttempts failed attempts allowed within the window
+ * @param loginWindow      time window for counting the attempts
  */
 @ConfigurationProperties("app.security")
 public record SecurityProperties(
         String jwtSecret,
         @DefaultValue("15m") Duration accessTokenTtl,
         @DefaultValue("14d") Duration refreshTokenTtl,
-        @DefaultValue("10") int loginMaxTentativi,
-        @DefaultValue("15m") Duration loginFinestra) {
+        @DefaultValue("10") int loginMaxAttempts,
+        @DefaultValue("15m") Duration loginWindow) {
 }

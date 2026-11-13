@@ -8,17 +8,17 @@ import org.springframework.data.jpa.repository.Query;
 
 public interface MembershipRepository extends JpaRepository<Membership, Long> {
 
-    /** Appartenenze valide: attività attiva e non eliminata. */
+    /** Valid memberships: tenant active and not deleted. */
     @Query("""
             select m from Membership m join fetch m.tenant t
-            where m.user.id = :userId and t.attivo = true and t.deletedAt is null
-            order by t.nome""")
-    List<Membership> findValideByUser(Long userId);
+            where m.user.id = :userId and t.active = true and t.deletedAt is null
+            order by t.name""")
+    List<Membership> findValidByUser(Long userId);
 
     @Query("""
             select m from Membership m join fetch m.tenant t
-            where m.user.id = :userId and t.id = :tenantId and t.attivo = true and t.deletedAt is null""")
-    Optional<Membership> findValida(Long userId, Long tenantId);
+            where m.user.id = :userId and t.id = :tenantId and t.active = true and t.deletedAt is null""")
+    Optional<Membership> findValid(Long userId, Long tenantId);
 
     List<Membership> findByTenantId(Long tenantId);
 

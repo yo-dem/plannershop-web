@@ -12,9 +12,9 @@ public interface RefreshTokenRepository extends JpaRepository<RefreshToken, Long
 
     @Modifying
     @Query("update RefreshToken r set r.revokedAt = current_timestamp where r.userId = :userId and r.revokedAt is null")
-    int revocaTuttiDiUtente(Long userId);
+    int revokeAllOfUser(Long userId);
 
     @Modifying
     @Query("update RefreshToken r set r.revokedAt = current_timestamp where r.tenantId = :tenantId and r.revokedAt is null")
-    int revocaTuttiDiTenant(Long tenantId);
+    int revokeAllOfTenant(Long tenantId);
 }

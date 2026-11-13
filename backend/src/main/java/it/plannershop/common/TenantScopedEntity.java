@@ -6,12 +6,12 @@ import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;
 
 /**
- * Base per tutte le entità che appartengono a un'attività (clienti, prodotti, ...).
+ * Base class for all entities owned by a tenant (customers, products, ...).
  *
- * <p>{@code @TenantId}: Hibernate imposta da solo {@code tenant_id} in inserimento
- * e aggiunge {@code tenant_id = ?} a ogni query, leggendo il tenant corrente da
- * {@link it.plannershop.tenant.TenantIdentifierResolver}. Il codice applicativo
- * non deve (e non può) impostarlo a mano.
+ * <p>{@code @TenantId}: Hibernate sets {@code tenant_id} on insert and adds
+ * {@code tenant_id = ?} to every query, reading the current tenant from
+ * {@link it.plannershop.tenant.TenantIdentifierResolver}. Application code must
+ * not (and cannot) set it by hand.
  */
 @MappedSuperclass
 public abstract class TenantScopedEntity extends BaseEntity {

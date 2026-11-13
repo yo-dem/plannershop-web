@@ -12,26 +12,26 @@ import jakarta.validation.ConstraintValidatorContext;
 import jakarta.validation.Payload;
 
 /**
- * IBAN valido: due lettere del paese, due cifre di controllo, da 11 a 30
- * caratteri alfanumerici e controllo Mod-97 uguale a 1 (SPECIFICA §7.4).
- * Il valore va prima normalizzato con {@link CodiceIban#normalizza(String)}; null è valido.
+ * Valid IBAN: country letters, check digits, 11 to 30 alphanumeric characters
+ * and Mod-97 check (SPECIFICA §7.4). Normalize the value first with
+ * {@link Ibans#normalize(String)}; null is valid.
  */
 @Documented
-@Constraint(validatedBy = Iban.Validatore.class)
+@Constraint(validatedBy = Iban.Validator.class)
 @Target({ ElementType.FIELD, ElementType.PARAMETER, ElementType.RECORD_COMPONENT })
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Iban {
 
-    String message() default "IBAN non valido";
+    String message() default "{validation.iban}";
 
     Class<?>[] groups() default {};
 
     Class<? extends Payload>[] payload() default {};
 
-    class Validatore implements ConstraintValidator<Iban, String> {
+    class Validator implements ConstraintValidator<Iban, String> {
         @Override
         public boolean isValid(String value, ConstraintValidatorContext context) {
-            return value == null || CodiceIban.valido(value);
+            return value == null || Ibans.isValid(value);
         }
     }
 }

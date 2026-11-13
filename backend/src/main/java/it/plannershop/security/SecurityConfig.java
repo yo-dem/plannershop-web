@@ -12,15 +12,15 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtGra
 import org.springframework.security.web.SecurityFilterChain;
 
 /**
- * Regole di accesso alle API.
+ * Access rules for the APIs.
  *
  * <ul>
- * <li>Ogni richiesta (tranne login/refresh/logout, health e documentazione)
- * deve avere l'header {@code Authorization: Bearer <access token>}.</li>
- * <li>Nessuna sessione lato server (stateless): tutto è nel token.</li>
- * <li>CSRF disattivato: le API non usano cookie per autenticarsi; l'unico cookie,
- * il refresh token, è {@code SameSite=Strict} e limitato a {@code /api/auth}.</li>
- * <li>I permessi per ruolo si dichiarano sui metodi con {@code @PreAuthorize}.</li>
+ * <li>Every request (except login/refresh/logout, health and docs) must carry the
+ * header {@code Authorization: Bearer <access token>}.</li>
+ * <li>No server-side session (stateless): everything is in the token.</li>
+ * <li>CSRF disabled: the APIs do not authenticate with cookies; the only cookie,
+ * the refresh token, is {@code SameSite=Strict} and limited to {@code /api/auth}.</li>
+ * <li>Role permissions are declared on methods with {@code @PreAuthorize}.</li>
  * </ul>
  */
 @Configuration
@@ -42,17 +42,17 @@ class SecurityConfig {
         return http.build();
     }
 
-    /** Claim "roles": ["ADMIN"] → authority "ROLE_ADMIN", usata da hasRole('ADMIN'). */
+    /** Claim "roles": ["ADMIN"] → authority "ROLE_ADMIN", used by hasRole('ADMIN'). */
     private JwtAuthenticationConverter jwtAuthConverter() {
-        JwtGrantedAuthoritiesConverter ruoli = new JwtGrantedAuthoritiesConverter();
-        ruoli.setAuthoritiesClaimName(JwtClaims.ROLES);
-        ruoli.setAuthorityPrefix("ROLE_");
+        JwtGrantedAuthoritiesConverter roles = new JwtGrantedAuthoritiesConverter();
+        roles.setAuthoritiesClaimName(JwtClaims.ROLES);
+        roles.setAuthorityPrefix("ROLE_");
         JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
-        converter.setJwtGrantedAuthoritiesConverter(ruoli);
+        converter.setJwtGrantedAuthoritiesConverter(roles);
         return converter;
     }
 
-    /** BCrypt, con prefisso {bcrypt} per poter cambiare algoritmo in futuro. */
+    /** BCrypt, with the {bcrypt} prefix so the algorithm can be changed in the future. */
     @Bean
     PasswordEncoder passwordEncoder() {
         return PasswordEncoderFactories.createDelegatingPasswordEncoder();

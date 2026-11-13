@@ -9,7 +9,7 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 
 import it.plannershop.common.ApiException;
 
-/** Accesso comodo ai dati dell'utente autenticato nella richiesta corrente. */
+/** Convenient access to the data of the user authenticated in the current request. */
 public final class CurrentUser {
 
     private CurrentUser() {
@@ -29,6 +29,6 @@ public final class CurrentUser {
         if (auth instanceof JwtAuthenticationToken token) {
             return token.getToken();
         }
-        throw ApiException.nonAutenticato("Accesso richiesto");
+        throw ApiException.unauthorized("auth.loginRequired");
     }
 }

@@ -1,46 +1,58 @@
-<section class="pannello">
+<section class="panel">
   <h1><mat-icon aria-hidden="true">calendar_month</mat-icon> PlannerShop</h1>
-  <p class="sottotitolo">Accedi per continuare</p>
+  <p class="subtitle" i18n="@@login.subtitle">Sign in to continue</p>
 
-  @if (scaduta()) {
-    <app-avviso tipo="attenzione">La sessione è scaduta: accedi di nuovo.</app-avviso>
+  @if (expired()) {
+    <app-notice type="warning" i18n="@@login.expired">Your session has expired: please sign in again.</app-notice>
   }
-  @if (errore(); as e) {
-    <app-avviso tipo="errore">{{ e }}</app-avviso>
+  @if (error(); as e) {
+    <app-notice type="error">{{ e }}</app-notice>
   }
 
-  <form [formGroup]="form" (ngSubmit)="accedi()" class="modulo" novalidate>
+  <form [formGroup]="form" (ngSubmit)="signIn()" class="form" novalidate>
     <mat-form-field>
-      <mat-label>Email</mat-label>
+      <mat-label i18n="@@login.email">Email</mat-label>
       <input matInput id="email" type="email" formControlName="email" autocomplete="username" />
-      <mat-error>Inserisci un'email valida</mat-error>
+      <mat-error i18n="@@login.emailError">Enter a valid email</mat-error>
     </mat-form-field>
 
     <mat-form-field>
-      <mat-label>Password</mat-label>
-      <input matInput id="password" [type]="mostraPassword() ? 'text' : 'password'" formControlName="password"
+      <mat-label i18n="@@login.password">Password</mat-label>
+      <input matInput id="password" [type]="showPassword() ? 'text' : 'password'" formControlName="password"
              autocomplete="current-password" />
-      <button matIconButton matSuffix type="button" (click)="mostraPassword.set(!mostraPassword())"
-              [attr.aria-label]="mostraPassword() ? 'Nascondi password' : 'Mostra password'">
-        <mat-icon>{{ mostraPassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
-      </button>
-      <mat-error>Inserisci la password</mat-error>
+      @if (showPassword()) {
+        <button matIconButton matSuffix type="button" (click)="showPassword.set(false)"
+                aria-label="Hide password" i18n-aria-label="@@login.hidePassword">
+          <mat-icon>visibility_off</mat-icon>
+        </button>
+      } @else {
+        <button matIconButton matSuffix type="button" (click)="showPassword.set(true)"
+                aria-label="Show password" i18n-aria-label="@@login.showPassword">
+          <mat-icon>visibility</mat-icon>
+        </button>
+      }
+      <mat-error i18n="@@login.passwordError">Enter the password</mat-error>
     </mat-form-field>
 
-    @if (attivita(); as elenco) {
+    @if (tenants(); as list) {
       <mat-form-field>
-        <mat-label>Attività</mat-label>
+        <mat-label i18n="@@login.tenant">Business</mat-label>
         <mat-select id="tenant" formControlName="tenantId">
-          @for (a of elenco; track a.id) {
-            <mat-option [value]="a.id">{{ a.nome }}</mat-option>
+          @for (t of list; track t.id) {
+            <mat-option [value]="t.id">{{ t.name }}</mat-option>
           }
         </mat-select>
-        <mat-error>Scegli un'attività</mat-error>
+        <mat-error i18n="@@login.tenantError">Choose a business</mat-error>
       </mat-form-field>
     }
 
-    <button matButton="filled" type="submit" class="accedi" [disabled]="invio()">
-      <mat-icon>login</mat-icon> {{ invio() ? 'Accesso in corso…' : 'Accedi' }}
+    <button matButton="filled" type="submit" class="sign-in" [disabled]="sending()">
+      <mat-icon>login</mat-icon>
+      @if (sending()) {
+        <ng-container i18n="@@login.signingIn">Signing in…</ng-container>
+      } @else {
+        <ng-container i18n="@@login.signIn">Sign in</ng-container>
+      }
     </button>
   </form>
 </section>

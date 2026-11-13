@@ -6,61 +6,61 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
-/** Oggetti scambiati dalle API di autenticazione (JSON). */
+/** Objects exchanged by the authentication APIs (JSON). */
 public final class AuthDtos {
 
     private AuthDtos() {
     }
 
     public record LoginRequest(
-            @NotBlank(message = "Inserisci l'email") @Email(message = "Email non valida") String email,
-            @NotBlank(message = "Inserisci la password") String password,
-            /** Facoltativo: attività scelta, se l'utente ne ha più di una. */
+            @NotBlank(message = "{validation.required}") @Email(message = "{validation.email}") String email,
+            @NotBlank(message = "{validation.required}") String password,
+            /** Optional: chosen tenant, if the user belongs to more than one. */
             Long tenantId) {
     }
 
     /**
-     * Esito del login. Normalmente contiene il token e l'utente; se l'utente
-     * appartiene a più attività e non ne ha scelta una, contiene solo
-     * {@code sceltaTenant} e il client deve ripetere il login con {@code tenantId}.
+     * Result of the sign-in. Normally contains the token and the user; if the user
+     * belongs to several tenants and has not chosen one, it contains only
+     * {@code tenantChoices} and the client must repeat the sign-in with {@code tenantId}.
      */
     public record LoginResponse(
             String accessToken,
-            Long scadeTraSecondi,
-            UtenteCorrente utente,
-            List<TenantOpzione> sceltaTenant) {
+            Long expiresInSeconds,
+            CurrentUserDto user,
+            List<TenantOption> tenantChoices) {
 
-        static LoginResponse di(Sessione s) {
-            return new LoginResponse(s.accessToken(), s.scadeTraSecondi(), s.utente(), null);
+        static LoginResponse of(Session s) {
+            return new LoginResponse(s.accessToken(), s.expiresInSeconds(), s.user(), null);
         }
 
-        static LoginResponse scelta(List<TenantOpzione> opzioni) {
-            return new LoginResponse(null, null, null, opzioni);
+        static LoginResponse choice(List<TenantOption> options) {
+            return new LoginResponse(null, null, null, options);
         }
     }
 
-    public record TenantOpzione(Long id, String nome) {
+    public record TenantOption(Long id, String name) {
     }
 
-    /** Dati dell'utente collegato, come li vede l'interfaccia. */
-    public record UtenteCorrente(
+    /** Data of the signed-in user, as the UI sees it. */
+    public record CurrentUserDto(
             Long id,
             String email,
-            String nome,
-            /** ADMIN | OPERATORE | SUPERADMIN */
-            String ruolo,
+            String name,
+            /** ADMIN | OPERATOR | SUPERADMIN */
+            String role,
             boolean superadmin,
-            TenantOpzione tenant,
-            boolean deveCambiarePassword) {
+            TenantOption tenant,
+            boolean mustChangePassword) {
     }
 
-    public record CambioPasswordRequest(
-            @NotBlank(message = "Inserisci la password attuale") String passwordAttuale,
-            @NotBlank(message = "Inserisci la nuova password")
-            @Size(min = 8, max = 100, message = "La password deve avere almeno 8 caratteri") String nuovaPassword) {
+    public record ChangePasswordRequest(
+            @NotBlank(message = "{validation.required}") String currentPassword,
+            @NotBlank(message = "{validation.required}")
+            @Size(min = 8, max = 100, message = "{validation.passwordLength}") String newPassword) {
     }
 
-    /** Uso interno: token emessi da login/refresh. */
-    record Sessione(String accessToken, long scadeTraSecondi, String refreshToken, UtenteCorrente utente) {
+    /** Internal use: tokens issued by login/refresh. */
+    record Session(String accessToken, long expiresInSeconds, String refreshToken, CurrentUserDto user) {
     }
 }

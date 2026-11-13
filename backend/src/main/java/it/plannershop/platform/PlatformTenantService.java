@@ -9,9 +9,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import it.plannershop.auth.RefreshTokenRepository;
 import it.plannershop.common.ApiException;
-import it.plannershop.platform.PlatformDtos.ModificaTenantRequest;
-import it.plannershop.platform.PlatformDtos.NuovoTenantRequest;
+import it.plannershop.platform.PlatformDtos.NewTenantRequest;
 import it.plannershop.platform.PlatformDtos.TenantDto;
+import it.plannershop.platform.PlatformDtos.UpdateTenantRequest;
 import it.plannershop.security.CurrentUser;
 import it.plannershop.tenant.Tenant;
 import it.plannershop.tenant.TenantRepository;
@@ -19,11 +19,11 @@ import it.plannershop.user.AppUser;
 import it.plannershop.user.AppUserRepository;
 import it.plannershop.user.Membership;
 import it.plannershop.user.MembershipRepository;
-import it.plannershop.user.Ruolo;
+import it.plannershop.user.Role;
 
-/** Gestione delle attività da parte del SUPERADMIN (solo modalità CLOUD). */
+/** Tenant management by the SUPERADMIN (CLOUD mode only). */
 @Service
-@ConditionalOnProperty(name = "app.modalita", havingValue = "cloud", matchIfMissing = true)
+@ConditionalOnProperty(name = "app.mode", havingValue = "cloud", matchIfMissing = true)
 public class PlatformTenantService {
 
     private final TenantRepository tenants;
@@ -42,61 +42,61 @@ public class PlatformTenantService {
     }
 
     @Transactional(readOnly = true)
-    public List<TenantDto> elenco() {
-        return tenants.findAllByOrderByNomeAsc().stream().map(this::dto).toList();
+    public List<TenantDto> list() {
+        return tenants.findAllByOrderByNameAsc().stream().map(this::dto).toList();
     }
 
     /**
-     * Crea un'attività e il suo primo amministratore. Se l'email appartiene già
-     * a un utente, quell'utente diventa amministratore anche della nuova attività.
+     * Creates a tenant and its first administrator. If the email already belongs
+     * to a user, that user becomes administrator of the new tenant as well.
      */
     @Transactional
-    public TenantDto crea(NuovoTenantRequest req) {
-        Tenant tenant = tenants.save(new Tenant(req.nome().trim()));
+    public TenantDto create(NewTenantRequest req) {
+        Tenant tenant = tenants.save(new Tenant(req.name().trim()));
         AppUser admin = users.findByEmailIgnoreCase(req.adminEmail().trim()).orElse(null);
         if (admin == null) {
             if (req.adminPassword() == null || req.adminPassword().isBlank()) {
-                throw ApiException.richiestaNonValida("Inserisci una password provvisoria per il nuovo amministratore");
+                throw ApiException.badRequest("platform.adminPasswordRequired");
             }
-            admin = new AppUser(req.adminEmail(), req.adminNome().trim(), passwordEncoder.encode(req.adminPassword()));
-            admin.cambiaPassword(admin.getPasswordHash(), true);
+            admin = new AppUser(req.adminEmail(), req.adminName().trim(), passwordEncoder.encode(req.adminPassword()));
+            admin.changePassword(admin.getPasswordHash(), true);
             admin = users.save(admin);
         }
-        memberships.save(new Membership(admin, tenant, Ruolo.ADMIN));
+        memberships.save(new Membership(admin, tenant, Role.ADMIN));
         return dto(tenant);
     }
 
     @Transactional
-    public TenantDto modifica(Long id, ModificaTenantRequest req) {
-        Tenant tenant = trova(id);
-        tenant.setNome(req.nome().trim());
-        tenant.setAttivo(req.attivo());
-        if (!req.attivo()) {
-            refreshTokens.revocaTuttiDiTenant(id);
+    public TenantDto update(Long id, UpdateTenantRequest req) {
+        Tenant tenant = find(id);
+        tenant.setName(req.name().trim());
+        tenant.setActive(req.active());
+        if (!req.active()) {
+            refreshTokens.revokeAllOfTenant(id);
         }
         return dto(tenant);
     }
 
-    /** Eliminazione logica dell'attività e delle appartenenze; chiude le sessioni aperte. */
+    /** Soft delete of the tenant and its memberships; closes the open sessions. */
     @Transactional
-    public void elimina(Long id) {
-        Tenant tenant = trova(id);
-        Long chi = CurrentUser.id();
-        memberships.findByTenantId(id).forEach(m -> m.elimina(chi));
-        tenant.elimina(chi);
-        refreshTokens.revocaTuttiDiTenant(id);
+    public void delete(Long id) {
+        Tenant tenant = find(id);
+        Long by = CurrentUser.id();
+        memberships.findByTenantId(id).forEach(m -> m.delete(by));
+        tenant.delete(by);
+        refreshTokens.revokeAllOfTenant(id);
     }
 
-    private Tenant trova(Long id) {
-        return tenants.findById(id).orElseThrow(() -> ApiException.nonTrovato("Attività non trovata"));
+    private Tenant find(Long id) {
+        return tenants.findById(id).orElseThrow(() -> ApiException.notFound("error.notFound.tenant"));
     }
 
     private TenantDto dto(Tenant t) {
-        List<String> admin = memberships.findByTenantId(t.getId()).stream()
-                .filter(m -> m.getRuolo() == Ruolo.ADMIN)
+        List<String> admins = memberships.findByTenantId(t.getId()).stream()
+                .filter(m -> m.getRole() == Role.ADMIN)
                 .map(m -> m.getUser().getEmail())
                 .sorted()
                 .toList();
-        return new TenantDto(t.getId(), t.getNome(), t.isAttivo(), t.getCreatedAt(), admin);
+        return new TenantDto(t.getId(), t.getName(), t.isActive(), t.getCreatedAt(), admins);
     }
 }

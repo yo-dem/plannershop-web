@@ -1,8 +1,8 @@
 /*
- * Stili globali e tema Angular Material (Material 3).
- * I colori si usano tramite le variabili di sistema --mat-sys-* (es.
- * --mat-sys-primary, --mat-sys-surface, --mat-sys-error), così cambiando
- * il tema qui cambia tutta l'applicazione.
+ * Global styles and Angular Material theme (Material 3).
+ * Colours are used through the --mat-sys-* system variables (e.g.
+ * --mat-sys-primary, --mat-sys-surface, --mat-sys-error), so changing the
+ * theme here changes the whole application.
  */
 @use '@angular/material' as mat;
 
@@ -27,20 +27,20 @@ body {
   color: var(--mat-sys-on-surface);
 }
 
-/* Pannello bianco con angoli arrotondati (login, cambio password, schede). */
-.pannello {
+/* White panel with rounded corners (sign-in, password change, cards). */
+.panel {
   padding: 1.5rem;
   background: var(--mat-sys-surface);
   border-radius: var(--mat-sys-corner-large);
   box-shadow: var(--mat-sys-level1);
 }
 
-/* Moduli: campi uno sotto l'altro. */
-.modulo {
+/* Forms: fields one below the other. */
+.form {
   display: flex;
   flex-direction: column;
   gap: 0.875rem;
-  /* Spazio per l'etichetta del primo campo, che sporge sopra il bordo. */
+  /* Room for the label of the first field, which sticks out above the border. */
   padding-top: 0.5rem;
 
   mat-form-field {
@@ -48,8 +48,8 @@ body {
   }
 }
 
-/* Due campi affiancati, uno sotto l'altro su smartphone. */
-.modulo-riga {
+/* Two fields side by side, one below the other on smartphones. */
+.form-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 0.875rem 1rem;
@@ -59,8 +59,8 @@ body {
   }
 }
 
-/* Intestazione di pagina: titolo a sinistra, comandi a destra. */
-.intestazione {
+/* Page header: title on the left, actions on the right. */
+.page-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -77,14 +77,14 @@ body {
   }
 }
 
-.comandi {
+.page-actions {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
 }
 
-/* Tabelle: contenitore con bordo arrotondato e scorrimento orizzontale se serve. */
-.tabella {
+/* Tables: container with rounded border and horizontal scroll if needed. */
+.table-card {
   overflow-x: auto;
   border-radius: var(--mat-sys-corner-medium);
   background: var(--mat-sys-surface);
@@ -94,7 +94,7 @@ body {
     width: 100%;
   }
 
-  tr.cliccabile {
+  tr.clickable {
     cursor: pointer;
 
     &:hover > td {
@@ -102,58 +102,58 @@ body {
     }
   }
 
-  .vuoto {
+  .empty {
     padding: 1.5rem 1rem;
     color: var(--mat-sys-on-surface-variant);
   }
 }
 
-/* Su smartphone si nascondono le colonne secondarie (e si mostra ciò che serve solo lì). */
+/* On smartphones secondary columns are hidden (and what is needed only there is shown). */
 @media (max-width: 640px) {
-  .nascondi-mobile {
+  .hide-mobile {
     display: none;
   }
 }
 
 @media (min-width: 641px) {
-  .solo-mobile {
+  .mobile-only {
     display: none;
   }
 }
 
-/* Elenchi: campo di ricerca sopra la tabella. */
-.ricerca {
+/* Lists: search field above the table. */
+.search {
   width: 100%;
   margin-bottom: 1rem;
 }
 
-/* Riga appena salvata: resta evidenziata finché non se ne salva un'altra. */
-.evidenziata > td {
+/* Row just saved: stays highlighted until another one is saved. */
+.highlighted > td {
   background: var(--mat-sys-primary-container) !important;
 }
 
-/* Finestre di inserimento e modifica (clienti, prodotti, servizi...). */
-.in-caricamento {
+/* Create and edit dialogs (customers, products, services...). */
+.loading-dim {
   opacity: 0.5;
   pointer-events: none;
 }
 
-.caricamento {
+.loading-bar {
   margin-bottom: 1rem;
 }
 
-mat-dialog-actions .spazio {
+mat-dialog-actions .spacer {
   flex: 1;
 }
 
-/* Pulsante "Elimina" in rosso. */
-.elimina {
+/* Red "Delete" button. */
+.delete-button {
   --mat-button-text-label-text-color: var(--mat-sys-error);
   --mat-button-text-state-layer-color: var(--mat-sys-error);
 }
 
-/* Piccola etichetta colorata (stato, "Oggi"). */
-.etichetta {
+/* Small coloured badge (status, "Today"). */
+.badge {
   display: inline-block;
   padding: 0.125rem 0.5rem;
   border-radius: 999px;
@@ -161,28 +161,28 @@ mat-dialog-actions .spazio {
   background: var(--mat-sys-surface-container-high);
   color: var(--mat-sys-on-surface-variant);
 
-  &.positiva {
+  &.positive {
     background: var(--mat-sys-primary-container);
     color: var(--mat-sys-on-primary-container);
   }
 
-  &.negativa {
+  &.negative {
     background: var(--mat-sys-error-container);
     color: var(--mat-sys-on-error-container);
   }
 
-  &.attenzione {
+  &.warning {
     background: light-dark(#ffe0b2, #5c3a00);
     color: light-dark(#6d3a00, #ffddb3);
   }
 }
 
-.testo-secondario {
+.text-secondary {
   color: var(--mat-sys-on-surface-variant);
 }
 
-/* Notifica di errore (Notifiche.errore). */
-.notifica-errore {
+/* Error notification (Notifications.error). */
+.error-snackbar {
   --mat-snack-bar-container-color: var(--mat-sys-error-container);
   --mat-snack-bar-supporting-text-color: var(--mat-sys-on-error-container);
   --mat-snack-bar-button-color: var(--mat-sys-on-error-container);

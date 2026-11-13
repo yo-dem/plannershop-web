@@ -10,11 +10,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import it.plannershop.common.AppProperties;
-import it.plannershop.common.AppProperties.Modalita;
+import it.plannershop.common.AppProperties.Mode;
 
 /**
- * Endpoint di diagnostica: conferma che frontend, backend e database
- * comunicano, e in che modalità (CLOUD o LOCALE) gira l'applicazione.
+ * Diagnostic endpoint: confirms that frontend, backend and database talk to each
+ * other, and in which mode (CLOUD or LOCAL) the application runs.
  */
 @RestController
 @RequestMapping("/api/info")
@@ -35,10 +35,9 @@ public class InfoController {
         BuildProperties props = build.getIfAvailable();
         String version = props != null ? props.getVersion() : "dev";
         String database = jdbc.queryForObject("SHOW server_version", String.class);
-        return new InfoResponse("PlannerShop", version, "PostgreSQL " + database, app.modalita(), Instant.now());
+        return new InfoResponse("PlannerShop", version, "PostgreSQL " + database, app.mode(), Instant.now());
     }
 
-    public record InfoResponse(String applicazione, String versione, String database, Modalita modalita,
-            Instant oraServer) {
+    public record InfoResponse(String application, String version, String database, Mode mode, Instant serverTime) {
     }
 }

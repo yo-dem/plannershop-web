@@ -1,0 +1,18 @@
+:host {
+  display: block;
+  max-width: 64rem;
+  margin: 0 auto;
+}
+
+.email {
+  overflow-wrap: anywhere;
+}
+
+.actions {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.delete {
+  color: var(--mat-sys-error);
+}

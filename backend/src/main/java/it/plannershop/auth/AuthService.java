@@ -4,14 +4,13 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import it.plannershop.auth.AuthDtos.Sessione;
-import it.plannershop.auth.AuthDtos.TenantOpzione;
-import it.plannershop.auth.AuthDtos.UtenteCorrente;
+import it.plannershop.auth.AuthDtos.CurrentUserDto;
+import it.plannershop.auth.AuthDtos.Session;
+import it.plannershop.auth.AuthDtos.TenantOption;
 import it.plannershop.common.ApiException;
 import it.plannershop.common.AppProperties;
 import it.plannershop.security.LoginAttemptLimiter;
@@ -22,11 +21,9 @@ import it.plannershop.user.AppUserRepository;
 import it.plannershop.user.Membership;
 import it.plannershop.user.MembershipRepository;
 
-/** Login, rinnovo della sessione, logout e cambio password. */
+/** Sign-in, session renewal, sign-out and password change. */
 @Service
 public class AuthService {
-
-    private static final String CREDENZIALI_NON_VALIDE = "Email o password non corretti";
 
     private final AppUserRepository users;
     private final MembershipRepository memberships;
@@ -36,8 +33,8 @@ public class AuthService {
     private final LoginAttemptLimiter limiter;
     private final SecurityProperties props;
     private final AppProperties app;
-    /** Hash fittizio: si verifica anche se l'utente non esiste, per non rivelarlo dai tempi di risposta. */
-    private final String hashFittizio;
+    /** Dummy hash: checked even if the user does not exist, so response times do not reveal it. */
+    private final String dummyHash;
 
     AuthService(AppUserRepository users, MembershipRepository memberships,
             RefreshTokenRepository refreshTokens, TokenService tokens, PasswordEncoder passwordEncoder,
@@ -50,139 +47,139 @@ public class AuthService {
         this.limiter = limiter;
         this.props = props;
         this.app = app;
-        this.hashFittizio = passwordEncoder.encode("password-fittizia-per-tempi-costanti");
+        this.dummyHash = passwordEncoder.encode("dummy-password-for-constant-time");
     }
 
-    /** Esito del login: una sessione, oppure l'elenco delle attività tra cui scegliere. */
-    sealed interface EsitoLogin permits Accesso, SceltaRichiesta {
+    /** Result of the sign-in: a session, or the list of tenants to choose from. */
+    sealed interface LoginResult permits SignedIn, ChoiceRequired {
     }
 
-    record Accesso(Sessione sessione) implements EsitoLogin {
+    record SignedIn(Session session) implements LoginResult {
     }
 
-    record SceltaRichiesta(List<TenantOpzione> opzioni) implements EsitoLogin {
+    record ChoiceRequired(List<TenantOption> options) implements LoginResult {
     }
 
     @Transactional
-    public EsitoLogin login(String email, String password, Long tenantId, String ip, String userAgent) {
-        limiter.verifica(ip, email);
+    public LoginResult login(String email, String password, Long tenantId, String ip, String userAgent) {
+        limiter.check(ip, email);
 
         AppUser user = users.findByEmailIgnoreCase(email.trim()).orElse(null);
-        boolean passwordOk = passwordEncoder.matches(password, user != null ? user.getPasswordHash() : hashFittizio);
-        if (user == null || !passwordOk || !user.isAttivo()) {
-            limiter.registraFallimento(ip, email);
-            throw ApiException.nonAutenticato(CREDENZIALI_NON_VALIDE);
+        boolean passwordOk = passwordEncoder.matches(password, user != null ? user.getPasswordHash() : dummyHash);
+        if (user == null || !passwordOk || !user.isActive()) {
+            limiter.recordFailure(ip, email);
+            throw ApiException.unauthorized("auth.invalidCredentials");
         }
-        limiter.registraSuccesso(email);
+        limiter.recordSuccess(email);
 
-        Membership scelta;
+        Membership chosen;
         if (tenantId != null) {
-            scelta = memberships.findValida(user.getId(), tenantId)
-                    .orElseThrow(() -> new ApiException(HttpStatus.FORBIDDEN, "Non hai accesso a questa attività"));
+            chosen = memberships.findValid(user.getId(), tenantId)
+                    .orElseThrow(() -> ApiException.forbidden("auth.noAccessToTenant"));
         } else {
-            List<Membership> valide = memberships.findValideByUser(user.getId());
-            if (valide.size() > 1) {
-                return new SceltaRichiesta(valide.stream()
-                        .map(m -> new TenantOpzione(m.getTenant().getId(), m.getTenant().getNome()))
+            List<Membership> valid = memberships.findValidByUser(user.getId());
+            if (valid.size() > 1) {
+                return new ChoiceRequired(valid.stream()
+                        .map(m -> new TenantOption(m.getTenant().getId(), m.getTenant().getName()))
                         .toList());
             }
-            if (valide.isEmpty() && !accedeAllaPiattaforma(user)) {
-                throw new ApiException(HttpStatus.FORBIDDEN, "Il tuo utente non è associato a nessuna attività attiva");
+            if (valid.isEmpty() && !hasPlatformAccess(user)) {
+                throw ApiException.forbidden("auth.noActiveTenant");
             }
-            scelta = valide.isEmpty() ? null : valide.getFirst();
+            chosen = valid.isEmpty() ? null : valid.getFirst();
         }
-        return new Accesso(apriSessione(user, scelta, userAgent));
+        return new SignedIn(openSession(user, chosen, userAgent));
     }
 
     /**
-     * Rinnova la sessione con un refresh token. Il token usato viene revocato e
-     * sostituito (rotazione). Se arriva un token già revocato, qualcuno potrebbe
-     * averlo rubato: per sicurezza si revocano tutte le sessioni dell'utente.
+     * Renews the session with a refresh token. The token used is revoked and
+     * replaced (rotation). If an already revoked token arrives, someone may have
+     * stolen it: all the user's sessions are revoked for safety.
      */
     @Transactional(noRollbackFor = ApiException.class)
-    public Sessione refresh(String refreshToken, String userAgent) {
+    public Session refresh(String refreshToken, String userAgent) {
         if (refreshToken == null || refreshToken.isBlank()) {
-            throw ApiException.nonAutenticato("Sessione scaduta");
+            throw ApiException.unauthorized("auth.sessionExpired");
         }
-        RefreshToken salvato = refreshTokens.findByTokenHash(TokenService.hash(refreshToken))
-                .orElseThrow(() -> ApiException.nonAutenticato("Sessione scaduta"));
-        if (salvato.isRevocato()) {
-            refreshTokens.revocaTuttiDiUtente(salvato.getUserId());
-            throw ApiException.nonAutenticato("Sessione non più valida, accedi di nuovo");
+        RefreshToken stored = refreshTokens.findByTokenHash(TokenService.hash(refreshToken))
+                .orElseThrow(() -> ApiException.unauthorized("auth.sessionExpired"));
+        if (stored.isRevoked()) {
+            refreshTokens.revokeAllOfUser(stored.getUserId());
+            throw ApiException.unauthorized("auth.sessionRevoked");
         }
-        if (salvato.isScaduto(Instant.now())) {
-            throw ApiException.nonAutenticato("Sessione scaduta");
+        if (stored.isExpired(Instant.now())) {
+            throw ApiException.unauthorized("auth.sessionExpired");
         }
-        salvato.revoca();
+        stored.revoke();
 
-        AppUser user = users.findById(salvato.getUserId())
-                .filter(AppUser::isAttivo)
-                .orElseThrow(() -> ApiException.nonAutenticato("Utente non più attivo"));
+        AppUser user = users.findById(stored.getUserId())
+                .filter(AppUser::isActive)
+                .orElseThrow(() -> ApiException.unauthorized("auth.userInactive"));
         Membership membership = null;
-        if (salvato.getTenantId() != null) {
-            // Si rilegge il ruolo: se nel frattempo è cambiato, il nuovo token lo riflette.
-            membership = memberships.findValida(user.getId(), salvato.getTenantId())
-                    .orElseThrow(() -> ApiException.nonAutenticato("Non hai più accesso a questa attività"));
-        } else if (!accedeAllaPiattaforma(user)) {
-            throw ApiException.nonAutenticato("Sessione non più valida");
+        if (stored.getTenantId() != null) {
+            // The role is read again: if it has changed meanwhile, the new token reflects it.
+            membership = memberships.findValid(user.getId(), stored.getTenantId())
+                    .orElseThrow(() -> ApiException.unauthorized("auth.noLongerAccess"));
+        } else if (!hasPlatformAccess(user)) {
+            throw ApiException.unauthorized("auth.sessionRevoked");
         }
-        return apriSessione(user, membership, userAgent);
+        return openSession(user, membership, userAgent);
     }
 
     @Transactional
     public void logout(String refreshToken) {
         if (refreshToken != null && !refreshToken.isBlank()) {
-            refreshTokens.findByTokenHash(TokenService.hash(refreshToken)).ifPresent(RefreshToken::revoca);
+            refreshTokens.findByTokenHash(TokenService.hash(refreshToken)).ifPresent(RefreshToken::revoke);
         }
     }
 
     @Transactional(readOnly = true)
-    public UtenteCorrente utenteCorrente(Long userId, Long tenantId) {
-        AppUser user = users.findById(userId).orElseThrow(() -> ApiException.nonAutenticato("Utente non trovato"));
+    public CurrentUserDto currentUser(Long userId, Long tenantId) {
+        AppUser user = users.findById(userId).orElseThrow(() -> ApiException.unauthorized("auth.userNotFound"));
         Membership membership = tenantId == null ? null
-                : memberships.findValida(userId, tenantId)
-                        .orElseThrow(() -> ApiException.nonAutenticato("Non hai più accesso a questa attività"));
-        return utente(user, membership);
+                : memberships.findValid(userId, tenantId)
+                        .orElseThrow(() -> ApiException.unauthorized("auth.noLongerAccess"));
+        return userDto(user, membership);
     }
 
     @Transactional
-    public void cambiaPassword(Long userId, String attuale, String nuova) {
-        AppUser user = users.findById(userId).orElseThrow(() -> ApiException.nonAutenticato("Utente non trovato"));
-        if (!passwordEncoder.matches(attuale, user.getPasswordHash())) {
-            throw ApiException.richiestaNonValida("La password attuale non è corretta");
+    public void changePassword(Long userId, String current, String newPassword) {
+        AppUser user = users.findById(userId).orElseThrow(() -> ApiException.unauthorized("auth.userNotFound"));
+        if (!passwordEncoder.matches(current, user.getPasswordHash())) {
+            throw ApiException.badRequest("auth.currentPasswordWrong");
         }
-        if (attuale.equals(nuova)) {
-            throw ApiException.richiestaNonValida("La nuova password deve essere diversa da quella attuale");
+        if (current.equals(newPassword)) {
+            throw ApiException.badRequest("auth.newPasswordSame");
         }
-        user.cambiaPassword(passwordEncoder.encode(nuova), false);
+        user.changePassword(passwordEncoder.encode(newPassword), false);
     }
 
-    private Sessione apriSessione(AppUser user, Membership membership, String userAgent) {
-        String refresh = tokens.nuovoRefreshToken();
+    private Session openSession(AppUser user, Membership membership, String userAgent) {
+        String refresh = tokens.newRefreshToken();
         Long tenantId = membership != null ? membership.getTenant().getId() : null;
         refreshTokens.save(new RefreshToken(user.getId(), tenantId, TokenService.hash(refresh), userAgent,
                 Instant.now().plus(props.refreshTokenTtl())));
-        return new Sessione(tokens.creaAccessToken(user, membership), tokens.durataAccessTokenSecondi(), refresh,
-                utente(user, membership));
+        return new Session(tokens.createAccessToken(user, membership), tokens.accessTokenTtlSeconds(), refresh,
+                userDto(user, membership));
     }
 
-    /** Solo in modalità CLOUD il SUPERADMIN può lavorare senza un'attività. */
-    private boolean accedeAllaPiattaforma(AppUser user) {
-        return user.isSuperadmin() && !app.isLocale();
+    /** Only in CLOUD mode can the SUPERADMIN work without a tenant. */
+    private boolean hasPlatformAccess(AppUser user) {
+        return user.isSuperadmin() && !app.isLocal();
     }
 
-    private UtenteCorrente utente(AppUser user, Membership membership) {
-        String ruolo = membership != null ? membership.getRuolo().name() : "SUPERADMIN";
-        TenantOpzione tenant = null;
+    private CurrentUserDto userDto(AppUser user, Membership membership) {
+        String role = membership != null ? membership.getRole().name() : "SUPERADMIN";
+        TenantOption tenant = null;
         if (membership != null) {
             Tenant t = membership.getTenant();
-            tenant = new TenantOpzione(t.getId(), t.getNome());
+            tenant = new TenantOption(t.getId(), t.getName());
         }
-        return new UtenteCorrente(user.getId(), user.getEmail(), user.getNome(), ruolo, accedeAllaPiattaforma(user), tenant,
-                user.isDeveCambiarePassword());
+        return new CurrentUserDto(user.getId(), user.getEmail(), user.getName(), role, hasPlatformAccess(user), tenant,
+                user.isMustChangePassword());
     }
 
-    Duration durataRefresh() {
+    Duration refreshTtl() {
         return props.refreshTokenTtl();
     }
 }

@@ -13,7 +13,7 @@ class PlannershopApplicationTests extends AbstractIntegrationTest {
     InfoController infoController;
 
     @Test
-    void infoLeggeLaVersioneDelDatabase() {
+    void infoReadsTheDatabaseVersion() {
         assertThat(infoController.info().database()).startsWith("PostgreSQL 18");
     }
 }

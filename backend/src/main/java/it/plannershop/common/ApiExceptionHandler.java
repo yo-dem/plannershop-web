@@ -3,6 +3,8 @@ package it.plannershop.common;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -17,33 +19,43 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 /**
- * Traduce le eccezioni in risposte ProblemDetail (RFC 9457), es.:
- * <pre>{ "status": 400, "detail": "Dati non validi", "errori": { "email": "..." } }</pre>
+ * Turns exceptions into ProblemDetail responses (RFC 9457), e.g.:
+ * <pre>{ "status": 400, "detail": "Invalid data", "errors": { "email": "..." } }</pre>
+ * Messages are translated into the language of the request.
  */
 @RestControllerAdvice
 public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 
+    private final MessageSource messages;
+
+    ApiExceptionHandler(MessageSource messages) {
+        this.messages = messages;
+    }
+
     @ExceptionHandler(ApiException.class)
     ProblemDetail handleApi(ApiException ex) {
-        return ProblemDetail.forStatusAndDetail(ex.getStatus(), ex.getMessage());
+        return ProblemDetail.forStatusAndDetail(ex.getStatus(), message(ex.getMessageKey(), ex.getArgs()));
     }
 
     @ExceptionHandler(ObjectOptimisticLockingFailureException.class)
     ProblemDetail handleOptimisticLock(ObjectOptimisticLockingFailureException ex) {
-        return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT,
-                "Il dato è stato modificato da un altro utente. Ricarica e riprova.");
+        return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, message("error.conflict"));
     }
 
-    /** Errori di validazione (@Valid): elenco campo → messaggio. */
+    /** Validation errors (@Valid): field → message (already translated by the validator). */
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
             HttpHeaders headers, HttpStatusCode status, WebRequest request) {
-        Map<String, String> errori = new LinkedHashMap<>();
+        Map<String, String> errors = new LinkedHashMap<>();
         for (FieldError fe : ex.getBindingResult().getFieldErrors()) {
-            errori.putIfAbsent(fe.getField(), fe.getDefaultMessage());
+            errors.putIfAbsent(fe.getField(), fe.getDefaultMessage());
         }
-        ProblemDetail pd = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Dati non validi");
-        pd.setProperty("errori", errori);
+        ProblemDetail pd = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, message("error.validation"));
+        pd.setProperty("errors", errors);
         return ResponseEntity.badRequest().body(pd);
+    }
+
+    private String message(String key, Object... args) {
+        return messages.getMessage(key, args, key, LocaleContextHolder.getLocale());
     }
 }

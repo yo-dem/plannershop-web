@@ -3,15 +3,15 @@ import { Injectable, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 
-import { LoginResponse, Ruolo, UtenteCorrente } from './auth.models';
+import { CurrentUser, LoginResponse, Role } from './auth.models';
 
 /**
- * Stato della sessione.
+ * Session state.
  *
- * - L'access token sta solo in memoria (non in localStorage): non è leggibile
- *   da script esterni e sparisce chiudendo la scheda.
- * - Il refresh token è in un cookie HttpOnly gestito dal browser: ricaricando
- *   la pagina, refresh() ripristina la sessione senza chiedere la password.
+ * - The access token lives only in memory (not in localStorage): external
+ *   scripts cannot read it and it disappears when the tab is closed.
+ * - The refresh token is in an HttpOnly cookie handled by the browser: when the
+ *   page is reloaded, refresh() restores the session without asking for the password.
  */
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -19,76 +19,76 @@ export class AuthService {
   private readonly router = inject(Router);
 
   private accessToken: string | null = null;
-  private refreshInCorso: Promise<boolean> | null = null;
-  private readonly _utente = signal<UtenteCorrente | null>(null);
+  private refreshInProgress: Promise<boolean> | null = null;
+  private readonly _user = signal<CurrentUser | null>(null);
 
-  readonly utente = this._utente.asReadonly();
-  readonly autenticato = computed(() => this._utente() !== null);
+  readonly user = this._user.asReadonly();
+  readonly authenticated = computed(() => this._user() !== null);
 
   token(): string | null {
     return this.accessToken;
   }
 
-  haRuolo(...ruoli: Ruolo[]): boolean {
-    const u = this._utente();
+  hasRole(...roles: Role[]): boolean {
+    const u = this._user();
     if (!u) return false;
-    return ruoli.includes(u.ruolo) || (u.superadmin && ruoli.includes('SUPERADMIN'));
+    return roles.includes(u.role) || (u.superadmin && roles.includes('SUPERADMIN'));
   }
 
   async login(email: string, password: string, tenantId?: number): Promise<LoginResponse> {
     const r = await firstValueFrom(
       this.http.post<LoginResponse>('/api/auth/login', { email, password, tenantId }),
     );
-    if (r.accessToken) this.applica(r);
+    if (r.accessToken) this.apply(r);
     return r;
   }
 
   /**
-   * Rinnova l'access token usando il cookie. Se più richieste lo chiedono
-   * insieme, la chiamata al server è una sola.
+   * Renews the access token using the cookie. If several requests ask for it
+   * at the same time, only one call reaches the server.
    */
   refresh(): Promise<boolean> {
-    this.refreshInCorso ??= firstValueFrom(this.http.post<LoginResponse>('/api/auth/refresh', {}))
+    this.refreshInProgress ??= firstValueFrom(this.http.post<LoginResponse>('/api/auth/refresh', {}))
       .then((r) => {
-        this.applica(r);
+        this.apply(r);
         return true;
       })
       .catch(() => {
-        this.pulisci();
+        this.clear();
         return false;
       })
-      .finally(() => (this.refreshInCorso = null));
-    return this.refreshInCorso;
+      .finally(() => (this.refreshInProgress = null));
+    return this.refreshInProgress;
   }
 
   async logout(): Promise<void> {
     try {
       await firstValueFrom(this.http.post('/api/auth/logout', {}));
     } catch {
-      // anche se il server non risponde, lato client la sessione si chiude
+      // even if the server does not answer, the session is closed on the client
     }
-    this.pulisci();
+    this.clear();
     await this.router.navigate(['/login']);
   }
 
-  /** Chiamato dall'interceptor quando la sessione non è più rinnovabile. */
-  sessioneScaduta(): void {
-    this.pulisci();
-    void this.router.navigate(['/login'], { queryParams: { scaduta: 1 } });
+  /** Called by the interceptor when the session can no longer be renewed. */
+  sessionExpired(): void {
+    this.clear();
+    void this.router.navigate(['/login'], { queryParams: { expired: 1 } });
   }
 
-  async cambiaPassword(passwordAttuale: string, nuovaPassword: string): Promise<void> {
-    await firstValueFrom(this.http.put('/api/auth/password', { passwordAttuale, nuovaPassword }));
-    this._utente.update((u) => (u ? { ...u, deveCambiarePassword: false } : u));
+  async changePassword(currentPassword: string, newPassword: string): Promise<void> {
+    await firstValueFrom(this.http.put('/api/auth/password', { currentPassword, newPassword }));
+    this._user.update((u) => (u ? { ...u, mustChangePassword: false } : u));
   }
 
-  private applica(r: LoginResponse): void {
+  private apply(r: LoginResponse): void {
     this.accessToken = r.accessToken;
-    this._utente.set(r.utente);
+    this._user.set(r.user);
   }
 
-  private pulisci(): void {
+  private clear(): void {
     this.accessToken = null;
-    this._utente.set(null);
+    this._user.set(null);
   }
 }

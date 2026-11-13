@@ -7,9 +7,15 @@ import { MatTooltip } from '@angular/material/tooltip';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 
 import { AuthService } from './core/auth/auth.service';
-import { API_CLIENTI, Cliente, ClientiService } from './core/clienti';
+import { CUSTOMERS_API, Customer, CustomersApi } from './core/customers';
 
-/** Guscio dell'applicazione: barra superiore (se collegati) + pagina corrente. */
+interface NavItem {
+  label: string;
+  icon: string;
+  link: string;
+}
+
+/** Application shell: top bar (when signed in) + current page. */
 @Component({
   selector: 'app-root',
   imports: [RouterOutlet, RouterLink, RouterLinkActive, MatButton, MatIcon, MatMenuModule, MatTooltip],
@@ -18,26 +24,34 @@ import { API_CLIENTI, Cliente, ClientiService } from './core/clienti';
 })
 export class App {
   protected readonly auth = inject(AuthService);
-  private readonly clienti = inject(ClientiService);
+  private readonly customers = inject(CustomersApi);
 
-  protected readonly voci = computed(() => {
-    const voci = [{ label: 'Home', icon: 'home', link: '/' }];
-    if (this.auth.haRuolo('ADMIN', 'OPERATORE')) {
-      voci.push({ label: 'Clienti', icon: 'group', link: '/clienti' });
-      voci.push({ label: 'Fornitori', icon: 'local_shipping', link: '/fornitori' });
-      voci.push({ label: 'Prodotti', icon: 'inventory_2', link: '/prodotti' });
-      voci.push({ label: 'Servizi', icon: 'content_cut', link: '/servizi' });
+  protected readonly navItems = computed(() => {
+    const items: NavItem[] = [{ label: $localize`:@@nav.home:Home`, icon: 'home', link: '/' }];
+    if (this.auth.hasRole('ADMIN', 'OPERATOR')) {
+      items.push(
+        { label: $localize`:@@nav.customers:Customers`, icon: 'group', link: '/customers' },
+        { label: $localize`:@@nav.suppliers:Suppliers`, icon: 'local_shipping', link: '/suppliers' },
+        { label: $localize`:@@nav.products:Products`, icon: 'inventory_2', link: '/products' },
+        { label: $localize`:@@nav.services:Services`, icon: 'content_cut', link: '/services' },
+      );
     }
-    if (this.auth.haRuolo('SUPERADMIN')) {
-      voci.push({ label: 'Attività', icon: 'store', link: '/piattaforma' });
+    if (this.auth.hasRole('SUPERADMIN')) {
+      items.push({ label: $localize`:@@nav.tenants:Businesses`, icon: 'store', link: '/platform' });
     }
-    return voci;
+    return items;
   });
 
-  /** Compleanni del mese corrente (solo per chi lavora in un'attività), per l'avviso in alto. */
-  protected readonly compleanni = httpResource<Cliente[]>(() => {
-    this.clienti.modifiche();
-    return this.auth.haRuolo('ADMIN', 'OPERATORE') ? `${API_CLIENTI}/compleanni` : undefined;
+  /** Birthdays of the current month (only for tenant users), for the notice in the top bar. */
+  protected readonly birthdays = httpResource<Customer[]>(() => {
+    this.customers.changes();
+    return this.auth.hasRole('ADMIN', 'OPERATOR') ? `${CUSTOMERS_API}/birthdays` : undefined;
   });
-  protected readonly numeroCompleanni = computed(() => this.compleanni.value()?.length ?? 0);
+  protected readonly birthdayCount = computed(() => this.birthdays.value()?.length ?? 0);
+  protected readonly birthdayText = computed(() => {
+    const n = this.birthdayCount();
+    return n === 1
+      ? $localize`:@@nav.birthdays.one:1 birthday this month`
+      : $localize`:@@nav.birthdays.other:${n}:count: birthdays this month`;
+  });
 }

@@ -10,73 +10,73 @@ import org.springframework.beans.factory.annotation.Autowired;
 import it.plannershop.AbstractIntegrationTest;
 
 /**
- * Verifica il cuore del multi-tenant: un'attività non vede mai i dati di un'altra,
- * e senza tenant non si vede nulla.
+ * Verifies the core of multi-tenancy: a tenant never sees another tenant's data,
+ * and without a tenant nothing is visible.
  */
 class TenantIsolationTests extends AbstractIntegrationTest {
 
     @Autowired
     TenantRepository tenants;
     @Autowired
-    NotaProvaRepository note;
+    TestNoteRepository notes;
 
     Long a;
     Long b;
 
     @BeforeEach
-    void creaDueAttivita() {
-        a = tenants.save(new Tenant("Attività A")).getId();
-        b = tenants.save(new Tenant("Attività B")).getId();
+    void createTwoTenants() {
+        a = tenants.save(new Tenant("Tenant A")).getId();
+        b = tenants.save(new Tenant("Tenant B")).getId();
     }
 
     @Test
-    void ilTenantVieneImpostatoDaSoloInInserimento() {
-        NotaProva n = TenantContext.callAs(a, () -> note.save(new NotaProva("nota di A")));
+    void theTenantIsSetAutomaticallyOnInsert() {
+        TestNote n = TenantContext.callAs(a, () -> notes.save(new TestNote("note of A")));
         assertThat(n.getTenantId()).isEqualTo(a);
     }
 
     @Test
-    void unTenantNonVedeIDatiDiUnAltro() {
-        Long id = TenantContext.callAs(a, () -> note.save(new NotaProva("segreto-A-" + a)).getId());
+    void aTenantDoesNotSeeAnotherTenantsData() {
+        Long id = TenantContext.callAs(a, () -> notes.save(new TestNote("secret-A-" + a)).getId());
 
         TenantContext.runAs(b, () -> {
-            assertThat(note.findAll()).extracting(NotaProva::getTesto).doesNotContain("segreto-A-" + a);
-            assertThat(note.cercaPerTesto("segreto-A-%")).isEmpty();
-            assertThat(note.findById(id)).isEmpty();
+            assertThat(notes.findAll()).extracting(TestNote::getContent).doesNotContain("secret-A-" + a);
+            assertThat(notes.findByContentLike("secret-A-%")).isEmpty();
+            assertThat(notes.findById(id)).isEmpty();
         });
-        TenantContext.runAs(a, () -> assertThat(note.findById(id)).isPresent());
+        TenantContext.runAs(a, () -> assertThat(notes.findById(id)).isPresent());
     }
 
     @Test
-    void senzaTenantNonSiVedeNullaENonSiInserisce() {
-        TenantContext.runAs(a, () -> note.save(new NotaProva("visibile solo ad A")));
+    void withoutATenantNothingIsVisibleAndNothingCanBeInserted() {
+        TenantContext.runAs(a, () -> notes.save(new TestNote("visible only to A")));
 
-        assertThat(note.findAll()).isEmpty();
-        assertThatThrownBy(() -> note.saveAndFlush(new NotaProva("orfana")))
+        assertThat(notes.findAll()).isEmpty();
+        assertThatThrownBy(() -> notes.saveAndFlush(new TestNote("orphan")))
                 .isInstanceOf(Exception.class);
     }
 
     @Test
-    void lEliminazioneELogica() {
-        Long id = TenantContext.callAs(a, () -> note.save(new NotaProva("da eliminare")).getId());
+    void deletionIsSoft() {
+        Long id = TenantContext.callAs(a, () -> notes.save(new TestNote("to delete")).getId());
 
         TenantContext.runAs(a, () -> {
-            NotaProva n = note.findById(id).orElseThrow();
-            n.elimina(42L);
-            note.save(n);
-            assertThat(note.findById(id)).isEmpty();
+            TestNote n = notes.findById(id).orElseThrow();
+            n.delete(42L);
+            notes.save(n);
+            assertThat(notes.findById(id)).isEmpty();
         });
-        assertThat(note.contaRigheFisiche(id)).isEqualTo(1);
+        assertThat(notes.countPhysicalRows(id)).isEqualTo(1);
     }
 
     @Test
-    void ancheDeleteDelRepositoryELogico() {
-        Long id = TenantContext.callAs(a, () -> note.save(new NotaProva("delete accidentale")).getId());
+    void evenRepositoryDeleteIsSoft() {
+        Long id = TenantContext.callAs(a, () -> notes.save(new TestNote("accidental delete")).getId());
 
         TenantContext.runAs(a, () -> {
-            note.deleteById(id);
-            assertThat(note.findById(id)).isEmpty();
+            notes.deleteById(id);
+            assertThat(notes.findById(id)).isEmpty();
         });
-        assertThat(note.contaRigheFisiche(id)).isEqualTo(1);
+        assertThat(notes.countPhysicalRows(id)).isEqualTo(1);
     }
 }

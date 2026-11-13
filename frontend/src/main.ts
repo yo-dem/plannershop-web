@@ -1,6 +1,14 @@
-import { bootstrapApplication } from '@angular/platform-browser';
-import { appConfig } from './app/app.config';
-import { App } from './app/app';
+import { loadTranslations } from '@angular/localize';
 
-bootstrapApplication(App, appConfig)
-  .catch((err) => console.error(err));
+import { LANGUAGE } from './app/core/i18n';
+import it from './locale/messages.it.json';
+
+// Translations must be loaded before any code that uses $localize runs:
+// that is why the application is imported dynamically afterwards.
+const translations: Record<string, Record<string, string>> = { it: it.translations };
+if (translations[LANGUAGE]) {
+  loadTranslations(translations[LANGUAGE]);
+}
+document.documentElement.lang = LANGUAGE;
+
+import('./bootstrap').catch((err) => console.error(err));

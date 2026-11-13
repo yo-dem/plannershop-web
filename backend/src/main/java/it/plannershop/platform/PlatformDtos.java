@@ -7,29 +7,28 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
-/** Oggetti delle API di piattaforma (solo SUPERADMIN). */
+/** Objects of the platform APIs (SUPERADMIN only). */
 public final class PlatformDtos {
 
     private PlatformDtos() {
     }
 
-    public record TenantDto(Long id, String nome, boolean attivo, Instant createdAt, List<String> amministratori) {
+    public record TenantDto(Long id, String name, boolean active, Instant createdAt, List<String> admins) {
     }
 
-    public record NuovoTenantRequest(
-            @NotBlank(message = "Inserisci il nome dell'attività") String nome,
-            @NotBlank(message = "Inserisci il nome dell'amministratore") String adminNome,
-            @NotBlank(message = "Inserisci l'email dell'amministratore")
-            @Email(message = "Email non valida") String adminEmail,
+    public record NewTenantRequest(
+            @NotBlank(message = "{validation.required}") String name,
+            @NotBlank(message = "{validation.required}") String adminName,
+            @NotBlank(message = "{validation.required}") @Email(message = "{validation.email}") String adminEmail,
             /**
-             * Password provvisoria (l'amministratore la cambierà al primo accesso).
-             * Ignorata se l'email appartiene a un utente già esistente.
+             * Temporary password (the administrator will change it at the first sign-in).
+             * Ignored if the email belongs to an existing user.
              */
-            @Size(min = 8, max = 100, message = "La password deve avere almeno 8 caratteri") String adminPassword) {
+            @Size(min = 8, max = 100, message = "{validation.passwordLength}") String adminPassword) {
     }
 
-    public record ModificaTenantRequest(
-            @NotBlank(message = "Inserisci il nome dell'attività") String nome,
-            boolean attivo) {
+    public record UpdateTenantRequest(
+            @NotBlank(message = "{validation.required}") String name,
+            boolean active) {
     }
 }

@@ -1,34 +1,34 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
 
-import { Ruolo } from './auth.models';
+import { Role } from './auth.models';
 import { AuthService } from './auth.service';
 
 /**
- * Pagine riservate agli utenti collegati. Se la password è provvisoria,
- * l'unica pagina accessibile è quella di cambio password.
+ * Pages reserved to signed-in users. With a temporary password, the only
+ * reachable page is the password change.
  *
- * Nota: le guard servono all'interfaccia; la sicurezza vera è nel backend.
+ * Note: guards are for the UI; the real security is in the backend.
  */
 export const authGuard: CanActivateFn = (_route, state) => {
   const auth = inject(AuthService);
   const router = inject(Router);
-  const utente = auth.utente();
-  if (!utente) {
+  const user = auth.user();
+  if (!user) {
     return router.createUrlTree(['/login'], { queryParams: { returnUrl: state.url } });
   }
-  if (utente.deveCambiarePassword && state.url !== '/cambia-password') {
-    return router.createUrlTree(['/cambia-password']);
+  if (user.mustChangePassword && state.url !== '/change-password') {
+    return router.createUrlTree(['/change-password']);
   }
   return true;
 };
 
-/** Pagine riservate a certi ruoli; gli altri tornano alla home. */
-export const ruoloGuard =
-  (...ruoli: Ruolo[]): CanActivateFn =>
+/** Pages reserved to some roles; everyone else goes back to the home page. */
+export const roleGuard =
+  (...roles: Role[]): CanActivateFn =>
   () =>
-    inject(AuthService).haRuolo(...ruoli) || inject(Router).createUrlTree(['/']);
+    inject(AuthService).hasRole(...roles) || inject(Router).createUrlTree(['/']);
 
-/** La pagina di login non serve a chi è già collegato. */
-export const ospiteGuard: CanActivateFn = () =>
-  !inject(AuthService).autenticato() || inject(Router).createUrlTree(['/']);
+/** The sign-in page is not needed by whoever is already signed in. */
+export const guestGuard: CanActivateFn = () =>
+  !inject(AuthService).authenticated() || inject(Router).createUrlTree(['/']);

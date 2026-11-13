@@ -13,30 +13,29 @@ import org.springframework.stereotype.Component;
 import it.plannershop.security.JwtClaims;
 
 /**
- * Dice a Hibernate qual è il tenant corrente, usato da {@code @TenantId}.
+ * Tells Hibernate which tenant is current, used by {@code @TenantId}.
  *
- * <p>Ordine: {@link TenantContext} (uso interno) → claim {@code tenant} del token.
- * Se non c'è un tenant restituisce {@link #NESSUN_TENANT}: le query sulle entità
- * di un'attività non trovano nulla e gli inserimenti falliscono (vincolo FK).
- * Sicuro per default: mai "tutti i tenant".
+ * <p>Order: {@link TenantContext} (internal use) → {@code tenant} claim of the token.
+ * Without a tenant it returns {@link #NO_TENANT}: queries on tenant entities find
+ * nothing and inserts fail (FK constraint). Safe by default: never "all tenants".
  */
 @Component
 public class TenantIdentifierResolver implements CurrentTenantIdentifierResolver<Long>, HibernatePropertiesCustomizer {
 
-    public static final Long NESSUN_TENANT = -1L;
+    public static final Long NO_TENANT = -1L;
 
     @Override
     public Long resolveCurrentTenantIdentifier() {
-        Long forzato = TenantContext.corrente();
-        if (forzato != null) {
-            return forzato;
+        Long forced = TenantContext.current();
+        if (forced != null) {
+            return forced;
         }
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth instanceof JwtAuthenticationToken jwt
                 && jwt.getToken().getClaims().get(JwtClaims.TENANT) instanceof Number tenant) {
             return tenant.longValue();
         }
-        return NESSUN_TENANT;
+        return NO_TENANT;
     }
 
     @Override

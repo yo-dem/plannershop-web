@@ -1,32 +1,40 @@
-@if (auth.utente(); as u) {
-  <h2 class="benvenuto">Ciao, {{ u.nome }}</h2>
+@if (auth.user(); as u) {
+  <h2 class="welcome" i18n="@@home.welcome">Hello, {{ u.name // i18n(ph="name") }}</h2>
 }
 
 <mat-card appearance="outlined">
   <mat-card-header>
-    <mat-card-title>Stato del sistema</mat-card-title>
+    <mat-card-title i18n="@@home.systemStatus">System status</mat-card-title>
   </mat-card-header>
   <mat-card-content>
     @if (info.isLoading()) {
-      <span class="etichetta">Verifica in corso…</span>
+      <span class="badge" i18n="@@home.checking">Checking…</span>
     } @else if (info.error()) {
-      <span class="etichetta negativa">Backend non raggiungibile</span>
-      <p class="testo-secondario">Controlla che il backend sia avviato su <code>localhost:8080</code>.</p>
+      <span class="badge negative" i18n="@@home.backendUnreachable">Backend unreachable</span>
+      <p class="text-secondary" i18n="@@home.backendHint">Check that the backend is running on <code>localhost:8080</code>.</p>
     } @else if (info.value(); as i) {
-      <span class="etichetta positiva">Tutto collegato</span>
+      <span class="badge positive" i18n="@@home.allConnected">All connected</span>
       <dl>
-        <dt>Applicazione</dt>
-        <dd>{{ i.applicazione }} {{ i.versione }}</dd>
-        <dt>Installazione</dt>
-        <dd>{{ i.modalita === 'LOCALE' ? 'Locale (un solo PC)' : 'Cloud (più attività)' }}</dd>
-        <dt>Database</dt>
+        <dt i18n="@@home.application">Application</dt>
+        <dd>{{ i.application }} {{ i.version }}</dd>
+        <dt i18n="@@home.installation">Installation</dt>
+        <dd>
+          @if (i.mode === 'LOCAL') {
+            <ng-container i18n="@@home.modeLocal">Local (single PC)</ng-container>
+          } @else {
+            <ng-container i18n="@@home.modeCloud">Cloud (many businesses)</ng-container>
+          }
+        </dd>
+        <dt i18n="@@home.database">Database</dt>
         <dd>{{ i.database }}</dd>
-        <dt>Ora del server</dt>
-        <dd>{{ i.oraServer | date: 'dd/MM/yyyy HH:mm:ss' }}</dd>
+        <dt i18n="@@home.serverTime">Server time</dt>
+        <dd>{{ i.serverTime | date: 'short' }}</dd>
       </dl>
     }
   </mat-card-content>
   <mat-card-actions>
-    <button matButton (click)="info.reload()"><mat-icon>refresh</mat-icon> Ricontrolla</button>
+    <button matButton (click)="info.reload()">
+      <mat-icon>refresh</mat-icon> <ng-container i18n="@@home.checkAgain">Check again</ng-container>
+    </button>
   </mat-card-actions>
 </mat-card>

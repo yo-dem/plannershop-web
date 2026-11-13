@@ -1,0 +1,59 @@
+<div class="page-header">
+  <h2 i18n="@@services.title">Services</h2>
+  <div class="page-actions">
+    <button matButton="filled" (click)="create()">
+      <mat-icon>add</mat-icon> <ng-container i18n="@@services.new">New service</ng-container>
+    </button>
+  </div>
+</div>
+
+<mat-form-field class="search">
+  <mat-icon matPrefix>search</mat-icon>
+  <mat-label i18n="@@services.search">Search service</mat-label>
+  <input matInput type="search" [value]="list.text()" (input)="list.search($any($event.target).value)"
+         placeholder="Name, description or notes" i18n-placeholder="@@services.searchHint" />
+</mat-form-field>
+
+@if (data.error()) {
+  <app-notice type="error" i18n="@@services.loadError">Unable to load the services.</app-notice>
+}
+
+<div class="table-card">
+  @if (data.isLoading()) {
+    <mat-progress-bar mode="indeterminate" />
+  }
+  <table mat-table [dataSource]="items()" matSort (matSortChange)="list.sortBy($event)">
+    <ng-container matColumnDef="name">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header i18n="@@services.service">Service</th>
+      <td mat-cell *matCellDef="let s">
+        <strong>{{ s.name }}</strong>
+        <div class="text-secondary mobile-only">{{ s.description }}</div>
+      </td>
+    </ng-container>
+    <ng-container matColumnDef="description">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header class="hide-mobile" i18n="@@common.description">Description</th>
+      <td mat-cell *matCellDef="let s" class="hide-mobile">{{ s.description }}</td>
+    </ng-container>
+    <ng-container matColumnDef="salePrice">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header arrowPosition="before" class="number"
+          i18n="@@products.price">Price</th>
+      <td mat-cell *matCellDef="let s" class="number">{{ s.salePrice | currency: 'EUR' }}</td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="columns"></tr>
+    <tr mat-row *matRowDef="let s; columns: columns" class="clickable"
+        [class.highlighted]="s.id === list.highlighted()"
+        (click)="open(s)" (keydown.enter)="open(s)" tabindex="0"></tr>
+    <tr *matNoDataRow>
+      <td class="empty" [attr.colspan]="columns.length">
+        @if (list.text()) {
+          <ng-container i18n="@@services.noResults">No service found for "{{ list.text() // i18n(ph="query") }}".</ng-container>
+        } @else if (!data.isLoading()) {
+          <ng-container i18n="@@services.empty">No services yet. Add one with "New service".</ng-container>
+        }
+      </td>
+    </tr>
+  </table>
+  <mat-paginator [length]="total()" [pageIndex]="list.page()" [pageSize]="list.pageSize()"
+                 [pageSizeOptions]="[20, 50, 100]" (page)="list.changePage($event)" />
+</div>

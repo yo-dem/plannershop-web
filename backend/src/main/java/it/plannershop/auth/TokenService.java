@@ -23,7 +23,7 @@ import it.plannershop.security.SecurityProperties;
 import it.plannershop.user.AppUser;
 import it.plannershop.user.Membership;
 
-/** Creazione degli access token (JWT) e dei refresh token (stringhe casuali). */
+/** Creates access tokens (JWT) and refresh tokens (random strings). */
 @Service
 class TokenService {
 
@@ -40,26 +40,26 @@ class TokenService {
     }
 
     /**
-     * @param membership attività e ruolo correnti; null per il SUPERADMIN
-     *                   che lavora a livello di piattaforma
+     * @param membership current tenant and role; null for the SUPERADMIN
+     *                   working at platform level
      */
-    String creaAccessToken(AppUser user, Membership membership) {
-        Instant adesso = Instant.now();
-        List<String> ruoli = new ArrayList<>();
+    String createAccessToken(AppUser user, Membership membership) {
+        Instant now = Instant.now();
+        List<String> roles = new ArrayList<>();
         if (membership != null) {
-            ruoli.add(membership.getRuolo().name());
+            roles.add(membership.getRole().name());
         }
-        // In modalità LOCALE la piattaforma non esiste: il ruolo non viene mai concesso.
-        if (user.isSuperadmin() && !app.isLocale()) {
-            ruoli.add("SUPERADMIN");
+        // In LOCAL mode the platform does not exist: the role is never granted.
+        if (user.isSuperadmin() && !app.isLocal()) {
+            roles.add("SUPERADMIN");
         }
         JwtClaimsSet.Builder claims = JwtClaimsSet.builder()
                 .issuer("plannershop")
                 .subject(user.getId().toString())
-                .issuedAt(adesso)
-                .expiresAt(adesso.plus(props.accessTokenTtl()))
-                .claim(JwtClaims.ROLES, ruoli)
-                .claim(JwtClaims.NOME, user.getNome())
+                .issuedAt(now)
+                .expiresAt(now.plus(props.accessTokenTtl()))
+                .claim(JwtClaims.ROLES, roles)
+                .claim(JwtClaims.NAME, user.getName())
                 .claim(JwtClaims.EMAIL, user.getEmail());
         if (membership != null) {
             claims.claim(JwtClaims.TENANT, membership.getTenant().getId());
@@ -68,12 +68,12 @@ class TokenService {
         return encoder.encode(JwtEncoderParameters.from(header, claims.build())).getTokenValue();
     }
 
-    long durataAccessTokenSecondi() {
+    long accessTokenTtlSeconds() {
         return props.accessTokenTtl().toSeconds();
     }
 
-    /** 32 byte casuali in Base64 URL-safe: impossibili da indovinare. */
-    String nuovoRefreshToken() {
+    /** 32 random bytes in URL-safe Base64: impossible to guess. */
+    String newRefreshToken() {
         byte[] bytes = new byte[32];
         RANDOM.nextBytes(bytes);
         return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);

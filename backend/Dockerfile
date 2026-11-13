@@ -1,17 +1,17 @@
-# ---- Build: compila il jar con Maven Wrapper ----
+# ---- Build: compile the jar with the Maven Wrapper ----
 FROM eclipse-temurin:21-jdk AS build
 WORKDIR /src
 
-# Prima solo i file Maven: le dipendenze restano in cache finché pom.xml non cambia.
+# Maven files first: dependencies stay cached until pom.xml changes.
 COPY .mvn/ .mvn/
 COPY mvnw pom.xml ./
 RUN ./mvnw -q -B dependency:go-offline
 
 COPY src/ src/
-# I test (che richiedono Docker) si eseguono fuori dalla build dell'immagine.
+# Tests (which need Docker) run outside the image build.
 RUN ./mvnw -q -B package -DskipTests
 
-# ---- Runtime: solo JRE, utente non privilegiato ----
+# ---- Runtime: JRE only, unprivileged user ----
 FROM eclipse-temurin:21-jre
 WORKDIR /app
 RUN useradd --system --uid 1001 app

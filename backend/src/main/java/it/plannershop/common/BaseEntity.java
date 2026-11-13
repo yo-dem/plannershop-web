@@ -13,14 +13,12 @@ import jakarta.persistence.MappedSuperclass;
 import jakarta.persistence.Version;
 
 /**
- * Campi comuni a tutte le entità: id, tracciamento, optimistic locking
- * ed eliminazione logica.
+ * Fields shared by all entities: id, auditing, optimistic locking and soft delete.
  *
- * <p>Eliminazione logica (soft delete): nessuna riga si cancella davvero.
- * Si chiama {@link #elimina(Long)} e si salva; ogni entità concreta ha
- * {@code @SQLRestriction("deleted_at IS NULL")}, così le righe eliminate
- * spariscono da tutte le query, e {@code @SQLDelete}, così anche un
- * {@code repository.delete()} accidentale diventa un UPDATE.
+ * <p>Soft delete: no row is ever physically deleted. Call {@link #delete(Long)}
+ * and save; every concrete entity has {@code @SQLRestriction("deleted_at IS NULL")},
+ * so deleted rows disappear from all queries, and {@code @SQLDelete}, so even an
+ * accidental {@code repository.delete()} becomes an UPDATE.
  */
 @MappedSuperclass
 public abstract class BaseEntity {
@@ -44,15 +42,15 @@ public abstract class BaseEntity {
 
     private Long deletedBy;
 
-    /** Segna l'entità come eliminata dall'utente indicato. Idempotente. */
-    public void elimina(Long eliminataDa) {
+    /** Marks the entity as deleted by the given user. Idempotent. */
+    public void delete(Long deletedByUserId) {
         if (deletedAt == null) {
             deletedAt = Instant.now();
-            deletedBy = eliminataDa;
+            deletedBy = deletedByUserId;
         }
     }
 
-    public boolean isEliminata() {
+    public boolean isDeleted() {
         return deletedAt != null;
     }
 

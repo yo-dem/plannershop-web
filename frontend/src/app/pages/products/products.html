@@ -1,0 +1,80 @@
+<div class="page-header">
+  <h2 i18n="@@products.title">Products</h2>
+  <div class="page-actions">
+    <button matButton="filled" (click)="create()">
+      <mat-icon>add</mat-icon> <ng-container i18n="@@products.new">New product</ng-container>
+    </button>
+  </div>
+</div>
+
+<div class="filters">
+  <mat-form-field class="search">
+    <mat-icon matPrefix>search</mat-icon>
+    <mat-label i18n="@@products.search">Search product</mat-label>
+    <input matInput type="search" [value]="list.text()" (input)="list.search($any($event.target).value)"
+           placeholder="Brand, description or notes" i18n-placeholder="@@products.searchHint" />
+  </mat-form-field>
+  <mat-slide-toggle [checked]="availableOnly()" (change)="filterAvailable($event.checked)">
+    <ng-container i18n="@@products.availableOnly">Available only</ng-container>
+  </mat-slide-toggle>
+</div>
+
+@if (data.error()) {
+  <app-notice type="error" i18n="@@products.loadError">Unable to load the products.</app-notice>
+}
+
+<div class="table-card">
+  @if (data.isLoading()) {
+    <mat-progress-bar mode="indeterminate" />
+  }
+  <table mat-table [dataSource]="items()" matSort (matSortChange)="list.sortBy($event)">
+    <ng-container matColumnDef="brand">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header i18n="@@products.product">Product</th>
+      <td mat-cell *matCellDef="let p"><strong>{{ p.brand }}</strong> {{ p.description }}</td>
+    </ng-container>
+    <ng-container matColumnDef="quantity">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header arrowPosition="before" class="number"
+          i18n="@@products.quantity">Quantity</th>
+      <td mat-cell *matCellDef="let p" class="number">
+        @switch (stockLevel(p.quantity)) {
+          @case ('out') {
+            <span class="badge negative" title="Out of stock" i18n-title="@@products.outOfStock">{{ p.quantity }}</span>
+          }
+          @case ('low') {
+            <span class="badge warning" title="Running low" i18n-title="@@products.lowStock">{{ p.quantity }}</span>
+          }
+          @default {
+            {{ p.quantity }}
+          }
+        }
+      </td>
+    </ng-container>
+    <ng-container matColumnDef="salePrice">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header arrowPosition="before" class="number"
+          i18n="@@products.price">Price</th>
+      <td mat-cell *matCellDef="let p" class="number">{{ p.salePrice | currency: 'EUR' }}</td>
+    </ng-container>
+    <ng-container matColumnDef="stockDate">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header class="hide-mobile" i18n="@@products.stockDateShort">Stocked</th>
+      <td mat-cell *matCellDef="let p" class="hide-mobile">{{ p.stockDate | date: 'mediumDate' }}</td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="columns"></tr>
+    <tr mat-row *matRowDef="let p; columns: columns" class="clickable"
+        [class.highlighted]="p.id === list.highlighted()"
+        (click)="open(p)" (keydown.enter)="open(p)" tabindex="0"></tr>
+    <tr *matNoDataRow>
+      <td class="empty" [attr.colspan]="columns.length">
+        @if (list.text()) {
+          <ng-container i18n="@@products.noResults">No product found for "{{ list.text() // i18n(ph="query") }}".</ng-container>
+        } @else if (availableOnly()) {
+          <ng-container i18n="@@products.noneAvailable">No product available.</ng-container>
+        } @else if (!data.isLoading()) {
+          <ng-container i18n="@@products.empty">No products yet. Add one with "New product".</ng-container>
+        }
+      </td>
+    </tr>
+  </table>
+  <mat-paginator [length]="total()" [pageIndex]="list.page()" [pageSize]="list.pageSize()"
+                 [pageSizeOptions]="[20, 50, 100]" (page)="list.changePage($event)" />
+</div>

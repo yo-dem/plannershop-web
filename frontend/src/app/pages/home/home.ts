@@ -9,8 +9,8 @@ import { AuthService } from '../../core/auth/auth.service';
 import { Info } from '../../core/info';
 
 /**
- * Pagina provvisoria: verifica che il frontend raggiunga il backend
- * e che il backend raggiunga il database.
+ * Temporary page: checks that the frontend reaches the backend and that the
+ * backend reaches the database.
  */
 @Component({
   selector: 'app-home',
@@ -20,6 +20,6 @@ import { Info } from '../../core/info';
 })
 export class Home {
   protected readonly auth = inject(AuthService);
-  /** httpResource esegue la GET e espone value(), isLoading(), error() come signal. */
+  /** httpResource runs the GET and exposes value(), isLoading(), error() as signals. */
   protected readonly info = httpResource<Info>(() => '/api/info');
 }

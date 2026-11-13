@@ -5,7 +5,7 @@
   min-height: calc(100dvh - 2rem);
 }
 
-.pannello {
+.panel {
   width: 100%;
   max-width: 24rem;
   padding: 2rem 1.5rem;
@@ -20,12 +20,12 @@ h1 {
   color: var(--mat-sys-primary);
 }
 
-.sottotitolo {
+.subtitle {
   margin: 0.25rem 0 1.5rem;
   color: var(--mat-sys-on-surface-variant);
 }
 
-.accedi {
+.sign-in {
   width: 100%;
   margin-top: 0.75rem;
 }

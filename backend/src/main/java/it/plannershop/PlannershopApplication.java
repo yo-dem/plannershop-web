@@ -13,9 +13,9 @@ public class PlannershopApplication {
 
 	public static void main(String[] args) {
 		SpringApplication app = new SpringApplication(PlannershopApplication.class);
-		// Ripristino password (--app.reset-password=<email>): il server web usa una
-		// porta libera qualsiasi, così si può eseguire anche mentre l'applicazione
-		// è già avviata sulla 8080. Il processo termina subito dopo il ripristino.
+		// Password reset (--app.reset-password=<email>): the web server uses any free
+		// port, so it can run even while the application is already running on 8080.
+		// The process exits right after the reset.
 		if (Arrays.stream(args).anyMatch(a -> a.startsWith("--app.reset-password"))) {
 			app.setDefaultProperties(Map.of("server.port", "0"));
 		}

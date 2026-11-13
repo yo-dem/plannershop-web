@@ -8,7 +8,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 
-/** Un'attività (negozio, centro estetico, ...) servita dalla piattaforma. */
+/** A business (shop, beauty center, ...) served by the platform. */
 @Entity
 @Table(name = "tenant")
 @SQLRestriction("deleted_at IS NULL")
@@ -16,39 +16,39 @@ import jakarta.persistence.Table;
 public class Tenant extends BaseEntity {
 
     @Column(nullable = false)
-    private String nome;
+    private String name;
 
     @Column(nullable = false)
-    private boolean attivo = true;
+    private boolean active = true;
 
     @Column(nullable = false)
-    private String fusoOrario = "Europe/Rome";
+    private String timeZone = "Europe/Rome";
 
     protected Tenant() {
-        // per JPA
+        // for JPA
     }
 
-    public Tenant(String nome) {
-        this.nome = nome;
+    public Tenant(String name) {
+        this.name = name;
     }
 
-    public String getNome() {
-        return nome;
+    public String getName() {
+        return name;
     }
 
-    public void setNome(String nome) {
-        this.nome = nome;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public boolean isAttivo() {
-        return attivo;
+    public boolean isActive() {
+        return active;
     }
 
-    public void setAttivo(boolean attivo) {
-        this.attivo = attivo;
+    public void setActive(boolean active) {
+        this.active = active;
     }
 
-    public String getFusoOrario() {
-        return fusoOrario;
+    public String getTimeZone() {
+        return timeZone;
     }
 }

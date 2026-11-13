@@ -10,9 +10,9 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
 /**
- * Refresh token emesso al login. Nel database c'è solo l'hash: chi leggesse la
- * tabella non potrebbe usare i token. A ogni utilizzo il token viene revocato
- * e sostituito da uno nuovo (rotazione).
+ * Refresh token issued at sign-in. Only the hash is in the database: whoever read
+ * the table could not use the tokens. At every use the token is revoked and
+ * replaced by a new one (rotation).
  */
 @Entity
 @Table(name = "refresh_token")
@@ -25,7 +25,7 @@ public class RefreshToken {
     @Column(nullable = false)
     private Long userId;
 
-    /** Attività per cui è stato emesso il token; null per il SUPERADMIN senza attività. */
+    /** Tenant the token was issued for; null for the SUPERADMIN without a tenant. */
     private Long tenantId;
 
     @Column(nullable = false, unique = true)
@@ -42,7 +42,7 @@ public class RefreshToken {
     private Instant revokedAt;
 
     protected RefreshToken() {
-        // per JPA
+        // for JPA
     }
 
     public RefreshToken(Long userId, Long tenantId, String tokenHash, String userAgent, Instant expiresAt) {
@@ -53,15 +53,15 @@ public class RefreshToken {
         this.expiresAt = expiresAt;
     }
 
-    public boolean isRevocato() {
+    public boolean isRevoked() {
         return revokedAt != null;
     }
 
-    public boolean isScaduto(Instant adesso) {
-        return !expiresAt.isAfter(adesso);
+    public boolean isExpired(Instant now) {
+        return !expiresAt.isAfter(now);
     }
 
-    public void revoca() {
+    public void revoke() {
         if (revokedAt == null) {
             revokedAt = Instant.now();
         }

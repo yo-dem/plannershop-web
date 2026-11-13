@@ -8,18 +8,18 @@ import { authInterceptor } from './auth.interceptor';
 import { AuthService } from './auth.service';
 import { LoginResponse } from './auth.models';
 
-const sessione = (token: string): LoginResponse => ({
+const session = (token: string): LoginResponse => ({
   accessToken: token,
-  scadeTraSecondi: 900,
-  sceltaTenant: null,
-  utente: {
+  expiresInSeconds: 900,
+  tenantChoices: null,
+  user: {
     id: 1,
     email: 'a@b.it',
-    nome: 'Mario',
-    ruolo: 'ADMIN',
+    name: 'Mario',
+    role: 'ADMIN',
     superadmin: false,
-    tenant: { id: 1, nome: 'Negozio' },
-    deveCambiarePassword: false,
+    tenant: { id: 1, name: 'Shop' },
+    mustChangePassword: false,
   },
 });
 
@@ -43,53 +43,54 @@ describe('authInterceptor', () => {
 
   afterEach(() => backend.verify());
 
-  async function collegati(token: string): Promise<void> {
+  async function signIn(token: string): Promise<void> {
     const login = auth.login('a@b.it', 'x');
-    backend.expectOne('/api/auth/login').flush(sessione(token));
+    backend.expectOne('/api/auth/login').flush(session(token));
     await login;
   }
 
-  it('aggiunge il token alle chiamate /api', async () => {
-    await collegati('token-1');
-    const risposta = firstValueFrom(http.get('/api/info'));
+  it('adds the token and the language to /api calls', async () => {
+    await signIn('token-1');
+    const response = firstValueFrom(http.get('/api/info'));
     const req = backend.expectOne('/api/info');
     expect(req.request.headers.get('Authorization')).toBe('Bearer token-1');
+    expect(req.request.headers.get('Accept-Language')).toBe('it');
     req.flush({});
-    await risposta;
+    await response;
   });
 
-  it('non aggiunge il token alle chiamate di autenticazione', async () => {
-    await collegati('token-1');
+  it('does not add the token to authentication calls', async () => {
+    await signIn('token-1');
     void auth.refresh();
     const req = backend.expectOne('/api/auth/refresh');
     expect(req.request.headers.has('Authorization')).toBe(false);
-    req.flush(sessione('token-2'));
+    req.flush(session('token-2'));
   });
 
-  it('dopo un 401 rinnova la sessione e ripete la richiesta', async () => {
-    await collegati('scaduto');
-    const risposta = firstValueFrom(http.get<{ ok: boolean }>('/api/info'));
+  it('after a 401 renews the session and retries the request', async () => {
+    await signIn('expired');
+    const response = firstValueFrom(http.get<{ ok: boolean }>('/api/info'));
 
     backend.expectOne('/api/info').flush(null, { status: 401, statusText: 'Unauthorized' });
     await Promise.resolve();
-    backend.expectOne('/api/auth/refresh').flush(sessione('nuovo'));
+    backend.expectOne('/api/auth/refresh').flush(session('new'));
     await new Promise((r) => setTimeout(r));
 
-    const ripetuta = backend.expectOne('/api/info');
-    expect(ripetuta.request.headers.get('Authorization')).toBe('Bearer nuovo');
-    ripetuta.flush({ ok: true });
-    expect(await risposta).toEqual({ ok: true });
+    const retried = backend.expectOne('/api/info');
+    expect(retried.request.headers.get('Authorization')).toBe('Bearer new');
+    retried.flush({ ok: true });
+    expect(await response).toEqual({ ok: true });
   });
 
-  it('se il rinnovo fallisce chiude la sessione', async () => {
-    await collegati('scaduto');
-    const risposta = firstValueFrom(http.get('/api/info')).catch((e) => e);
+  it('closes the session if the renewal fails', async () => {
+    await signIn('expired');
+    const response = firstValueFrom(http.get('/api/info')).catch((e) => e);
 
     backend.expectOne('/api/info').flush(null, { status: 401, statusText: 'Unauthorized' });
     await Promise.resolve();
     backend.expectOne('/api/auth/refresh').flush(null, { status: 401, statusText: 'Unauthorized' });
-    await risposta;
+    await response;
 
-    expect(auth.autenticato()).toBe(false);
+    expect(auth.authenticated()).toBe(false);
   });
 });

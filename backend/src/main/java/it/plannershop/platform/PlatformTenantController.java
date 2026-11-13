@@ -15,17 +15,17 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import it.plannershop.platform.PlatformDtos.ModificaTenantRequest;
-import it.plannershop.platform.PlatformDtos.NuovoTenantRequest;
+import it.plannershop.platform.PlatformDtos.NewTenantRequest;
 import it.plannershop.platform.PlatformDtos.TenantDto;
+import it.plannershop.platform.PlatformDtos.UpdateTenantRequest;
 import jakarta.validation.Valid;
 
 /**
- * Attività della piattaforma. {@code @PreAuthorize} a livello di classe vale
- * per tutti i metodi (in aggiunta alla regola su /api/platform/** in SecurityConfig).
+ * Tenants of the platform. The class-level {@code @PreAuthorize} applies to all
+ * methods (in addition to the /api/platform/** rule in SecurityConfig).
  */
 @RestController
-@ConditionalOnProperty(name = "app.modalita", havingValue = "cloud", matchIfMissing = true)
+@ConditionalOnProperty(name = "app.mode", havingValue = "cloud", matchIfMissing = true)
 @RequestMapping("/api/platform/tenants")
 @PreAuthorize("hasRole('SUPERADMIN')")
 public class PlatformTenantController {
@@ -37,24 +37,24 @@ public class PlatformTenantController {
     }
 
     @GetMapping
-    List<TenantDto> elenco() {
-        return service.elenco();
+    List<TenantDto> list() {
+        return service.list();
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    TenantDto crea(@Valid @RequestBody NuovoTenantRequest body) {
-        return service.crea(body);
+    TenantDto create(@Valid @RequestBody NewTenantRequest body) {
+        return service.create(body);
     }
 
     @PutMapping("/{id}")
-    TenantDto modifica(@PathVariable Long id, @Valid @RequestBody ModificaTenantRequest body) {
-        return service.modifica(id, body);
+    TenantDto update(@PathVariable Long id, @Valid @RequestBody UpdateTenantRequest body) {
+        return service.update(id, body);
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    void elimina(@PathVariable Long id) {
-        service.elimina(id);
+    void delete(@PathVariable Long id) {
+        service.delete(id);
     }
 }

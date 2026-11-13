@@ -1,0 +1,63 @@
+<div class="page-header">
+  <h2 i18n="@@tenants.title">Businesses</h2>
+  <button matButton="filled" (click)="open(null)">
+    <mat-icon>add</mat-icon> <ng-container i18n="@@tenants.new">New business</ng-container>
+  </button>
+</div>
+
+@if (list.error()) {
+  <app-notice type="error" i18n="@@tenants.loadError">Unable to load the businesses.</app-notice>
+}
+
+<div class="table-card">
+  @if (list.isLoading()) {
+    <mat-progress-bar mode="indeterminate" />
+  }
+  <table mat-table [dataSource]="list.value()">
+    <ng-container matColumnDef="name">
+      <th mat-header-cell *matHeaderCellDef i18n="@@tenants.nameColumn">Name</th>
+      <td mat-cell *matCellDef="let t">{{ t.name }}</td>
+    </ng-container>
+    <ng-container matColumnDef="admins">
+      <th mat-header-cell *matHeaderCellDef i18n="@@tenants.admins">Administrators</th>
+      <td mat-cell *matCellDef="let t" class="email">{{ t.admins.join(', ') }}</td>
+    </ng-container>
+    <ng-container matColumnDef="status">
+      <th mat-header-cell *matHeaderCellDef i18n="@@tenants.status">Status</th>
+      <td mat-cell *matCellDef="let t">
+        @if (t.active) {
+          <span class="badge positive" i18n="@@tenants.active">Active</span>
+        } @else {
+          <span class="badge" i18n="@@tenants.suspended">Suspended</span>
+        }
+      </td>
+    </ng-container>
+    <ng-container matColumnDef="created">
+      <th mat-header-cell *matHeaderCellDef class="hide-mobile" i18n="@@tenants.createdOn">Created on</th>
+      <td mat-cell *matCellDef="let t" class="hide-mobile">{{ t.createdAt | date: 'mediumDate' }}</td>
+    </ng-container>
+    <ng-container matColumnDef="actions">
+      <th mat-header-cell *matHeaderCellDef></th>
+      <td mat-cell *matCellDef="let t" class="actions">
+        <button matIconButton matTooltip="Edit" i18n-matTooltip="@@common.edit" aria-label="Edit"
+                i18n-aria-label="@@common.edit" (click)="open(t)">
+          <mat-icon>edit</mat-icon>
+        </button>
+        <button matIconButton matTooltip="Delete" i18n-matTooltip="@@common.delete" aria-label="Delete"
+                i18n-aria-label="@@common.delete" class="delete" (click)="delete(t)">
+          <mat-icon>delete</mat-icon>
+        </button>
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="columns"></tr>
+    <tr mat-row *matRowDef="let t; columns: columns"></tr>
+    <tr *matNoDataRow>
+      <td class="empty" [attr.colspan]="columns.length">
+        @if (!list.isLoading()) {
+          <ng-container i18n="@@tenants.empty">No businesses yet. Create one with "New business".</ng-container>
+        }
+      </td>
+    </tr>
+  </table>
+</div>

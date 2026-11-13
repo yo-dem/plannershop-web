@@ -13,69 +13,69 @@ import org.springframework.stereotype.Component;
 import it.plannershop.common.ApiException;
 
 /**
- * Limita i tentativi di login falliti per indirizzo IP e per email, per
- * rallentare chi prova a indovinare le password.
+ * Limits failed sign-in attempts per IP address and per email, to slow down
+ * password guessing.
  *
- * <p>In memoria: si azzera al riavvio e vale per una sola istanza del backend,
- * sufficiente per l'uso previsto.
+ * <p>In memory: reset at restart and valid for a single backend instance,
+ * enough for the intended use.
  */
 @Component
 public class LoginAttemptLimiter {
 
     private final SecurityProperties props;
     private final Clock clock = Clock.systemUTC();
-    private final Map<String, Deque<Instant>> fallimenti = new ConcurrentHashMap<>();
+    private final Map<String, Deque<Instant>> failures = new ConcurrentHashMap<>();
 
     public LoginAttemptLimiter(SecurityProperties props) {
         this.props = props;
     }
 
-    public void verifica(String ip, String email) {
-        if (bloccato(chiaveIp(ip)) || bloccato(chiaveEmail(email))) {
-            throw ApiException.troppiTentativi("Troppi tentativi di accesso. Riprova tra qualche minuto.");
+    public void check(String ip, String email) {
+        if (blocked(ipKey(ip)) || blocked(emailKey(email))) {
+            throw ApiException.tooManyRequests("auth.tooManyAttempts");
         }
     }
 
-    public void registraFallimento(String ip, String email) {
-        aggiungi(chiaveIp(ip));
-        aggiungi(chiaveEmail(email));
+    public void recordFailure(String ip, String email) {
+        add(ipKey(ip));
+        add(emailKey(email));
     }
 
-    public void registraSuccesso(String email) {
-        fallimenti.remove(chiaveEmail(email));
+    public void recordSuccess(String email) {
+        failures.remove(emailKey(email));
     }
 
-    private boolean bloccato(String chiave) {
-        Deque<Instant> lista = fallimenti.get(chiave);
-        if (lista == null) {
+    private boolean blocked(String key) {
+        Deque<Instant> list = failures.get(key);
+        if (list == null) {
             return false;
         }
-        synchronized (lista) {
-            pulisci(lista);
-            return lista.size() >= props.loginMaxTentativi();
+        synchronized (list) {
+            prune(list);
+            return list.size() >= props.loginMaxAttempts();
         }
     }
 
-    private void aggiungi(String chiave) {
-        Deque<Instant> lista = fallimenti.computeIfAbsent(chiave, k -> new ArrayDeque<>());
-        synchronized (lista) {
-            pulisci(lista);
-            lista.addLast(clock.instant());
+    private void add(String key) {
+        Deque<Instant> list = failures.computeIfAbsent(key, k -> new ArrayDeque<>());
+        synchronized (list) {
+            prune(list);
+            list.addLast(clock.instant());
         }
     }
 
-    private void pulisci(Deque<Instant> lista) {
-        Instant limite = clock.instant().minus(props.loginFinestra());
-        while (!lista.isEmpty() && lista.peekFirst().isBefore(limite)) {
-            lista.removeFirst();
+    private void prune(Deque<Instant> list) {
+        Instant limit = clock.instant().minus(props.loginWindow());
+        while (!list.isEmpty() && list.peekFirst().isBefore(limit)) {
+            list.removeFirst();
         }
     }
 
-    private static String chiaveIp(String ip) {
+    private static String ipKey(String ip) {
         return "ip:" + ip;
     }
 
-    private static String chiaveEmail(String email) {
+    private static String emailKey(String email) {
         return "email:" + (email == null ? "" : email.trim().toLowerCase(Locale.ROOT));
     }
 }

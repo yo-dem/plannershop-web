@@ -1,0 +1,61 @@
+<div class="page-header">
+  <h2 i18n="@@customers.title">Customers</h2>
+  <div class="page-actions">
+    <a matButton="outlined" routerLink="/customers/birthdays">
+      <mat-icon>redeem</mat-icon> <ng-container i18n="@@customers.birthdays">Birthdays</ng-container>
+    </a>
+    <button matButton="filled" (click)="create()">
+      <mat-icon>person_add</mat-icon> <ng-container i18n="@@customers.new">New customer</ng-container>
+    </button>
+  </div>
+</div>
+
+<mat-form-field class="search">
+  <mat-icon matPrefix>search</mat-icon>
+  <mat-label i18n="@@customers.search">Search customer</mat-label>
+  <input matInput type="search" [value]="list.text()" (input)="list.search($any($event.target).value)"
+         placeholder="First name, last name, phone or email" i18n-placeholder="@@customers.searchHint" />
+</mat-form-field>
+
+@if (data.error()) {
+  <app-notice type="error" i18n="@@customers.loadError">Unable to load the customers.</app-notice>
+}
+
+<div class="table-card">
+  @if (data.isLoading()) {
+    <mat-progress-bar mode="indeterminate" />
+  }
+  <table mat-table [dataSource]="items()" matSort (matSortChange)="list.sortBy($event)">
+    <ng-container matColumnDef="lastName">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header i18n="@@customers.customer">Customer</th>
+      <td mat-cell *matCellDef="let c"><strong>{{ c.lastName }}</strong> {{ c.firstName }}</td>
+    </ng-container>
+    <ng-container matColumnDef="phone">
+      <th mat-header-cell *matHeaderCellDef i18n="@@customers.phone">Phone</th>
+      <td mat-cell *matCellDef="let c">{{ c.phone }}</td>
+    </ng-container>
+    <ng-container matColumnDef="email">
+      <th mat-header-cell *matHeaderCellDef class="hide-mobile" i18n="@@customers.email">Email</th>
+      <td mat-cell *matCellDef="let c" class="hide-mobile email">{{ c.email }}</td>
+    </ng-container>
+    <ng-container matColumnDef="birthday">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header class="hide-mobile" i18n="@@customers.birthday">Birthday</th>
+      <td mat-cell *matCellDef="let c" class="hide-mobile">{{ birthday(c) }}</td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="columns"></tr>
+    <tr mat-row *matRowDef="let c; columns: columns" class="clickable" [class.highlighted]="c.id === list.highlighted()"
+        (click)="open(c)" (keydown.enter)="open(c)" tabindex="0"></tr>
+    <tr *matNoDataRow>
+      <td class="empty" [attr.colspan]="columns.length">
+        @if (list.text()) {
+          <ng-container i18n="@@customers.noResults">No customer found for "{{ list.text() // i18n(ph="query") }}".</ng-container>
+        } @else if (!data.isLoading()) {
+          <ng-container i18n="@@customers.empty">No customers yet. Add one with "New customer".</ng-container>
+        }
+      </td>
+    </tr>
+  </table>
+  <mat-paginator [length]="total()" [pageIndex]="list.page()" [pageSize]="list.pageSize()"
+                 [pageSizeOptions]="[20, 50, 100]" (page)="list.changePage($event)" />
+</div>

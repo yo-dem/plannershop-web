@@ -46,14 +46,14 @@
     font: var(--mat-sys-label-large);
 
     &:hover,
-    &.attiva {
+    &.active {
       background: color-mix(in srgb, currentColor 16%, transparent);
     }
   }
 }
 
-/* Avviso compleanni del mese: icona regalo con il numero di clienti. */
-.compleanni {
+/* Birthdays of the month: gift icon with the number of customers. */
+.birthdays {
   position: relative;
   display: flex;
   align-items: center;
@@ -64,7 +64,7 @@
     background: color-mix(in srgb, currentColor 16%, transparent);
   }
 
-  .conteggio {
+  .count {
     position: absolute;
     top: 0;
     right: -0.125rem;
@@ -80,7 +80,7 @@
   }
 }
 
-.utente {
+.user-menu {
   --mat-button-text-label-text-color: var(--mat-sys-on-primary);
   --mat-button-text-state-layer-color: var(--mat-sys-on-primary);
 }
@@ -90,7 +90,7 @@
   padding: 1rem;
 }
 
-/* Smartphone: nascondi i testi, restano le icone. */
+/* Smartphones: hide the texts, keep the icons. */
 @media (max-width: 640px) {
   .topbar {
     gap: 0.25rem;
@@ -99,11 +99,11 @@
 
   .tenant,
   .nav span,
-  .nome-utente {
+  .user-name {
     display: none;
   }
 
-  .utente {
+  .user-menu {
     min-width: 0;
     padding: 0 0.5rem;
 
@@ -118,7 +118,7 @@
     display: none;
   }
 
-  /* Cinque sezioni più avviso e utente devono stare anche in 360 px. */
+  /* Five sections plus notice and user menu must fit in 360 px too. */
   .nav {
     gap: 0;
 

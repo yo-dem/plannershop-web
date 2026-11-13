@@ -1,16 +1,16 @@
-# PlannerShop — stack completo.
+# PlannerShop — full stack.
 #
-# Sviluppo (solo database; backend da IntelliJ, frontend con ng serve):
+# Development (database only; backend from IntelliJ, frontend with ng serve):
 #   docker compose up -d postgres
 #
-# Stack completo nei container (test di deploy):
+# Full stack in containers (deployment test):
 #   docker compose up -d --build        →  http://localhost:${APP_PORT:-8090}
 #
-# Ripristino della password di un utente (stampa una password provvisoria):
-#   docker compose run --rm backend --app.reset-password=email@utente
+# Reset a user's password (prints a temporary password):
+#   docker compose run --rm backend --app.reset-password=user@email
 #
-# Le variabili si leggono dal file .env in questa cartella (vedi .env.example).
-# I default valgono SOLO per lo sviluppo locale.
+# Variables are read from the .env file in this folder (see .env.example).
+# The defaults are meant ONLY for local development.
 
 name: plannershop
 
@@ -26,7 +26,7 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql
     ports:
-      # Solo su localhost: serve al backend avviato da IntelliJ e a DBeaver.
+      # Localhost only: used by the backend started from IntelliJ and by DBeaver.
       - "127.0.0.1:${POSTGRES_PORT:-5432}:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
@@ -45,9 +45,10 @@ services:
       APP_MODE: ${APP_MODE:-cloud}
       SUPERADMIN_EMAIL: ${SUPERADMIN_EMAIL:-admin@plannershop.local}
       SUPERADMIN_PASSWORD: ${SUPERADMIN_PASSWORD:-}
-      ACTIVITY_NAME: ${ACTIVITY_NAME:-La mia attività}
+      SUPERADMIN_NAME: ${SUPERADMIN_NAME:-Platform administrator}
+      ACTIVITY_NAME: ${ACTIVITY_NAME:-My business}
       ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@plannershop.local}
-      ADMIN_NAME: ${ADMIN_NAME:-Amministratore}
+      ADMIN_NAME: ${ADMIN_NAME:-Administrator}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
       TZ: ${TZ:-Europe/Rome}
     depends_on:

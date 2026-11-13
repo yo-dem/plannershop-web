@@ -1,42 +1,41 @@
-@if (auth.utente(); as utente) {
+@if (auth.user(); as user) {
   <header class="topbar">
     <a routerLink="/" class="brand">
       <mat-icon aria-hidden="true">calendar_month</mat-icon>
       <span>PlannerShop</span>
     </a>
-    @if (utente.tenant) {
-      <span class="tenant">{{ utente.tenant.nome }}</span>
+    @if (user.tenant) {
+      <span class="tenant">{{ user.tenant.name }}</span>
     }
 
     <nav class="nav">
-      @for (v of voci(); track v.link) {
-        <a [routerLink]="v.link" routerLinkActive="attiva" [routerLinkActiveOptions]="{ exact: v.link === '/' }">
-          <mat-icon aria-hidden="true">{{ v.icon }}</mat-icon>
-          <span>{{ v.label }}</span>
+      @for (item of navItems(); track item.link) {
+        <a [routerLink]="item.link" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: item.link === '/' }">
+          <mat-icon aria-hidden="true">{{ item.icon }}</mat-icon>
+          <span>{{ item.label }}</span>
         </a>
       }
     </nav>
 
-    @if (numeroCompleanni(); as n) {
-      @let testo = n + (n === 1 ? ' compleanno' : ' compleanni') + ' questo mese';
-      <a routerLink="/clienti/compleanni" class="compleanni" [attr.aria-label]="testo" [matTooltip]="testo">
+    @if (birthdayCount(); as n) {
+      <a routerLink="/customers/birthdays" class="birthdays" [attr.aria-label]="birthdayText()" [matTooltip]="birthdayText()">
         <mat-icon aria-hidden="true">redeem</mat-icon>
-        <span class="conteggio">{{ n }}</span>
+        <span class="count">{{ n }}</span>
       </a>
     }
 
-    <button matButton class="utente" [matMenuTriggerFor]="menuUtente">
+    <button matButton class="user-menu" [matMenuTriggerFor]="userMenu">
       <mat-icon>account_circle</mat-icon>
-      <span class="nome-utente">{{ utente.nome }}</span>
+      <span class="user-name">{{ user.name }}</span>
     </button>
-    <mat-menu #menuUtente="matMenu" xPosition="before">
-      <a mat-menu-item routerLink="/cambia-password">
+    <mat-menu #userMenu="matMenu" xPosition="before">
+      <a mat-menu-item routerLink="/change-password">
         <mat-icon>key</mat-icon>
-        <span>Cambia password</span>
+        <span i18n="@@nav.changePassword">Change password</span>
       </a>
       <button mat-menu-item (click)="auth.logout()">
         <mat-icon>logout</mat-icon>
-        <span>Esci</span>
+        <span i18n="@@nav.signOut">Sign out</span>
       </button>
     </mat-menu>
   </header>

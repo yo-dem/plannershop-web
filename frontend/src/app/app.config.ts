@@ -16,9 +16,10 @@ import { provideRouter, withComponentInputBinding } from '@angular/router';
 import { routes } from './app.routes';
 import { authInterceptor } from './core/auth/auth.interceptor';
 import { AuthService } from './core/auth/auth.service';
-import { PaginatoreItaliano } from './core/ui/paginatore-it';
+import { LOCALE } from './core/i18n';
+import { TranslatedPaginatorIntl } from './core/ui/paginator-intl';
 
-// Formati italiani per date, numeri e valute (pipe date, number, currency).
+// Italian formats for dates, numbers and currencies (date, number, currency pipes).
 registerLocaleData(localeIt);
 
 export const appConfig: ApplicationConfig = {
@@ -26,12 +27,12 @@ export const appConfig: ApplicationConfig = {
     provideBrowserGlobalErrorListeners(),
     provideRouter(routes, withComponentInputBinding()),
     provideHttpClient(withFetch(), withInterceptors([authInterceptor])),
-    // Prima di mostrare qualsiasi pagina prova a ripristinare la sessione dal cookie.
+    // Before showing any page, try to restore the session from the cookie.
     provideAppInitializer(() => inject(AuthService).refresh()),
-    { provide: LOCALE_ID, useValue: 'it-IT' },
-    // Angular Material: campi con bordo, icone Material Symbols, paginatore in italiano.
+    { provide: LOCALE_ID, useValue: LOCALE },
+    // Angular Material: outlined fields, Material Symbols icons, translated paginator.
     { provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: { appearance: 'outline', subscriptSizing: 'dynamic' } },
     { provide: MAT_ICON_DEFAULT_OPTIONS, useValue: { fontSet: 'material-symbols-outlined' } },
-    { provide: MatPaginatorIntl, useClass: PaginatoreItaliano },
+    { provide: MatPaginatorIntl, useClass: TranslatedPaginatorIntl },
   ],
 };

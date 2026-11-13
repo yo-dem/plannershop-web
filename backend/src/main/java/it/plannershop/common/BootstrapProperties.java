@@ -4,22 +4,24 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.bind.DefaultValue;
 
 /**
- * Utenti creati al primo avvio ({@code app.bootstrap.*}), solo se il database
- * non ha ancora utenti. Una password vuota viene generata e scritta nel log.
+ * Users created on first start-up ({@code app.bootstrap.*}), only if the
+ * database has no users yet. An empty password is generated and logged.
  *
- * @param superadminEmail    modalità CLOUD: email del SUPERADMIN
- * @param superadminPassword modalità CLOUD: password del SUPERADMIN
- * @param attivitaNome       modalità LOCALE: nome dell'attività
- * @param adminEmail         modalità LOCALE: email dell'ADMIN dell'attività
- * @param adminNome          modalità LOCALE: nome visualizzato dell'ADMIN
- * @param adminPassword      modalità LOCALE: password provvisoria dell'ADMIN
+ * @param superadminEmail    CLOUD mode: SUPERADMIN email
+ * @param superadminPassword CLOUD mode: SUPERADMIN password
+ * @param superadminName     CLOUD mode: display name of the SUPERADMIN
+ * @param tenantName         LOCAL mode: name of the business
+ * @param adminEmail         LOCAL mode: email of the tenant ADMIN
+ * @param adminName          LOCAL mode: display name of the ADMIN
+ * @param adminPassword      LOCAL mode: temporary password of the ADMIN
  */
 @ConfigurationProperties("app.bootstrap")
 public record BootstrapProperties(
         @DefaultValue("admin@plannershop.local") String superadminEmail,
         String superadminPassword,
-        @DefaultValue("La mia attività") String attivitaNome,
+        @DefaultValue("Platform administrator") String superadminName,
+        @DefaultValue("My business") String tenantName,
         @DefaultValue("admin@plannershop.local") String adminEmail,
-        @DefaultValue("Amministratore") String adminNome,
+        @DefaultValue("Administrator") String adminName,
         String adminPassword) {
 }

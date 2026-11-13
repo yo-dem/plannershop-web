@@ -13,7 +13,7 @@ describe('App', () => {
     }).compileComponents();
   });
 
-  it('senza utente collegato non mostra la barra superiore', async () => {
+  it('does not show the top bar without a signed-in user', async () => {
     const fixture = TestBed.createComponent(App);
     await fixture.whenStable();
     const el = fixture.nativeElement as HTMLElement;

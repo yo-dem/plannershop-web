@@ -7,14 +7,14 @@ import { MatInput } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { Router } from '@angular/router';
 
-import { TenantOpzione } from '../../core/auth/auth.models';
+import { TenantOption } from '../../core/auth/auth.models';
 import { AuthService } from '../../core/auth/auth.service';
-import { messaggioErrore } from '../../core/errori';
-import { Avviso } from '../../core/ui/avviso';
+import { errorMessage } from '../../core/errors';
+import { Notice } from '../../core/ui/notice';
 
 @Component({
   selector: 'app-login',
-  imports: [ReactiveFormsModule, MatButton, MatIconButton, MatFormFieldModule, MatIcon, MatInput, MatSelectModule, Avviso],
+  imports: [ReactiveFormsModule, MatButton, MatIconButton, MatFormFieldModule, MatIcon, MatInput, MatSelectModule, Notice],
   templateUrl: './login.html',
   styleUrl: './login.scss',
 })
@@ -22,9 +22,9 @@ export class Login {
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
 
-  /** Parametri dell'URL (withComponentInputBinding). */
+  /** URL parameters (withComponentInputBinding). */
   readonly returnUrl = input<string>();
-  readonly scaduta = input<string>();
+  readonly expired = input<string>();
 
   protected readonly form = inject(FormBuilder).nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
@@ -32,37 +32,35 @@ export class Login {
     tenantId: [null as number | null],
   });
 
-  protected readonly invio = signal(false);
-  protected readonly errore = signal<string | null>(null);
-  protected readonly mostraPassword = signal(false);
-  /** Attività tra cui scegliere, se l'utente ne ha più di una. */
-  protected readonly attivita = signal<TenantOpzione[] | null>(null);
+  protected readonly sending = signal(false);
+  protected readonly error = signal<string | null>(null);
+  protected readonly showPassword = signal(false);
+  /** Tenants to choose from, if the user belongs to more than one. */
+  protected readonly tenants = signal<TenantOption[] | null>(null);
 
-  async accedi(): Promise<void> {
+  async signIn(): Promise<void> {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
     }
-    this.invio.set(true);
-    this.errore.set(null);
+    this.sending.set(true);
+    this.error.set(null);
     const { email, password, tenantId } = this.form.getRawValue();
     try {
       const r = await this.auth.login(email, password, tenantId ?? undefined);
-      if (r.sceltaTenant) {
-        this.attivita.set(r.sceltaTenant);
+      if (r.tenantChoices) {
+        this.tenants.set(r.tenantChoices);
         this.form.controls.tenantId.setValidators(Validators.required);
         this.form.controls.tenantId.updateValueAndValidity();
         return;
       }
-      const u = r.utente!;
-      const destinazione = u.deveCambiarePassword
-        ? '/cambia-password'
-        : (this.returnUrl() ?? (u.tenant ? '/' : '/piattaforma'));
-      await this.router.navigateByUrl(destinazione);
+      const u = r.user!;
+      const target = u.mustChangePassword ? '/change-password' : (this.returnUrl() ?? (u.tenant ? '/' : '/platform'));
+      await this.router.navigateByUrl(target);
     } catch (err) {
-      this.errore.set(messaggioErrore(err));
+      this.error.set(errorMessage(err));
     } finally {
-      this.invio.set(false);
+      this.sending.set(false);
     }
   }
 }
