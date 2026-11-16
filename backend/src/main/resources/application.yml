@@ -75,6 +75,9 @@ app:
   mode: ${APP_MODE:cloud}
   # The ADMIN of an empty business may load the demo data (demo/demo-data.json).
   demo-data: ${DEMO_DATA:true}
+  # The ADMIN may wipe the data of the business and reload the demo data.
+  # Only for development and demo installations: never enable it in production.
+  demo-reset: ${DEMO_RESET:false}
   security:
     # Secret used to sign the tokens. In production: a long random string (≥ 32 characters).
     jwt-secret: ${JWT_SECRET:}

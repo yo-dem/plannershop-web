@@ -3,14 +3,16 @@ import { DatePipe } from '@angular/common';
 import { httpResource } from '@angular/common/http';
 import { MatButton } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
+import { MatDialog } from '@angular/material/dialog';
 import { MatIcon } from '@angular/material/icon';
 
 import { AuthService } from '../../core/auth/auth.service';
-import { DEMO_DATA_API, DemoDataApi, DemoDataStatus } from '../../core/demo-data';
+import { DEMO_DATA_API, DemoDataApi, DemoDataResult, DemoDataStatus } from '../../core/demo-data';
 import { errorMessage } from '../../core/errors';
 import { Info } from '../../core/info';
 import { Confirm } from '../../core/ui/confirm';
 import { Notifications } from '../../core/ui/notifications';
+import { openResetDemo } from './reset-demo-dialog';
 
 /**
  * Temporary page: checks that the frontend reaches the backend and that the
@@ -31,6 +33,7 @@ export class Home {
   private readonly demoData = inject(DemoDataApi);
   private readonly confirm = inject(Confirm);
   private readonly notifications = inject(Notifications);
+  private readonly dialog = inject(MatDialog);
   protected readonly demoStatus = httpResource<DemoDataStatus>(() =>
     this.auth.hasRole('ADMIN') ? DEMO_DATA_API : undefined,
   );
@@ -45,15 +48,28 @@ export class Home {
     if (!ok) return;
     this.loadingDemo.set(true);
     try {
-      const r = await this.demoData.load();
-      this.notifications.success(
-        $localize`:@@demo.loaded:Loaded ${r.customers}:customers: customers, ${r.suppliers}:suppliers: suppliers, ${r.products}:products: products and ${r.services}:services: services`,
-      );
+      this.loaded(await this.demoData.load());
     } catch (err) {
       this.notifications.error(errorMessage(err));
     } finally {
       this.loadingDemo.set(false);
       this.demoStatus.reload();
     }
+  }
+
+  protected async resetDemoData(): Promise<void> {
+    const tenant = this.auth.user()?.tenant;
+    if (!tenant) return;
+    const r = await openResetDemo(this.dialog, tenant.name);
+    if (r) {
+      this.loaded(r);
+      this.demoStatus.reload();
+    }
+  }
+
+  private loaded(r: DemoDataResult): void {
+    this.notifications.success(
+      $localize`:@@demo.loaded:Loaded ${r.customers}:customers: customers, ${r.suppliers}:suppliers: suppliers, ${r.products}:products: products and ${r.services}:services: services`,
+    );
   }
 }

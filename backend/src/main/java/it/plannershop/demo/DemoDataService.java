@@ -7,6 +7,7 @@ import java.util.Set;
 import java.util.function.Consumer;
 
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,11 +16,14 @@ import it.plannershop.common.AppProperties;
 import it.plannershop.customer.CustomerRepository;
 import it.plannershop.customer.CustomerService;
 import it.plannershop.product.ProductRepository;
+import it.plannershop.security.CurrentUser;
 import it.plannershop.product.ProductService;
 import it.plannershop.serviceitem.ServiceItemRepository;
 import it.plannershop.serviceitem.ServiceItemService;
 import it.plannershop.supplier.SupplierRepository;
 import it.plannershop.supplier.SupplierService;
+import it.plannershop.tenant.Tenant;
+import it.plannershop.tenant.TenantRepository;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
 import tools.jackson.databind.json.JsonMapper;
@@ -29,11 +33,20 @@ import tools.jackson.databind.json.JsonMapper;
  * business, read from {@code demo/demo-data.json}. They can be loaded only
  * while the business has none of these records, so real data is never mixed
  * with demo data. All the people and companies in the file are fictional.
+ *
+ * <p>With {@code app.demo-reset} the ADMIN can also wipe the data of the
+ * business and load the demo data again (development and demo installations).
  */
 @Service
 public class DemoDataService {
 
     private static final String RESOURCE = "demo/demo-data.json";
+
+    /**
+     * Tables emptied by the reset, children first. Every new table with data of
+     * the business (sales, appointments, ...) must be added here.
+     */
+    private static final List<String> RESET_TABLES = List.of("customer", "supplier", "product", "service_item");
 
     private final AppProperties app;
     private final JsonMapper json;
@@ -46,8 +59,10 @@ public class DemoDataService {
     private final SupplierService suppliers;
     private final ProductService products;
     private final ServiceItemService services;
+    private final TenantRepository tenants;
+    private final JdbcTemplate jdbc;
 
-    DemoDataService(AppProperties app, JsonMapper json, Validator validator,
+    DemoDataService(AppProperties app, JsonMapper json, Validator validator, TenantRepository tenants, JdbcTemplate jdbc,
             CustomerRepository customerRepository, SupplierRepository supplierRepository,
             ProductRepository productRepository, ServiceItemRepository serviceRepository,
             CustomerService customers, SupplierService suppliers, ProductService products,
@@ -55,6 +70,8 @@ public class DemoDataService {
         this.app = app;
         this.json = json;
         this.validator = validator;
+        this.tenants = tenants;
+        this.jdbc = jdbc;
         this.customerRepository = customerRepository;
         this.supplierRepository = supplierRepository;
         this.productRepository = productRepository;
@@ -69,10 +86,16 @@ public class DemoDataService {
     public record ImportResult(int customers, int suppliers, int products, int services) {
     }
 
-    /** True if the demo data are enabled and the current business is still empty. */
+    /**
+     * @param available the business is empty: the demo data can be loaded
+     * @param resettable the business can be reset to the demo data
+     */
+    public record Status(boolean available, boolean resettable) {
+    }
+
     @Transactional(readOnly = true)
-    public boolean available() {
-        return app.demoData() && isEmpty();
+    public Status status() {
+        return new Status(app.demoData() && isEmpty(), app.demoReset());
     }
 
     /** Creates the demo data in the current business, all or nothing. */
@@ -84,6 +107,33 @@ public class DemoDataService {
         if (!isEmpty()) {
             throw ApiException.conflict("demoData.notEmpty");
         }
+        return loadData();
+    }
+
+    /**
+     * Permanently deletes customers, suppliers, products and services of the
+     * current business (also the soft-deleted ones) and loads the demo data, all
+     * or nothing. Users are not touched.
+     *
+     * @param confirmName name of the business typed by the user, as confirmation
+     */
+    @Transactional
+    public ImportResult reset(String confirmName) {
+        if (!app.demoReset()) {
+            throw ApiException.forbidden("demoData.resetDisabled");
+        }
+        Long tenantId = CurrentUser.tenantId().orElseThrow();
+        Tenant tenant = tenants.findById(tenantId).orElseThrow();
+        if (confirmName == null || !confirmName.strip().equalsIgnoreCase(tenant.getName().strip())) {
+            throw ApiException.badRequest("demoData.wrongName");
+        }
+        for (String table : RESET_TABLES) {
+            jdbc.update("DELETE FROM " + table + " WHERE tenant_id = ?", tenantId);
+        }
+        return loadData();
+    }
+
+    private ImportResult loadData() {
         DemoData data = read();
         create(data.customers(), customers::create);
         create(data.suppliers(), suppliers::create);

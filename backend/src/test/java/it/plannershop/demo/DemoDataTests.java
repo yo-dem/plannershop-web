@@ -15,7 +15,8 @@ class DemoDataTests extends AbstractTenantTest {
 
     @Test
     void adminLoadsDemoDataOnceIntoAnEmptyBusiness() throws Exception {
-        call(get(URL), admin).andExpect(status().isOk()).andExpect(jsonPath("$.available").value(true));
+        call(get(URL), admin).andExpect(status().isOk()).andExpect(jsonPath("$.available").value(true))
+                .andExpect(jsonPath("$.resettable").value(false));
 
         call(post(URL), admin).andExpect(status().isCreated())
                 .andExpect(jsonPath("$.customers").value(36))
@@ -49,6 +50,11 @@ class DemoDataTests extends AbstractTenantTest {
                  "netPrice":10,"salePrice":15}""");
         call(get(URL), admin).andExpect(jsonPath("$.available").value(false));
         call(post(URL), admin).andExpect(status().isConflict());
+    }
+
+    @Test
+    void resetDisabledByDefault() throws Exception {
+        send(post(URL + "/reset"), admin, "{\"confirmName\":\"x\"}").andExpect(status().isForbidden());
     }
 
     @Test

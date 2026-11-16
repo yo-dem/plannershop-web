@@ -44,6 +44,7 @@ services:
       JWT_SECRET: ${JWT_SECRET:-}
       APP_MODE: ${APP_MODE:-cloud}
       DEMO_DATA: ${DEMO_DATA:-true}
+      DEMO_RESET: ${DEMO_RESET:-false}
       SUPERADMIN_EMAIL: ${SUPERADMIN_EMAIL:-admin@plannershop.local}
       SUPERADMIN_PASSWORD: ${SUPERADMIN_PASSWORD:-}
       SUPERADMIN_NAME: ${SUPERADMIN_NAME:-Platform administrator}

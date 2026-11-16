@@ -36,3 +36,9 @@ dd {
     margin: 0.75rem 0 0;
   }
 }
+
+.danger-outlined {
+  --mat-button-outlined-label-text-color: var(--mat-sys-error);
+  --mat-button-outlined-outline-color: var(--mat-sys-error);
+  --mat-button-outlined-state-layer-color: var(--mat-sys-error);
+}

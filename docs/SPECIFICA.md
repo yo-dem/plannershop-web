@@ -352,7 +352,7 @@ Clienti (implementato): ricerca su nome e cognome in entrambi gli ordini, telefo
 
 Fornitori (implementati): ricerca su nome, indirizzo, telefono, email, IBAN (anche scritto con gli spazi) e note; ordinamento per `name` (predefinito), `createdAt`, `updatedAt`. Nome, indirizzo e telefono obbligatori; email e IBAN facoltativi ma verificati se presenti. Eliminazione consentita anche all'operatore.
 
-Dati demo (implementati): clienti, fornitori, prodotti e servizi di esempio, tutti inventati, in `backend/src/main/resources/demo/demo-data.json`. L'ADMIN li carica dalla Home solo se l'attività non ha ancora nessuno di questi dati, così non si mescolano mai con quelli veri. Passano per le stesse validazioni e lo stesso calcolo dei prezzi dell'inserimento manuale. `DEMO_DATA=false` li disattiva (per esempio in produzione).
+Dati demo (implementati): clienti, fornitori, prodotti e servizi di esempio, tutti inventati, in `backend/src/main/resources/demo/demo-data.json`. L'ADMIN li carica dalla Home solo se l'attività non ha ancora nessuno di questi dati, così non si mescolano mai con quelli veri. Passano per le stesse validazioni e lo stesso calcolo dei prezzi dell'inserimento manuale. `DEMO_DATA=false` li disattiva (per esempio in produzione). Con `DEMO_RESET=true` (predefinito `false`, solo sviluppo e dimostrazioni) l'ADMIN può anche ripristinare i dati demo: clienti, fornitori, prodotti e servizi dell'attività vengono cancellati definitivamente (anche quelli già eliminati), poi si caricano i dati demo, tutto in un'unica transazione; gli utenti non cambiano. Conferma scrivendo il nome dell'attività (maiuscole e spazi non contano). Ogni nuova tabella con dati dell'attività (vendite, agenda…) va aggiunta all'elenco delle tabelle svuotate.
 
 Prodotti e servizi (implementati): ricerca su marca e descrizione in entrambi gli ordini e note (prodotti), nome, descrizione e note (servizi); ordinamento predefinito per marca e descrizione / nome, poi `quantity`, `salePrice`, `stockDate` (prodotti), `createdAt`, `updatedAt`. `?available=true` restituisce solo i prodotti con quantità > 0. Data di carico assente in inserimento → oggi nel fuso dell'attività. Prezzi come §7.1. Eliminazione consentita anche all'operatore.
 
@@ -376,7 +376,8 @@ Prodotti e servizi (implementati): ricerca su marca e descrizione in entrambi gl
 | Impostazioni | `GET/PUT /settings`, `POST /settings/email/test` | A |
 | Utenti tenant | CRUD `/users`, `POST /users/{id}/reset-password` | A |
 | Export | `GET /export` | A |
-| Dati demo | `GET /demo-data` (`available`), `POST /demo-data` (solo con attività vuota, altrimenti `409`) | A |
+| Dati demo | `GET /demo-data` (`available`, `resettable`), `POST /demo-data` (solo con attività vuota, altrimenti `409`) | A |
+| | `POST /demo-data/reset` `{confirmName}` (solo con `DEMO_RESET=true`) | A |
 | Piattaforma | CRUD `/platform/tenants` | SUPERADMIN |
 
 Errori: `ProblemDetail` (RFC 9457) con `detail` ed eventuale `errors` (campo → messaggio), già tradotti nella lingua della richiesta (`Accept-Language`). Concorrenza: campo `version`; conflitto → `409`.
@@ -439,7 +440,7 @@ Strumento a riga di comando (modulo del backend) che importa `PSDB.db` e `PSDB_A
 3. ✅ **Clienti**: CRUD completo end-to-end (ricerca, paginazione, ordinamento, compleanni del mese con avviso nella barra), da usare come modello per le altre entità.
 4. ✅ **Fornitori, prodotti e servizi** (IBAN verificato con Mod-97; prezzi netto/ivato; giacenza evidenziata con soglia fissa 10 in attesa delle impostazioni).
 4b. ✅ **Codice in inglese e traduzioni**: nomi, schema del database e API in inglese; interfaccia e messaggi del backend tradotti in italiano (§2).
-4c. ✅ **Dati demo**: pulsante "Importa dati demo" nella Home dell'ADMIN per un'attività vuota (§8).
+4c. ✅ **Dati demo**: pulsante "Importa dati demo" nella Home dell'ADMIN per un'attività vuota; "Ripristina dati demo" con `DEMO_RESET=true` (§8).
 5. Vendite.
 6. Staff e agenda.
 7. Impostazioni (aspetto, SMTP, agenda) ed email.

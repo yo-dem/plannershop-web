@@ -145,6 +145,14 @@ aziende inventate). Il pulsante sparisce appena l'attività contiene dati. I dat
 `backend/src/main/resources/demo/demo-data.json`: per cambiarli basta modificare quel file. Con
 `DEMO_DATA=false` la funzione è disattivata.
 
+Con `DEMO_RESET=true` l'ADMIN trova invece il pulsante **Ripristina dati demo**: cancella
+definitivamente clienti, fornitori, prodotti e servizi dell'attività (non gli utenti) e ricarica i
+dati demo. Per confermare bisogna scrivere il nome dell'attività. **Solo per sviluppo e
+dimostrazioni, mai in produzione** (il valore predefinito è `false`). In sviluppo:
+
+- IntelliJ: aggiungi `DEMO_RESET=true` nelle *Environment variables*, accanto a `JWT_SECRET`;
+- stack Docker: `DEMO_RESET=true` in `docker/.env`.
+
 ### Password dimenticata
 
 ```bash
