@@ -1,5 +1,11 @@
 @if (auth.user(); as user) {
   <header class="topbar">
+    @if (handset()) {
+      <button matIconButton class="menu-toggle" (click)="sidenav.toggle()"
+              aria-label="Menu" i18n-aria-label="@@nav.menu" [attr.aria-expanded]="sidenav.opened">
+        <mat-icon>menu</mat-icon>
+      </button>
+    }
     <a routerLink="/" class="brand">
       <mat-icon aria-hidden="true">calendar_month</mat-icon>
       <span>PlannerShop</span>
@@ -8,14 +14,7 @@
       <span class="tenant">{{ user.tenant.name }}</span>
     }
 
-    <nav class="nav">
-      @for (item of navItems(); track item.link) {
-        <a [routerLink]="item.link" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: item.link === '/' }">
-          <mat-icon aria-hidden="true">{{ item.icon }}</mat-icon>
-          <span>{{ item.label }}</span>
-        </a>
-      }
-    </nav>
+    <span class="spacer"></span>
 
     @if (birthdayCount(); as n) {
       <a routerLink="/customers/birthdays" class="birthdays" [attr.aria-label]="birthdayText()" [matTooltip]="birthdayText()">
@@ -41,6 +40,28 @@
   </header>
 }
 
-<main class="content">
-  <router-outlet />
-</main>
+<!-- Side menu: always visible on wide screens, opened with the ☰ button on smartphones. -->
+<mat-sidenav-container class="layout">
+  <mat-sidenav #sidenav class="sidebar"
+               [mode]="handset() ? 'over' : 'side'"
+               [opened]="!!auth.user() && !handset()"
+               [disableClose]="!handset()">
+    <mat-nav-list>
+      @for (item of navItems(); track item.link) {
+        <a mat-list-item [routerLink]="item.link"
+           routerLinkActive #rla="routerLinkActive" [routerLinkActiveOptions]="{ exact: item.link === '/' }"
+           [activated]="rla.isActive" [attr.aria-current]="rla.isActive ? 'page' : null"
+           (click)="handset() && sidenav.close()">
+          <mat-icon matListItemIcon aria-hidden="true">{{ item.icon }}</mat-icon>
+          <span matListItemTitle>{{ item.label }}</span>
+        </a>
+      }
+    </mat-nav-list>
+  </mat-sidenav>
+
+  <mat-sidenav-content>
+    <main class="content">
+      <router-outlet />
+    </main>
+  </mat-sidenav-content>
+</mat-sidenav-container>

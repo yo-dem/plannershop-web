@@ -383,6 +383,7 @@ Errori: `ProblemDetail` (RFC 9457) con `detail` ed eventuale `errors` (campo →
 ## 9. Frontend
 
 - Layout responsive (desktop, tablet, smartphone); predisposizione PWA.
+- Menu delle sezioni in una barra laterale: sempre visibile sugli schermi larghi, sotto gli 840 px si apre con il pulsante ☰ e si chiude dopo la scelta.
 - Sezioni (rotte): Clienti `/customers`, Fornitori `/suppliers`, Prodotti `/products`, Servizi `/services`, Agenda, Statistiche*, Impostazioni* (*solo ADMIN); Attività `/platform` per il SUPERADMIN.
 - Elenchi con ricerca istantanea, ordinamento e paginazione lato server; la riga modificata resta evidenziata dopo il salvataggio.
 - Form in dialog (desktop) / pagina intera (mobile); campi obbligatori evidenziati in rosso in caso di errore.

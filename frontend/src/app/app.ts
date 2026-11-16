@@ -1,10 +1,15 @@
 import { httpResource } from '@angular/common/http';
+import { BreakpointObserver } from '@angular/cdk/layout';
 import { Component, computed, inject } from '@angular/core';
-import { MatButton } from '@angular/material/button';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
+import { MatListModule } from '@angular/material/list';
 import { MatMenuModule } from '@angular/material/menu';
+import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatTooltip } from '@angular/material/tooltip';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { map } from 'rxjs';
 
 import { AuthService } from './core/auth/auth.service';
 import { CUSTOMERS_API, Customer, CustomersApi } from './core/customers';
@@ -15,16 +20,37 @@ interface NavItem {
   link: string;
 }
 
-/** Application shell: top bar (when signed in) + current page. */
+/** Width below which the side menu is hidden and opened with the ☰ button. */
+const HANDSET_QUERY = '(max-width: 840px)';
+
+/** Application shell: top bar and side menu (when signed in) + current page. */
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, MatButton, MatIcon, MatMenuModule, MatTooltip],
+  imports: [
+    RouterOutlet,
+    RouterLink,
+    RouterLinkActive,
+    MatButton,
+    MatIconButton,
+    MatIcon,
+    MatListModule,
+    MatMenuModule,
+    MatSidenavModule,
+    MatTooltip,
+  ],
   templateUrl: './app.html',
   styleUrl: './app.scss',
 })
 export class App {
   protected readonly auth = inject(AuthService);
   private readonly customers = inject(CustomersApi);
+
+  /** True on smartphones and narrow windows: the side menu floats over the page. */
+  private readonly breakpoints = inject(BreakpointObserver);
+  protected readonly handset = toSignal(
+    this.breakpoints.observe(HANDSET_QUERY).pipe(map((state) => state.matches)),
+    { initialValue: this.breakpoints.isMatched(HANDSET_QUERY) },
+  );
 
   protected readonly navItems = computed(() => {
     const items: NavItem[] = [{ label: $localize`:@@nav.home:Home`, icon: 'home', link: '/' }];

@@ -1,6 +1,7 @@
 {
   "locale": "en-US",
   "translations": {
+    "nav.menu": "Menu",
     "nav.changePassword": "Change password",
     "nav.signOut": "Sign out",
     "title.login": "Sign in",
