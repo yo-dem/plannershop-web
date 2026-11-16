@@ -6,10 +6,12 @@ import org.springframework.boot.context.properties.bind.DefaultValue;
 /**
  * General settings ({@code app.*} in application.yml).
  *
- * @param mode how the application is installed (APP_MODE variable)
+ * @param mode     how the application is installed (APP_MODE variable)
+ * @param demoData whether the ADMIN of an empty business may load the demo data
+ *                 (DEMO_DATA variable)
  */
 @ConfigurationProperties("app")
-public record AppProperties(@DefaultValue("CLOUD") Mode mode) {
+public record AppProperties(@DefaultValue("CLOUD") Mode mode, @DefaultValue("true") boolean demoData) {
 
     /**
      * <ul>

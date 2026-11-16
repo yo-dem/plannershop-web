@@ -1,0 +1,530 @@
+{
+  "customers": [
+    {
+      "firstName": "Giulia",
+      "lastName": "Rossi",
+      "birthDay": 1,
+      "birthMonth": 1,
+      "phone": "333 000 0001",
+      "email": "giulia.rossi@example.com",
+      "address": "Via Roma 3, Milano",
+      "notes": "Pelle sensibile: evitare prodotti profumati"
+    },
+    {
+      "firstName": "Francesca",
+      "lastName": "Bianchi",
+      "birthDay": 8,
+      "birthMonth": 2,
+      "phone": "333 000 0002",
+      "email": "francesca.bianchi@example.com"
+    },
+    {
+      "firstName": "Chiara",
+      "lastName": "Ferrari",
+      "birthDay": 15,
+      "birthMonth": 3,
+      "phone": "333 000 0003",
+      "email": "chiara.ferrari@example.com",
+      "address": "Via Garibaldi 5, Milano"
+    },
+    {
+      "firstName": "Sara",
+      "lastName": "Esposito",
+      "birthDay": 22,
+      "birthMonth": 4,
+      "phone": "333 000 0004",
+      "email": "sara.esposito@example.com"
+    },
+    {
+      "firstName": "Martina",
+      "lastName": "Romano",
+      "birthDay": 1,
+      "birthMonth": 5,
+      "email": "martina.romano@example.com",
+      "address": "Viale dei Pini 7, Milano"
+    },
+    {
+      "firstName": "Valentina",
+      "lastName": "Colombo",
+      "birthDay": 8,
+      "birthMonth": 6,
+      "phone": "333 000 0006"
+    },
+    {
+      "firstName": "Elena",
+      "lastName": "Ricci",
+      "birthDay": 15,
+      "birthMonth": 7,
+      "phone": "333 000 0007",
+      "email": "elena.ricci@example.com",
+      "address": "Piazza Dante 9, Milano"
+    },
+    {
+      "firstName": "Laura",
+      "lastName": "Marino",
+      "birthDay": 22,
+      "birthMonth": 8,
+      "phone": "333 000 0008",
+      "email": "laura.marino@example.com",
+      "notes": "Preferisce gli appuntamenti al mattino"
+    },
+    {
+      "firstName": "Alessia",
+      "lastName": "Greco",
+      "birthDay": 1,
+      "birthMonth": 9,
+      "phone": "333 000 0009",
+      "email": "alessia.greco@example.com",
+      "address": "Via Roma 11, Milano"
+    },
+    {
+      "firstName": "Federica",
+      "lastName": "Bruno",
+      "birthDay": 8,
+      "birthMonth": 10,
+      "phone": "333 000 0010",
+      "email": "federica.bruno@example.com"
+    },
+    {
+      "firstName": "Silvia",
+      "lastName": "Gallo",
+      "birthDay": 15,
+      "birthMonth": 11,
+      "phone": "333 000 0011",
+      "email": "silvia.gallo@example.com",
+      "address": "Via Garibaldi 13, Milano"
+    },
+    {
+      "firstName": "Paola",
+      "lastName": "Conti",
+      "birthDay": 22,
+      "birthMonth": 12,
+      "phone": "333 000 0012",
+      "email": "paola.conti@example.com"
+    },
+    {
+      "firstName": "Roberta",
+      "lastName": "De Luca",
+      "birthDay": 1,
+      "birthMonth": 1,
+      "phone": "333 000 0013",
+      "email": "roberta.deluca@example.com",
+      "address": "Viale dei Pini 15, Milano"
+    },
+    {
+      "firstName": "Simona",
+      "lastName": "Mancini",
+      "birthDay": 8,
+      "birthMonth": 2,
+      "email": "simona.mancini@example.com"
+    },
+    {
+      "firstName": "Claudia",
+      "lastName": "Costa",
+      "birthDay": 15,
+      "birthMonth": 3,
+      "phone": "333 000 0015",
+      "email": "claudia.costa@example.com",
+      "address": "Piazza Dante 17, Milano"
+    },
+    {
+      "firstName": "Elisa",
+      "lastName": "Giordano",
+      "birthDay": 22,
+      "birthMonth": 4,
+      "phone": "333 000 0016",
+      "email": "elisa.giordano@example.com",
+      "notes": "Allergia al nichel"
+    },
+    {
+      "firstName": "Ilaria",
+      "lastName": "Rizzo",
+      "birthDay": 1,
+      "birthMonth": 5,
+      "phone": "333 000 0017",
+      "address": "Via Roma 19, Milano"
+    },
+    {
+      "firstName": "Serena",
+      "lastName": "Lombardi",
+      "birthDay": 8,
+      "birthMonth": 6,
+      "phone": "333 000 0018",
+      "email": "serena.lombardi@example.com"
+    },
+    {
+      "firstName": "Marta",
+      "lastName": "Moretti",
+      "birthDay": 15,
+      "birthMonth": 7,
+      "phone": "333 000 0019",
+      "email": "marta.moretti@example.com",
+      "address": "Via Garibaldi 21, Milano"
+    },
+    {
+      "firstName": "Beatrice",
+      "lastName": "Barbieri",
+      "birthDay": 22,
+      "birthMonth": 8,
+      "phone": "333 000 0020",
+      "email": "beatrice.barbieri@example.com"
+    },
+    {
+      "firstName": "Camilla",
+      "lastName": "Fontana",
+      "birthDay": 1,
+      "birthMonth": 9,
+      "phone": "333 000 0021",
+      "email": "camilla.fontana@example.com",
+      "address": "Viale dei Pini 23, Milano"
+    },
+    {
+      "firstName": "Arianna",
+      "lastName": "Santoro",
+      "birthDay": 8,
+      "birthMonth": 10,
+      "phone": "333 000 0022",
+      "email": "arianna.santoro@example.com"
+    },
+    {
+      "firstName": "Giorgia",
+      "lastName": "Mariani",
+      "birthDay": 15,
+      "birthMonth": 11,
+      "email": "giorgia.mariani@example.com",
+      "address": "Piazza Dante 25, Milano",
+      "notes": "Cliente dal 2019"
+    },
+    {
+      "firstName": "Veronica",
+      "lastName": "Rinaldi",
+      "birthDay": 22,
+      "birthMonth": 12,
+      "phone": "333 000 0024",
+      "email": "veronica.rinaldi@example.com"
+    },
+    {
+      "firstName": "Daniela",
+      "lastName": "Caruso",
+      "birthDay": 1,
+      "birthMonth": 1,
+      "phone": "333 000 0025",
+      "email": "daniela.caruso@example.com",
+      "address": "Via Roma 27, Milano"
+    },
+    {
+      "firstName": "Monica",
+      "lastName": "Ferrara",
+      "birthDay": 8,
+      "birthMonth": 2,
+      "phone": "333 000 0026",
+      "email": "monica.ferrara@example.com"
+    },
+    {
+      "firstName": "Cristina",
+      "lastName": "Galli",
+      "birthDay": 15,
+      "birthMonth": 3,
+      "phone": "333 000 0027",
+      "email": "cristina.galli@example.com",
+      "address": "Via Garibaldi 29, Milano"
+    },
+    {
+      "firstName": "Barbara",
+      "lastName": "Martini",
+      "birthDay": 22,
+      "birthMonth": 4,
+      "phone": "333 000 0028"
+    },
+    {
+      "firstName": "Luca",
+      "lastName": "Leone",
+      "birthDay": 1,
+      "birthMonth": 5,
+      "phone": "333 000 0029",
+      "email": "luca.leone@example.com",
+      "address": "Viale dei Pini 31, Milano"
+    },
+    {
+      "firstName": "Marco",
+      "lastName": "Longo",
+      "birthDay": 8,
+      "birthMonth": 6,
+      "phone": "333 000 0030",
+      "email": "marco.longo@example.com"
+    },
+    {
+      "firstName": "Andrea",
+      "lastName": "Gentile",
+      "birthDay": 15,
+      "birthMonth": 7,
+      "phone": "333 000 0031",
+      "email": "andrea.gentile@example.com",
+      "address": "Piazza Dante 33, Milano"
+    },
+    {
+      "firstName": "Stefano",
+      "lastName": "Martinelli",
+      "birthDay": 22,
+      "birthMonth": 8,
+      "email": "stefano.martinelli@example.com"
+    },
+    {
+      "firstName": "Davide",
+      "lastName": "Vitale",
+      "birthDay": 1,
+      "birthMonth": 9,
+      "phone": "333 000 0033",
+      "email": "davide.vitale@example.com",
+      "address": "Via Roma 35, Milano"
+    },
+    {
+      "firstName": "Matteo",
+      "lastName": "Lombardo",
+      "birthDay": 8,
+      "birthMonth": 10,
+      "phone": "333 000 0034",
+      "email": "matteo.lombardo@example.com"
+    },
+    {
+      "firstName": "Lorenzo",
+      "lastName": "Serra",
+      "birthDay": 15,
+      "birthMonth": 11,
+      "phone": "333 000 0035",
+      "email": "lorenzo.serra@example.com",
+      "address": "Via Garibaldi 37, Milano"
+    },
+    {
+      "firstName": "Paolo",
+      "lastName": "Coppola",
+      "birthDay": 22,
+      "birthMonth": 12,
+      "phone": "333 000 0036",
+      "email": "paolo.coppola@example.com"
+    }
+  ],
+  "suppliers": [
+    {
+      "name": "Bellezza Ingrosso srl",
+      "address": "Via dell'Industria 12, Bologna",
+      "phone": "051 000 1122",
+      "email": "ordini@example.com",
+      "iban": "IT60X0542811101000000123456",
+      "notes": "Consegna in 48 ore"
+    },
+    {
+      "name": "Cosmetica Naturale snc",
+      "address": "Via dei Mille 8, Firenze",
+      "phone": "055 000 3344",
+      "email": "info@example.org"
+    },
+    {
+      "name": "Forniture Estetica spa",
+      "address": "Viale Europa 120, Torino",
+      "phone": "011 000 5566",
+      "email": "amministrazione@example.net",
+      "notes": "Ordine minimo 200 €"
+    },
+    {
+      "name": "Professional Beauty Line",
+      "address": "Via Etnea 30, Catania",
+      "phone": "095 000 7788"
+    }
+  ],
+  "products": [
+    {
+      "stockDate": "2025-01-10",
+      "brand": "DERMALUXE",
+      "description": "CREMA VISO IDRATANTE GIORNO 50ML",
+      "quantity": 30,
+      "vatRate": 22.0,
+      "priceBase": "NET",
+      "netPrice": 18.0,
+      "salePrice": 25.0,
+      "notes": "Linea pelli sensibili"
+    },
+    {
+      "stockDate": "2025-01-12",
+      "brand": "BEAUTYPRO",
+      "description": "SIERO VISO ANTI-AGE AL COLLAGENE 30ML",
+      "quantity": 15,
+      "vatRate": 22.0,
+      "priceBase": "NET",
+      "netPrice": 32.0,
+      "salePrice": 45.0
+    },
+    {
+      "stockDate": "2025-01-15",
+      "brand": "SKINLAB",
+      "description": "MASCHERA VISO PURIFICANTE ALL’ARGILLA",
+      "quantity": 40,
+      "vatRate": 22.0,
+      "priceBase": "NET",
+      "netPrice": 6.5,
+      "salePrice": 9.9,
+      "notes": "Uso settimanale"
+    },
+    {
+      "stockDate": "2025-01-18",
+      "brand": "ESTHETIQUE",
+      "description": "LATTE DETERGENTE STRUCCANTE 200ML",
+      "quantity": 25,
+      "vatRate": 22.0,
+      "priceBase": "NET",
+      "netPrice": 9.8,
+      "salePrice": 14.5
+    },
+    {
+      "stockDate": "2025-01-20",
+      "brand": "DERMALUXE",
+      "description": "TONICO RIEQUILIBRANTE SENZA ALCOOL 200ML",
+      "quantity": 20,
+      "vatRate": 22.0,
+      "priceBase": "NET",
+      "netPrice": 8.2,
+      "salePrice": 12.0,
+      "notes": "Adatto a pelli delicate"
+    },
+    {
+      "stockDate": "2025-01-22",
+      "brand": "GLOWCARE",
+      "description": "CREMA CORPO NUTRIENTE AL BURRO DI KARITÉ 250ML",
+      "quantity": 18,
+      "vatRate": 22.0,
+      "priceBase": "NET",
+      "netPrice": 14.0,
+      "salePrice": 20.0
+    },
+    {
+      "stockDate": "2025-01-25",
+      "brand": "BEAUTYPRO",
+      "description": "OLIO SECCO ILLUMINANTE CORPO 100ML",
+      "quantity": 10,
+      "vatRate": 22.0,
+      "priceBase": "NET",
+      "netPrice": 19.5,
+      "salePrice": 28.0,
+      "notes": "Effetto glow"
+    },
+    {
+      "stockDate": "2025-01-28",
+      "brand": "SKINLAB",
+      "description": "PEELING VISO DELICATO AGLI ACIDI DELLA FRUTTA",
+      "quantity": 12,
+      "vatRate": 22.0,
+      "priceBase": "NET",
+      "netPrice": 21.0,
+      "salePrice": 30.0
+    },
+    {
+      "stockDate": "2025-02-01",
+      "brand": "ESTHETIQUE",
+      "description": "CREMA MANI RIPARATRICE 75ML",
+      "quantity": 35,
+      "vatRate": 22.0,
+      "priceBase": "NET",
+      "netPrice": 4.5,
+      "salePrice": 6.9,
+      "notes": "Consigliata per uso frequente"
+    },
+    {
+      "stockDate": "2025-02-03",
+      "brand": "GLOWCARE",
+      "description": "SIERO CONTORNO OCCHI ANTI-BORSE 15ML",
+      "quantity": 8,
+      "vatRate": 22.0,
+      "priceBase": "NET",
+      "netPrice": 27.0,
+      "salePrice": 38.0,
+      "notes": "Texture leggera"
+    }
+  ],
+  "services": [
+    {
+      "name": "PULIZIA VISO BASE",
+      "description": "TRATTAMENTO VISO DETOSSINANTE E RIEQUILIBRANTE",
+      "vatRate": 22.0,
+      "priceBase": "NET",
+      "netPrice": 30.0,
+      "salePrice": 45.0,
+      "notes": "Durata 60 minuti"
+    },
+    {
+      "name": "TRATTAMENTO VISO ANTI-AGE",
+      "description": "TRATTAMENTO RASSODANTE CON SIERO AL COLLAGENE",
+      "vatRate": 22.0,
+      "priceBase": "NET",
+      "netPrice": 45.0,
+      "salePrice": 65.0
+    },
+    {
+      "name": "MASSAGGIO RILASSANTE CORPO",
+      "description": "MASSAGGIO DECONTRATTURANTE E RILASSANTE",
+      "vatRate": 22.0,
+      "priceBase": "NET",
+      "netPrice": 40.0,
+      "salePrice": 60.0,
+      "notes": "Oli essenziali inclusi"
+    },
+    {
+      "name": "EPILAZIONE GAMBE COMPLETE",
+      "description": "EPILAZIONE A CERA SU ENTRAMBE LE GAMBE",
+      "vatRate": 22.0,
+      "priceBase": "NET",
+      "netPrice": 25.0,
+      "salePrice": 35.0
+    },
+    {
+      "name": "EPILAZIONE ASCELLE",
+      "description": "EPILAZIONE A CERA ZONA ASCELLARE",
+      "vatRate": 22.0,
+      "priceBase": "NET",
+      "netPrice": 10.0,
+      "salePrice": 15.0
+    },
+    {
+      "name": "MANICURE ESTETICA",
+      "description": "TRATTAMENTO COMPLETO UNGHIE E CUTICOLE",
+      "vatRate": 22.0,
+      "priceBase": "NET",
+      "netPrice": 18.0,
+      "salePrice": 25.0
+    },
+    {
+      "name": "PEDICURE ESTETICA",
+      "description": "TRATTAMENTO ESTETICO PIEDI CON MASSAGGIO",
+      "vatRate": 22.0,
+      "priceBase": "NET",
+      "netPrice": 25.0,
+      "salePrice": 35.0,
+      "notes": "Non curativo"
+    },
+    {
+      "name": "TRATTAMENTO CORPO DRENANTE",
+      "description": "TRATTAMENTO RIMODELLANTE E DRENANTE",
+      "vatRate": 22.0,
+      "priceBase": "NET",
+      "netPrice": 50.0,
+      "salePrice": 70.0,
+      "notes": "Ciclo consigliato"
+    },
+    {
+      "name": "TRATTAMENTO CONTORNO OCCHI",
+      "description": "TRATTAMENTO SPECIFICO ANTI-BORSE E ANTI-OCCHIAIE",
+      "vatRate": 22.0,
+      "priceBase": "NET",
+      "netPrice": 22.0,
+      "salePrice": 30.0
+    },
+    {
+      "name": "CONSULENZA ESTETICA PERSONALIZZATA",
+      "description": "ANALISI DELLA PELLE E CONSIGLI MIRATI",
+      "vatRate": 22.0,
+      "priceBase": "NET",
+      "netPrice": 15.0,
+      "salePrice": 20.0,
+      "notes": "Durata 30 minuti"
+    }
+  ]
+}

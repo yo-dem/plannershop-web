@@ -22,7 +22,8 @@ attività da parte del SUPERADMIN, modalità di installazione `cloud` e `local`,
 password da riga di comando, **clienti** (elenco con ricerca, ordinamento e paginazione,
 inserimento, modifica, eliminazione solo per l'ADMIN, compleanni del mese con avviso in alto),
 **fornitori** (IBAN verificato), **prodotti** (giacenza evidenziata, filtro "solo disponibili")
-e **servizi**, con calcolo del prezzo netto o IVA inclusa.
+e **servizi**, con calcolo del prezzo netto o IVA inclusa, **dati demo** caricabili dall'ADMIN
+in un'attività vuota.
 
 Non ancora presenti: vendite, agenda, impostazioni, email,
 statistiche, migrazione dei dati dal vecchio programma (piano in `docs/SPECIFICA.md` §13).
@@ -136,6 +137,14 @@ docker compose logs backend | grep -A4 "Local installation"   # password inizial
 
 La password iniziale è sempre provvisoria. Dettagli in `docs/SPECIFICA.md` §4.1.
 
+### Dati demo
+
+Dopo un'installazione pulita, l'ADMIN di un'attività ancora vuota trova nella Home il pulsante
+**Importa dati demo**: carica 36 clienti, 4 fornitori, 10 prodotti e 10 servizi di esempio (persone e
+aziende inventate). Il pulsante sparisce appena l'attività contiene dati. I dati sono in
+`backend/src/main/resources/demo/demo-data.json`: per cambiarli basta modificare quel file. Con
+`DEMO_DATA=false` la funzione è disattivata.
+
 ### Password dimenticata
 
 ```bash
@@ -202,9 +211,11 @@ backend/
     platform/        gestione attività (SUPERADMIN) — modalità cloud
     local/           creazione dell'attività al primo avvio — modalità local
     info/            /api/info (versione, database, modalità)
+    demo/            dati demo per un'attività vuota
   src/main/resources/
     application.yml        configurazione (variabili d'ambiente)
     messages*.properties   messaggi del backend (inglese) e traduzione italiana
+    demo/demo-data.json    dati demo (inventati)
     db/migration/          migrazioni Flyway V<n>__description.sql
   src/test/          test d'integrazione (Testcontainers)
 frontend/

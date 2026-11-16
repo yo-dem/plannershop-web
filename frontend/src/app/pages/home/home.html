@@ -2,6 +2,22 @@
   <h2 class="welcome" i18n="@@home.welcome">Hello, {{ u.name // i18n(ph="name") }}</h2>
 }
 
+@if (demoStatus.value()?.available) {
+  <mat-card appearance="outlined" class="demo">
+    <mat-card-header>
+      <mat-card-title i18n="@@demo.title">Demo data</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <p i18n="@@demo.description">The business is still empty. To try the application you can load fictional customers, suppliers, products and services.</p>
+    </mat-card-content>
+    <mat-card-actions>
+      <button matButton="filled" (click)="loadDemoData()" [disabled]="loadingDemo()">
+        <mat-icon>dataset</mat-icon> <ng-container i18n="@@demo.load">Import demo data</ng-container>
+      </button>
+    </mat-card-actions>
+  </mat-card>
+}
+
 <mat-card appearance="outlined">
   <mat-card-header>
     <mat-card-title i18n="@@home.systemStatus">System status</mat-card-title>

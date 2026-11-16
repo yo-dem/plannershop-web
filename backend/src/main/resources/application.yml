@@ -73,6 +73,8 @@ app:
   # cloud = platform with many businesses managed by the SUPERADMIN
   # local = installed on the PC of a single business, without SUPERADMIN
   mode: ${APP_MODE:cloud}
+  # The ADMIN of an empty business may load the demo data (demo/demo-data.json).
+  demo-data: ${DEMO_DATA:true}
   security:
     # Secret used to sign the tokens. In production: a long random string (≥ 32 characters).
     jwt-secret: ${JWT_SECRET:}
