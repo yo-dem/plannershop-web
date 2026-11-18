@@ -241,13 +241,13 @@ Sostituisce il campo testo `OPERATORE` dell'agenda.
 
 ### 6.9 Impostazioni tenant (`TOpzioni`, `TOpzioniAgenda`)
 
-Tabella tipizzata `tenant_settings` (una riga per tenant) invece di chiave/valore:
+Tabella tipizzata `tenant_settings` (una riga per tenant, creata al primo salvataggio; prima valgono i predefiniti) invece di chiave/valore. Ogni attività ha le sue impostazioni, decise dal proprio ADMIN:
 
 | Gruppo | Campi | Valori attuali |
 |---|---|---|
 | Aspetto | logo, colore primario, nome visualizzato | — (nuovo) |
 | Agenda | day_start, day_end, slot_minutes, default_duration_minutes | 08:00, 21:00, 15, 30 |
-| Magazzino | low_stock_threshold | 10 (oggi hardcoded) |
+| Magazzino ✅ | out_of_stock_threshold (rosso), low_stock_threshold (arancione) | 0, 10 (prima fissi nel codice) |
 | Email | smtp_host, smtp_port, smtp_user, smtp_password, sender_name | chiavi `smtpmailgest`, `portmailgest`, `mailgest`, `pwdmailgest` |
 
 La password SMTP è salvata **cifrata** (AES-GCM, chiave da variabile d'ambiente), mai restituita dalle API (solo "impostata sì/no").
@@ -284,7 +284,7 @@ Flusso (oggi: `ProductPurchaseEditForm` / `ServicePurchaseEditForm`):
 
 ### 7.3 Magazzino
 
-- Evidenza in elenco prodotti: `quantity = 0` → rosso; `0 < quantity ≤ soglia` → arancione.
+- Evidenza in elenco prodotti, con le soglie dell'attività (§6.9): `quantity ≤ out_of_stock_threshold` → rosso; fino a `low_stock_threshold` → arancione. Predefiniti 0 e 10, come nel vecchio programma; la soglia arancione non può essere inferiore a quella rossa (se uguali, niente arancione).
 - Nella vendita sono proposti solo i prodotti con `quantity > 0`.
 
 ### 7.4 Validazioni
@@ -373,7 +373,8 @@ Prodotti e servizi (implementati): ricerca su marca e descrizione in entrambi gl
 | Staff | `GET /staff` | A, O |
 | | CRUD `/staff` | A |
 | Statistiche | `GET /statistics/summary?from=&to=`, `/top-products`, `/top-customers` | A |
-| Impostazioni | `GET/PUT /settings`, `POST /settings/email/test` | A |
+| Impostazioni | `GET /settings` (soglie di magazzino; serve anche all'operatore per i colori) | A, O |
+| | `PUT /settings` (con `version`, tranne il primo salvataggio), `POST /settings/email/test` | A |
 | Utenti tenant | CRUD `/users`, `POST /users/{id}/reset-password` | A |
 | Export | `GET /export` | A |
 | Dati demo | `GET /demo-data` (`available`, `resettable`), `POST /demo-data` (solo con attività vuota, altrimenti `409`) | A |
@@ -441,6 +442,7 @@ Strumento a riga di comando (modulo del backend) che importa `PSDB.db` e `PSDB_A
 4. ✅ **Fornitori, prodotti e servizi** (IBAN verificato con Mod-97; prezzi netto/ivato; giacenza evidenziata con soglia fissa 10 in attesa delle impostazioni).
 4b. ✅ **Codice in inglese e traduzioni**: nomi, schema del database e API in inglese; interfaccia e messaggi del backend tradotti in italiano (§2).
 4c. ✅ **Dati demo**: pulsante "Importa dati demo" nella Home dell'ADMIN per un'attività vuota; "Ripristina dati demo" con `DEMO_RESET=true` (§8).
+4d. ✅ **Impostazioni, prima parte**: pagina Impostazioni dell'ADMIN con le soglie di magazzino (§6.9).
 5. Vendite.
 6. Staff e agenda.
 7. Impostazioni (aspetto, SMTP, agenda) ed email.

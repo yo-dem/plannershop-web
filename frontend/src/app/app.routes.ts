@@ -57,6 +57,12 @@ export const routes: Routes = [
         title: title($localize`:@@title.services:Services`),
       },
       {
+        path: 'settings',
+        canActivate: [roleGuard('ADMIN')],
+        loadComponent: () => import('./pages/settings/settings').then((m) => m.Settings),
+        title: title($localize`:@@title.settings:Settings`),
+      },
+      {
         path: 'platform',
         canActivate: [roleGuard('SUPERADMIN')],
         loadComponent: () => import('./pages/platform/tenants').then((m) => m.Tenants),

@@ -62,6 +62,9 @@ export class App {
         { label: $localize`:@@nav.services:Services`, icon: 'content_cut', link: '/services' },
       );
     }
+    if (this.auth.hasRole('ADMIN')) {
+      items.push({ label: $localize`:@@nav.settings:Settings`, icon: 'settings', link: '/settings' });
+    }
     if (this.auth.hasRole('SUPERADMIN')) {
       items.push({ label: $localize`:@@nav.tenants:Businesses`, icon: 'store', link: '/platform' });
     }

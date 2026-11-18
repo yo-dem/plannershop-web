@@ -1,0 +1,59 @@
+<div class="page-header">
+  <h2 i18n="@@settings.title">Settings</h2>
+</div>
+
+<section class="panel">
+  @if (settings.isLoading()) {
+    <mat-progress-bar mode="indeterminate" class="loading-bar" />
+  }
+  @if (settings.error(); as e) {
+    <app-notice type="error">{{ errorMessage(e) }}</app-notice>
+  }
+  @if (error(); as e) {
+    <app-notice type="error">{{ e }}</app-notice>
+  }
+
+  <h3>
+    <mat-icon aria-hidden="true">inventory_2</mat-icon>
+    <ng-container i18n="@@settings.stock">Stock</ng-container>
+  </h3>
+  <p class="text-secondary" i18n="@@settings.stockHelp">How the quantity of the products is highlighted in the products list.</p>
+
+  <form [formGroup]="form" (ngSubmit)="save()" class="form" novalidate>
+    <div class="form-row">
+      <mat-form-field>
+        <mat-label i18n="@@settings.outOfStockThreshold">Red up to</mat-label>
+        <input matInput id="outOfStockThreshold" type="number" min="0" step="1" formControlName="outOfStockThreshold" required />
+        <span matTextSuffix i18n="@@settings.pieces">pcs</span>
+        <mat-hint i18n="@@settings.outOfStockHint">Out of stock or almost (default 0)</mat-hint>
+        <mat-error>{{ fieldError('outOfStockThreshold') }}</mat-error>
+      </mat-form-field>
+
+      <mat-form-field>
+        <mat-label i18n="@@settings.lowStockThreshold">Orange up to</mat-label>
+        <input matInput id="lowStockThreshold" type="number" min="0" step="1" formControlName="lowStockThreshold" required />
+        <span matTextSuffix i18n="@@settings.pieces">pcs</span>
+        <mat-hint i18n="@@settings.lowStockHint">Running low (default 10)</mat-hint>
+        <mat-error>{{ fieldError('lowStockThreshold') }}</mat-error>
+      </mat-form-field>
+    </div>
+
+    @if (form.valid) {
+      <p class="preview">
+        <span class="badge negative">{{ form.value.outOfStockThreshold }}</span>
+        <ng-container i18n="@@settings.previewRed">or less: red</ng-container>
+        @if (form.value.lowStockThreshold! > form.value.outOfStockThreshold!) {
+          ·
+          <span class="badge warning">{{ form.value.outOfStockThreshold! + 1 }}–{{ form.value.lowStockThreshold }}</span>
+          <ng-container i18n="@@settings.previewOrange">orange</ng-container>
+        }
+      </p>
+    }
+
+    <div class="actions">
+      <button matButton="filled" type="submit" [disabled]="sending() || form.pristine">
+        <mat-icon>check</mat-icon> <ng-container i18n="@@common.save">Save</ng-container>
+      </button>
+    </div>
+  </form>
+</section>

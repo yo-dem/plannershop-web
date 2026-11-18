@@ -22,10 +22,11 @@ attività da parte del SUPERADMIN, modalità di installazione `cloud` e `local`,
 password da riga di comando, **clienti** (elenco con ricerca, ordinamento e paginazione,
 inserimento, modifica, eliminazione solo per l'ADMIN, compleanni del mese con avviso in alto),
 **fornitori** (IBAN verificato), **prodotti** (giacenza evidenziata, filtro "solo disponibili")
-e **servizi**, con calcolo del prezzo netto o IVA inclusa, **dati demo** caricabili dall'ADMIN
-in un'attività vuota.
+e **servizi**, con calcolo del prezzo netto o IVA inclusa, **impostazioni** dell'attività
+(per ora le soglie rossa/arancione della giacenza), **dati demo** caricabili dall'ADMIN in
+un'attività vuota.
 
-Non ancora presenti: vendite, agenda, impostazioni, email,
+Non ancora presenti: vendite, agenda, altre impostazioni (aspetto, agenda, email), email,
 statistiche, migrazione dei dati dal vecchio programma (piano in `docs/SPECIFICA.md` §13).
 
 ## Requisiti
@@ -220,6 +221,7 @@ backend/
     local/           creazione dell'attività al primo avvio — modalità local
     info/            /api/info (versione, database, modalità)
     demo/            dati demo per un'attività vuota
+    settings/        impostazioni dell'attività (tenant_settings)
   src/main/resources/
     application.yml        configurazione (variabili d'ambiente)
     messages*.properties   messaggi del backend (inglese) e traduzione italiana
@@ -230,7 +232,7 @@ frontend/
   src/app/core/      sessione, interceptor del token, guard, servizi API, prezzi, elenchi, lingua
   src/app/core/ui/   componenti comuni: avvisi, notifiche, conferme, paginatore, campi prezzo
   src/app/pages/     pagine (login, home, change-password, customers, suppliers, products,
-                     services, platform)
+                     services, settings, platform)
   src/locale/        messages.json (testi inglesi estratti), messages.it.json (traduzione)
   scripts/           check-translations.mjs (usato da npm run i18n)
   proxy.conf.json    /api → localhost:8080 durante ng serve

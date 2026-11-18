@@ -15,10 +15,11 @@ import { MatTableModule } from '@angular/material/table';
 import { PageResponse } from '../../core/api-resource';
 import { ListState } from '../../core/list-state';
 import { PRODUCTS_API, Product, ProductsApi, stockLevel } from '../../core/products';
+import { SettingsApi } from '../../core/settings';
 import { Notice } from '../../core/ui/notice';
 import { openProduct } from './product-dialog';
 
-/** Product list with stock highlighted: out of stock in red, running low in orange. */
+/** Product list with stock highlighted (thresholds from the settings): red and orange. */
 @Component({
   selector: 'app-products',
   imports: [
@@ -31,7 +32,10 @@ import { openProduct } from './product-dialog';
 export class Products {
   private readonly products = inject(ProductsApi);
   private readonly dialog = inject(MatDialog);
-  protected readonly stockLevel = stockLevel;
+  private readonly settings = inject(SettingsApi);
+  protected stockLevel(quantity: number) {
+    return stockLevel(quantity, this.settings.value());
+  }
   protected readonly columns = ['brand', 'quantity', 'salePrice', 'stockDate'];
 
   protected readonly list = new ListState();

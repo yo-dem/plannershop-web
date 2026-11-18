@@ -38,7 +38,11 @@
       <td mat-cell *matCellDef="let p" class="number">
         @switch (stockLevel(p.quantity)) {
           @case ('out') {
-            <span class="badge negative" title="Out of stock" i18n-title="@@products.outOfStock">{{ p.quantity }}</span>
+            @if (p.quantity <= 0) {
+              <span class="badge negative" title="Out of stock" i18n-title="@@products.outOfStock">{{ p.quantity }}</span>
+            } @else {
+              <span class="badge negative" title="Almost out of stock" i18n-title="@@products.criticalStock">{{ p.quantity }}</span>
+            }
           }
           @case ('low') {
             <span class="badge warning" title="Running low" i18n-title="@@products.lowStock">{{ p.quantity }}</span>
