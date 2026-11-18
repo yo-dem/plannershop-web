@@ -27,7 +27,8 @@ e **servizi**, con calcolo del prezzo netto o IVA inclusa, **impostazioni** dell
 un'attività vuota.
 
 Non ancora presenti: vendite, agenda, altre impostazioni (aspetto, agenda, email), email,
-statistiche, migrazione dei dati dal vecchio programma (piano in `docs/SPECIFICA.md` §13).
+statistiche (piano in `docs/SPECIFICA.md` §13). I dati del vecchio programma (clienti, fornitori,
+prodotti, servizi) si importano con lo script in [tools/legacy-import](tools/legacy-import/README.md).
 
 ## Requisiti
 
@@ -239,6 +240,8 @@ frontend/
   nginx.conf         configurazione nginx dell'immagine Docker
 docker/
   docker-compose.yml, .env.example
+tools/
+  legacy-import/     importazione dal vecchio PlannerShop (PSDB.db)
 docs/
   SPECIFICA.md
   CREDENZIALI-*.md   credenziali di sviluppo (solo locali, escluse da git)

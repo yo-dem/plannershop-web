@@ -447,7 +447,7 @@ Strumento a riga di comando (modulo del backend) che importa `PSDB.db` e `PSDB_A
 6. Staff e agenda.
 7. Impostazioni (aspetto, SMTP, agenda) ed email.
 8. Statistiche.
-9. Migrazione dati e export.
+9. Migrazione dati e export. Già disponibile: `tools/legacy-import/import_legacy.py` (clienti, fornitori, prodotti, servizi, solo in un'attività vuota salvo `--merge`); mancano acquisti, agenda e l'export.
 10. PWA e rifinitura per mobile.
 
 ## 14. Decisioni prese
