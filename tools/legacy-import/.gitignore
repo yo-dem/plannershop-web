@@ -1,4 +1,0 @@
-# Old databases and generated SQL contain personal data of customers.
-*.db
-*.sql
-__pycache__/

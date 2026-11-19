@@ -407,18 +407,9 @@ Errori: `ProblemDetail` (RFC 9457) con `detail` ed eventuale `errors` (campo →
 - Bootstrap: al primo avvio, se non esistono utenti, crea il SUPERADMIN (modalità cloud) oppure l'attività e il suo ADMIN (modalità locale), da variabili d'ambiente (§4.1).
 - Installazione presso un cliente (modalità locale): Docker Desktop su Windows (WSL2), `APP_MODE=local` nel `.env`; in alternativa futura, installazione nativa (PostgreSQL + backend come servizio Windows).
 
-## 11. Migrazione dati
+## 11. Dati del vecchio programma
 
-Strumento a riga di comando (modulo del backend) che importa `PSDB.db` e `PSDB_Agenda.db` in un tenant indicato:
-
-- Prezzi: parsing formato italiano (`"18,00 €"` → `18.00`), aliquote (`"22%"` → `22`).
-- Compleanni: `" 25-01"` → giorno 25, mese 1.
-- Vendite: raggruppamento delle righe `TAcquisti` per `(IDCLIENTE, TIMESTAMP)` → una testata per gruppo.
-- Appuntamenti: `OPERATORE` → creazione/collegamento `staff` per nome; `NOMECLIENTE` → collegamento a cliente se c'è una corrispondenza univoca nome+cognome.
-- Impostazioni: `TOpzioni`/`TOpzioniAgenda` → `tenant_settings`.
-- Per lo sviluppo esiste già uno script provvisorio (fuori dal repository) che importa clienti, fornitori, prodotti e servizi.
-- `TPwd` non migrata (si creano utenti nuovi).
-- Report finale di righe importate/scartate.
+Non vengono migrati: ogni attività parte da zero e, per provare l'applicazione, l'ADMIN carica i dati demo (§8, decisione 9). I prodotti e i servizi dei dati demo derivano da quelli di esempio del vecchio programma; clienti e fornitori sono inventati.
 
 ## 12. Problemi del progetto attuale da non replicare
 
@@ -447,7 +438,7 @@ Strumento a riga di comando (modulo del backend) che importa `PSDB.db` e `PSDB_A
 6. Staff e agenda.
 7. Impostazioni (aspetto, SMTP, agenda) ed email.
 8. Statistiche.
-9. Migrazione dati e export. Già disponibile: `tools/legacy-import/import_legacy.py` (clienti, fornitori, prodotti, servizi, solo in un'attività vuota salvo `--merge`); mancano acquisti, agenda e l'export.
+9. Export dei dati dell'attività (nessuna migrazione dal vecchio programma, §11).
 10. PWA e rifinitura per mobile.
 
 ## 14. Decisioni prese
@@ -462,3 +453,4 @@ Strumento a riga di comando (modulo del backend) che importa `PSDB.db` e `PSDB_A
 | 6 | Installazione sul PC del cliente senza piattaforma | Modalità `local` da configurazione, stesso codice (§4.1) |
 | 7 | Libreria dei componenti del frontend | Angular Material (MIT) al posto di PrimeNG: dalla versione 22 PrimeNG richiede una chiave di licenza PrimeUI (gratuita solo sotto certi limiti, rinnovo annuale) |
 | 8 | Lingua del codice | Tutto in inglese (nomi, database, API, commenti); in italiano solo le traduzioni dei testi per l'utente, con `@angular/localize` nel frontend e `messages_it.properties` nel backend (§2). Questa specifica e il README restano in italiano |
+| 9 | Dati del vecchio programma | Non migrati: si lavora solo con i dati demo (§11) |
